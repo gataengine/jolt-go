@@ -3422,7 +3422,10 @@ func (bi *BodyInterface) DestroyBody(b BodyID) {
 }
 
 func (bi *BodyInterface) CreateAndAddBody(s *BodyCreationSettings, a Activation) BodyID {
-	result := cjolt.JPH_BodyInterface_CreateAndAddBody(bi.h, (*cjolt.C_JPH_BodyCreationSettings)(unsafe.Pointer(s)), cjolt.C_JPH_Activation(a))
+	// BUGFIX: BodyCreationSettings is an opaque-handle type; use s.h, not
+	// unsafe.Pointer(s).  The generator incorrectly treats all *Settings
+	// pointer params as layout-mirror structs.
+	result := cjolt.JPH_BodyInterface_CreateAndAddBody(bi.h, s.h, cjolt.C_JPH_Activation(a))
 	runtime.KeepAlive(s)
 	runtime.KeepAlive(bi)
 	return BodyID(result)

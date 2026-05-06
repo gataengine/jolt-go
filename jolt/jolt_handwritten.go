@@ -11,6 +11,69 @@ import (
 // or shouldn't produce.
 
 // ---------------------------------------------------------------------------
+// Enum constants — MotionType, Activation, ObjectLayer (Mask scheme)
+//
+// These are C enum values that cannot be expressed as Go typed constants
+// directly (CGo enum types are not iota-friendly).  We declare them as typed
+// constants using their numeric values from joltc.h.
+// ---------------------------------------------------------------------------
+
+// MotionType values — mirror JPH_MotionType in joltc.h.
+const (
+	MotionTypeStatic    MotionType = 0 // JPH_MotionType_Static
+	MotionTypeKinematic MotionType = 1 // JPH_MotionType_Kinematic
+	MotionTypeDynamic   MotionType = 2 // JPH_MotionType_Dynamic
+)
+
+// Activation values — mirror JPH_Activation in joltc.h.
+const (
+	ActivationActivate     Activation = 0 // JPH_Activation_Activate
+	ActivationDontActivate Activation = 1 // JPH_Activation_DontActivate
+)
+
+// ObjectLayerMaskMake encodes group and mask bits into an ObjectLayer value
+// for use with the ObjectLayerPairFilterMask / BroadPhaseLayerInterfaceMask
+// scheme.
+//
+// joltc is built with JPH_OBJECT_LAYER_BITS=32 (see third_party/joltc/CMakeLists.txt),
+// so cNumBits = 32/2 = 16 and cMask = 0xFFFF.
+// Encoding: (group & 0xFFFF) | (mask << 16).
+//
+// Two objects collide when:
+//
+//	(group(A) & mask(B)) != 0 && (group(B) & mask(A)) != 0
+func ObjectLayerMaskMake(group, mask uint32) ObjectLayer {
+	const numBits = 16 // JPH_OBJECT_LAYER_BITS/2 = 32/2 = 16
+	return ObjectLayer((group & 0xFFFF) | (mask << numBits))
+}
+
+// ObjectLayer constants for a standard two-layer (NON_MOVING / MOVING) Mask
+// scheme using the 32-bit ObjectLayer encoding (16-bit group/mask split).
+//
+//	NonMoving: group=0x0001, mask=0x0002  →  0x0002_0001
+//	Moving:    group=0x0002, mask=0x0003  →  0x0003_0002
+//
+// Use SetupDefaultBroadPhaseLayers to configure the BroadPhaseLayerInterface.
+var (
+	ObjectLayerNonMoving = ObjectLayerMaskMake(0x0001, 0x0002) // static / floor
+	ObjectLayerMoving    = ObjectLayerMaskMake(0x0002, 0x0003) // dynamic / actors
+)
+
+// SetupDefaultBroadPhaseLayers configures a 2-layer BroadPhaseLayerInterface
+// created with NewBroadPhaseLayerInterfaceMask(2) for the standard
+// NON_MOVING (BP layer 0) / MOVING (BP layer 1) scheme used by the
+// ObjectLayerNonMoving / ObjectLayerMoving constants above.
+//
+// BP layer 0 accepts objects whose group bit 0 is set (NON_MOVING).
+// BP layer 1 accepts objects whose group bit 1 is set (MOVING).
+func SetupDefaultBroadPhaseLayers(bpli *BroadPhaseLayerInterface) {
+	// BP layer 0 accepts objects whose group bit 0 is set (= NON_MOVING group)
+	bpli.ConfigureLayer(0, 0x0001, 0)
+	// BP layer 1 accepts objects whose group bit 1 is set (= MOVING group)
+	bpli.ConfigureLayer(1, 0x0002, 0)
+}
+
+// ---------------------------------------------------------------------------
 // Global lifecycle
 // ---------------------------------------------------------------------------
 
@@ -210,4 +273,61 @@ func NewPhysicsSystemWithMaskFilters(
 		objectVsBroadPhaseLayerFilter: unsafe.Pointer(ovbplf.h),
 	}
 	return NewPhysicsSystem(unsafe.Pointer(&s))
+}
+
+// ---------------------------------------------------------------------------
+// BodyCreationSettings — convenience constructor with shape
+//
+// The generator only emits NewBodyCreationSettings() (no shape).
+// JPH_BodyCreationSettings_Create3 in joltc takes a Shape directly and sets
+// position, rotation, motionType and objectLayer in one call.
+// ---------------------------------------------------------------------------
+
+// NewBodyCreationSettingsWithShape creates a BodyCreationSettings pre-wired
+// with the given shape, position, motion type, and object layer.
+// rotation is set to the identity quaternion automatically.
+func NewBodyCreationSettingsWithShape(
+	shape *Shape,
+	position RVec3,
+	motionType MotionType,
+	objectLayer ObjectLayer,
+) *BodyCreationSettings {
+	identity := Quat{X: 0, Y: 0, Z: 0, W: 1}
+	h := cjolt.JPH_BodyCreationSettings_Create3(
+		shape.h,
+		(*cjolt.C_JPH_RVec3)(unsafe.Pointer(&position)),
+		(*cjolt.C_JPH_Quat)(unsafe.Pointer(&identity)),
+		cjolt.C_JPH_MotionType(motionType),
+		cjolt.C_JPH_ObjectLayer(objectLayer),
+	)
+	p := &BodyCreationSettings{h: h}
+	runtime.SetFinalizer(p, (*BodyCreationSettings).finalize)
+	return p
+}
+
+// ---------------------------------------------------------------------------
+// BodyInterface — GetPosition returns RVec3 by value
+//
+// The generated Position(b BodyID, r RVec3) passes r by value so the C write
+// is lost.  GetPosition returns the value directly.
+// ---------------------------------------------------------------------------
+
+// GetPosition returns the world-space position of the body with the given ID.
+func (bi *BodyInterface) GetPosition(b BodyID) RVec3 {
+	var out RVec3
+	cjolt.JPH_BodyInterface_GetPosition(bi.h, cjolt.C_JPH_BodyID(b), (*cjolt.C_JPH_RVec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(bi)
+	return out
+}
+
+// ---------------------------------------------------------------------------
+// BroadPhaseLayerInterface — ConfigureLayer for Mask scheme
+// ---------------------------------------------------------------------------
+
+// ConfigureLayer configures a broad-phase layer for the Mask scheme.
+// broadPhaseLayer is the layer index (0..numBroadPhaseLayers-1).
+// groupsToInclude and groupsToExclude are bit-masks of object-layer groups.
+func (bpli *BroadPhaseLayerInterface) ConfigureLayer(broadPhaseLayer uint8, groupsToInclude, groupsToExclude uint32) {
+	cjolt.JPH_BroadPhaseLayerInterfaceMask_ConfigureLayer(bpli.h, cjolt.C_JPH_BroadPhaseLayer(broadPhaseLayer), groupsToInclude, groupsToExclude)
+	runtime.KeepAlive(bpli)
 }
