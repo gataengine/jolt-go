@@ -29,7 +29,9 @@ func main() {
 		if err != nil {
 			log.Fatalf("extract jolt sources: %v", err)
 		}
-		fmt.Print(gen.EmitUnity(joltSources, joltcUnitySources))
+		fmt.Print(gen.EmitUnity(joltSources, joltcUnitySources, gen.UnityOpts{
+			SettingsSizeAsserts: gen.Annotations.SettingsSizes,
+		}))
 	default:
 		log.Fatalf("unknown mode: %s", os.Args[1])
 	}

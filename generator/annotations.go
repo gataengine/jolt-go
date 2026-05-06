@@ -30,6 +30,7 @@ type Sidecar struct {
 	Listeners        []ListenerSpec
 	SettingsInit     map[string]string   // settings type -> JPH_*_Init function
 	SettingsStrategy map[string]Strategy // override per type
+	SettingsSizes    map[string]int      // C-type-name → expected sizeof(bytes), filled empirically
 }
 
 // Annotations is the MVP sidecar populated for Phase 8 codegen runs.
@@ -81,4 +82,9 @@ var Annotations = Sidecar{
 		"BodyCreationSettings": "JPH_BodyCreationSettings_Init",
 	},
 	SettingsStrategy: map[string]Strategy{},
+	SettingsSizes: map[string]int{
+		// Empirical sizes — populated after the first successful build.
+		// Task 33 will discover these by running unsafe.Sizeof on the cgo C type.
+		// Empty for Task 28; entries added in Task 33.
+	},
 }
