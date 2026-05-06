@@ -22,3 +22,21 @@ var _ = Describe("Vec3", func() {
 		Expect(v).To(Equal(jolt.Vec3{}))
 	})
 })
+
+var _ = Describe("Vec3 arithmetic", func() {
+	a := jolt.Vec3{X: 1, Y: 2, Z: 3}
+	b := jolt.Vec3{X: 4, Y: 5, Z: 6}
+
+	It("Add", func() {
+		Expect(a.Add(b)).To(Equal(jolt.Vec3{X: 5, Y: 7, Z: 9}))
+	})
+	It("Sub", func() {
+		Expect(b.Sub(a)).To(Equal(jolt.Vec3{X: 3, Y: 3, Z: 3}))
+	})
+	It("Scale", func() {
+		Expect(a.Scale(2)).To(Equal(jolt.Vec3{X: 2, Y: 4, Z: 6}))
+	})
+	It("Neg", func() {
+		Expect(a.Neg()).To(Equal(jolt.Vec3{X: -1, Y: -2, Z: -3}))
+	})
+})
