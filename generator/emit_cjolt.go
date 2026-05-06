@@ -6,6 +6,45 @@ import (
 	"strings"
 )
 
+// goReservedWords is the set of Go reserved words that must be suffixed with _
+// when used as parameter names.
+var goReservedWords = map[string]bool{
+	"break": true, "case": true, "chan": true, "const": true,
+	"continue": true, "default": true, "defer": true, "else": true,
+	"fallthrough": true, "for": true, "func": true, "go": true,
+	"goto": true, "if": true, "import": true, "interface": true,
+	"map": true, "package": true, "range": true, "return": true,
+	"select": true, "struct": true, "switch": true, "type": true,
+	"var": true,
+}
+
+// safeParamName returns name suffixed with _ if it is a Go reserved word.
+func safeParamName(name string) string {
+	if goReservedWords[name] {
+		return name + "_"
+	}
+	return name
+}
+
+// cjoltGoType converts a C type string to its Go/cgo representation for the
+// cjolt layer.
+//
+//   - "const T *" | "T *"  →  "*C.T"
+//   - scalar/enum (no *)   →  "C.T"
+func cjoltGoType(cType string) string {
+	s := cType
+	// Strip leading "const " if present.
+	s = strings.TrimPrefix(s, "const ")
+	s = strings.TrimSpace(s)
+	// Pointer type: ends with '*' after trimming.
+	if strings.HasSuffix(s, "*") {
+		base := strings.TrimSpace(strings.TrimSuffix(s, "*"))
+		return "*C." + base
+	}
+	// Scalar / enum type.
+	return "C." + s
+}
+
 // EmitCjolt returns the source of internal/cjolt/cjolt_generated.go.
 func EmitCjolt(h *Header) string {
 	var b strings.Builder
@@ -22,9 +61,23 @@ func EmitCjolt(h *Header) string {
 }
 
 func emitCjoltFunc(f Func) string {
-	if f.Return == "void" && len(f.Params) == 0 {
-		return fmt.Sprintf("func %s() { C.%s() }\n\n", f.Name, f.Name)
+	// Build parameter list and argument list.
+	paramParts := make([]string, 0, len(f.Params))
+	argParts := make([]string, 0, len(f.Params))
+	for _, p := range f.Params {
+		safe := safeParamName(p.Name)
+		goType := cjoltGoType(p.CType)
+		paramParts = append(paramParts, safe+" "+goType)
+		argParts = append(argParts, safe)
 	}
-	// Other shapes implemented in later tasks.
-	return ""
+	paramList := strings.Join(paramParts, ", ")
+	argList := strings.Join(argParts, ", ")
+
+	if f.Return == "void" {
+		return fmt.Sprintf("func %s(%s) { C.%s(%s) }\n\n",
+			f.Name, paramList, f.Name, argList)
+	}
+	retType := "C." + f.Return
+	return fmt.Sprintf("func %s(%s) %s {\nreturn C.%s(%s)\n}\n\n",
+		f.Name, paramList, retType, f.Name, argList)
 }
