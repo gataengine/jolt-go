@@ -188,3 +188,34 @@ var _ = Describe("EmitJolt — settings struct", func() {
 		})
 	})
 })
+
+var _ = Describe("EmitJolt — ContactListener", func() {
+	Context("ContactListener struct-of-funcs", func() {
+		h := &generator.Header{}
+		It("emits public Go struct with func fields", func() {
+			src := generator.EmitJolt(h)
+			Expect(src).To(ContainSubstring("type ContactListener struct {"))
+			Expect(src).To(ContainSubstring(
+				"OnContactValidate  func(b1, b2 *Body, baseOffset RVec3, result *CollideShapeResult) ValidateResult",
+			))
+			Expect(src).To(ContainSubstring(
+				"OnContactAdded     func(b1, b2 *Body, manifold *ContactManifold, settings *ContactSettings)",
+			))
+			Expect(src).To(ContainSubstring(
+				"OnContactPersisted func(b1, b2 *Body, manifold *ContactManifold, settings *ContactSettings)",
+			))
+			Expect(src).To(ContainSubstring(
+				"OnContactRemoved   func(subShapePair *SubShapeIDPair)",
+			))
+			Expect(src).To(ContainSubstring("h      *cjolt.C_JPH_ContactListener"))
+			Expect(src).To(ContainSubstring("handle cgo.Handle"))
+		})
+		It("emits NewContactListener registering cgo.Handle as userData", func() {
+			src := generator.EmitJolt(h)
+			Expect(src).To(ContainSubstring("func NewContactListener(l ContactListener) *ContactListener {"))
+			Expect(src).To(ContainSubstring("cl.handle = cgo.NewHandle(cl)"))
+			Expect(src).To(ContainSubstring("cl.h = cjolt.JPH_ContactListener_Create(unsafe.Pointer(uintptr(cl.handle)))"))
+			Expect(src).To(ContainSubstring("runtime.SetFinalizer(cl, (*ContactListener).finalize)"))
+		})
+	})
+})
