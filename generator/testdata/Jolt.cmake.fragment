@@ -1,0 +1,7 @@
+set(JOLT_PHYSICS_SRC_FILES
+    ${JOLT_PHYSICS_ROOT}/Core/Color.cpp
+    ${JOLT_PHYSICS_ROOT}/Core/Factory.cpp
+    ${JOLT_PHYSICS_ROOT}/Core/IssueReporting.cpp
+    ${JOLT_PHYSICS_ROOT}/Geometry/ConvexHullBuilder.cpp
+    ${JOLT_PHYSICS_ROOT}/Geometry/EPAPenetrationDepth.cpp
+)
