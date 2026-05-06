@@ -24,6 +24,7 @@ func ParseHeader(path string) (*Header, error) {
 	}
 
 	h := &Header{
+		// populated by typedef extraction in Task 13
 		Typedefs: make(map[string]string),
 	}
 
@@ -48,10 +49,7 @@ func ParseHeader(path string) (*Header, error) {
 				continue
 			}
 
-			fn, err := extractFunc(d, t.(*cc.FunctionType))
-			if err != nil {
-				continue
-			}
+			fn := extractFunc(d, t.(*cc.FunctionType))
 			h.Funcs = append(h.Funcs, fn)
 		}
 	}
@@ -60,10 +58,10 @@ func ParseHeader(path string) (*Header, error) {
 }
 
 // extractFunc builds a Func from a declarator with function type.
-func extractFunc(d *cc.Declarator, ft *cc.FunctionType) (Func, error) {
+func extractFunc(d *cc.Declarator, ft *cc.FunctionType) Func {
 	f := Func{
 		Name:   d.Name(),
-		Return: renderReturnType(ft.Result()),
+		Return: renderType(ft.Result()),
 	}
 
 	for _, p := range ft.Parameters() {
@@ -74,35 +72,22 @@ func extractFunc(d *cc.Declarator, ft *cc.FunctionType) (Func, error) {
 		}
 		f.Params = append(f.Params, Param{
 			Name:  p.Name(),
-			CType: renderParamType(pt),
+			CType: renderType(pt),
 		})
 	}
 
-	return f, nil
+	return f
 }
 
-// renderReturnType converts a cc Type to its C type string for return values.
-// For void, returns "void". For struct/typedef types, returns the typedef name
-// or struct name. For pointers, uses renderParamType.
-func renderReturnType(t cc.Type) string {
-	if t == nil {
+// renderType converts a cc Type to its canonical C type string.
+// For void (or nil), returns "void". For pointer types, returns "BASE *" or
+// "const BASE *". For other types, returns the typedef name when available,
+// falling back to the type's own String() representation.
+func renderType(t cc.Type) string {
+	if t == nil || t.Kind() == cc.Void {
 		return "void"
 	}
-	if t.Kind() == cc.Void {
-		return "void"
-	}
-	// Use typedef name if available.
-	if name := t.Typedef().Name(); name != "" {
-		return name
-	}
-	return t.String()
-}
-
-// renderParamType converts a cc Type to a C type string in the canonical form
-// expected by the test: "const JPH_Body *" (space before star, const before base).
-func renderParamType(t cc.Type) string {
-	switch t.Kind() {
-	case cc.Ptr:
+	if t.Kind() == cc.Ptr {
 		pt := t.(*cc.PointerType)
 		elem := pt.Elem()
 		base := elemTypeName(elem)
@@ -110,12 +95,11 @@ func renderParamType(t cc.Type) string {
 			return "const " + base + " *"
 		}
 		return base + " *"
-	default:
-		if name := t.Typedef().Name(); name != "" {
-			return name
-		}
-		return t.String()
 	}
+	if name := t.Typedef().Name(); name != "" {
+		return name
+	}
+	return t.String()
 }
 
 // elemTypeName returns the name for a pointer's element type (without const).

@@ -33,6 +33,11 @@ var _ = Describe("Parser", func() {
 			Expect(f.Params).To(HaveLen(2))
 			Expect(f.Params[1].CType).To(Equal("const JPH_Vec3 *"))
 		})
+
+		It("renders pointer return type as 'JPH_Body *'", func() {
+			f := findFunc(h.Funcs, "JPH_BodyInterface_CreateBody")
+			Expect(f.Return).To(Equal("JPH_Body *"))
+		})
 	})
 })
 
