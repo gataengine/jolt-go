@@ -4,6 +4,9 @@ package cjolt
 
 /*
 #include "joltc.h"
+
+// Forward declaration of the C helper defined in contact_listener_procs.c.
+void register_contact_listener_procs(void);
 */
 import "C"
 
@@ -311,8 +314,7 @@ func jolt_go_contactListener_OnContactRemoved(userData unsafe.Pointer, subShapeP
 }
 
 func init() {
-	// TODO(Task 41): ContactListener trampoline registration moved to
-	// internal/cjolt/contact_listener_procs.c — see comment in emitListenerProcsInit.
+	C.register_contact_listener_procs()
 }
 
 func JPH_JobSystemThreadPool_Create(config *C.JobSystemThreadPoolConfig) *C.JPH_JobSystem {
