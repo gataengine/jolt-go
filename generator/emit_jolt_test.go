@@ -132,6 +132,35 @@ var _ = Describe("EmitJolt — methods on receiver types", func() {
 	})
 })
 
+var _ = Describe("EmitJolt — settings call site", func() {
+	Context("BodyInterface.CreateBody passes settings via unsafe.Pointer cast", func() {
+		h := &generator.Header{
+			Funcs: []generator.Func{
+				{Name: "JPH_BodyInterface_CreateBody", Return: "JPH_Body*",
+					Params: []generator.Param{
+						{Name: "self", CType: "JPH_BodyInterface *"},
+						{Name: "settings", CType: "const JPH_BodyCreationSettings *"},
+						{Name: "activation", CType: "JPH_Activation"},
+					}},
+			},
+			Structs: []generator.Struct{
+				{Name: "JPH_BodyInterface", Opaque: true},
+				{Name: "JPH_Body", Opaque: true},
+			},
+		}
+		It("emits CreateBody method with cast", func() {
+			src := generator.EmitJolt(h)
+			Expect(src).To(ContainSubstring(
+				"func (bi *BodyInterface) CreateBody(s *BodyCreationSettings, a Activation) *Body {",
+			))
+			Expect(src).To(ContainSubstring(
+				"cjolt.JPH_BodyInterface_CreateBody(bi.h, (*cjolt.C_JPH_BodyCreationSettings)(unsafe.Pointer(s)), cjolt.C_JPH_Activation(a))",
+			))
+			Expect(src).To(ContainSubstring("runtime.KeepAlive(s)"))
+		})
+	})
+})
+
 var _ = Describe("EmitJolt — settings struct", func() {
 	Context("settings struct (Approach 1)", func() {
 		var h *generator.Header

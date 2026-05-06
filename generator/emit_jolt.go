@@ -445,6 +445,88 @@ func emitPlainHandleTypes(h *Header, alreadyEmitted map[string]bool) string {
 	return b.String()
 }
 
+// receiverShortName produces a short Go receiver name from a CamelCase type by
+// extracting and lowercasing each uppercase letter:
+//
+//	Body           → b
+//	BodyInterface  → bi
+//	PhysicsSystem  → ps
+//	ContactListener → cl
+func receiverShortName(goType string) string {
+	var b strings.Builder
+	for _, r := range goType {
+		if r >= 'A' && r <= 'Z' {
+			b.WriteRune(r + ('a' - 'A'))
+		}
+	}
+	return b.String()
+}
+
+// abbreviateParamName shortens a param name to its first letter when the name
+// is longer than 2 characters. Applied only in receiver methods (not constructors).
+func abbreviateParamName(name string) string {
+	if len(name) > 2 {
+		return strings.ToLower(string([]rune(name)[0]))
+	}
+	return name
+}
+
+// methodParamFromCType maps a C type string to (goType, cjoltCallExpr, needsKeepAlive)
+// for receiver method parameters. It extends joltParamFromCType with:
+//   - Settings pointer params: const JPH_XSettings * → *XSettings + unsafe.Pointer cast
+//   - Enum/typedef params: JPH_X (non-pointer, non-math) → X param type + C cast
+func methodParamFromCType(cType, argName string) (goType, callExpr string, needsKeepAlive bool) {
+	s := strings.TrimPrefix(cType, "const ")
+	s = strings.TrimSpace(s)
+
+	// Pointer type check.
+	if base, ok := strings.CutSuffix(s, "*"); ok {
+		base = strings.TrimSpace(base)
+		// Settings pointer: const JPH_XSettings * → *XSettings
+		stripped := strings.TrimPrefix(base, "JPH_")
+		if strings.HasSuffix(stripped, "Settings") {
+			goT := "*" + stripped
+			cast := "(*cjolt.C_JPH_" + stripped + ")(unsafe.Pointer(" + argName + "))"
+			return goT, cast, true
+		}
+		// Delegate to existing logic for other pointer types.
+		gt, ce := joltParamFromCType(cType, argName)
+		return gt, ce, false
+	}
+
+	// Non-pointer JPH_X type: treat as Go-side typedef/enum.
+	if strings.HasPrefix(s, "JPH_") {
+		stripped := strings.TrimPrefix(s, "JPH_")
+		goT := stripped
+		cast := "cjolt.C_JPH_" + stripped + "(" + argName + ")"
+		return goT, cast, false
+	}
+
+	// Delegate to existing scalar logic.
+	gt, ce := joltParamFromCType(cType, argName)
+	return gt, ce, false
+}
+
+// parsePointerReturn checks if a C return type is JPH_X* (a plain opaque pointer)
+// and returns (goTypeName, true) if so. Math/void returns give ("", false).
+func parsePointerReturn(ret string) (goType string, ok bool) {
+	ret = strings.TrimSpace(ret)
+	if ret == "void" {
+		return "", false
+	}
+	base, hasStar := strings.CutSuffix(ret, "*")
+	if !hasStar {
+		return "", false
+	}
+	base = strings.TrimSpace(base)
+	goT := strings.TrimPrefix(base, "JPH_")
+	// Math types are not returned as wrapped struct pointers from receiver methods.
+	if mathReturnTypes[goT] {
+		return "", false
+	}
+	return goT, true
+}
+
 // emitReceiverMethods walks Funcs and emits Go methods on receiver types for
 // functions matching JPH_<Recv>_<Method> where the first param is the receiver.
 func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
@@ -479,8 +561,8 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 			continue
 		}
 
-		// Receiver variable: first letter of the Go type, lowercased.
-		recvVar := strings.ToLower(string(goRecv[0]))
+		// Receiver variable: extract lowercase initials from each capital segment.
+		recvVar := receiverShortName(goRecv)
 
 		// Go method name: strip "Get" prefix if followed by uppercase letter.
 		goMethod := method
@@ -491,12 +573,19 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 		// Build params and call args (skip first self param).
 		var goParams []string
 		var callArgs []string
+		var settingsKeepAlives []string // param names needing KeepAlive after the cgo call
 		callArgs = append(callArgs, recvVar+".h")
 		for _, p := range f.Params[1:] {
-			paramName := safeParamName(p.Name)
-			gt, callExpr := joltParamFromCType(p.CType, paramName)
+			rawName := safeParamName(p.Name)
+			// Abbreviate long param names in receiver methods only.
+			paramName := abbreviateParamName(rawName)
+
+			gt, callExpr, keepAlive := methodParamFromCType(p.CType, paramName)
 			goParams = append(goParams, paramName+" "+gt)
 			callArgs = append(callArgs, callExpr)
+			if keepAlive {
+				settingsKeepAlives = append(settingsKeepAlives, paramName)
+			}
 		}
 
 		paramList := strings.Join(goParams, ", ")
@@ -504,18 +593,38 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 
 		// Determine return type and body.
 		ret := strings.TrimSpace(f.Return)
+
+		// Check for pointer return: JPH_X* → *X (plain opaque type).
+		if ptrGoType, isPtrReturn := parsePointerReturn(ret); isPtrReturn {
+			fmt.Fprintf(&b, "func (%s *%s) %s(%s) *%s {\n", recvVar, goRecv, goMethod, paramList, ptrGoType)
+			fmt.Fprintf(&b, "    out := cjolt.%s(%s)\n", f.Name, argList)
+			for _, ka := range settingsKeepAlives {
+				fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", ka)
+			}
+			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
+			fmt.Fprintf(&b, "    return &%s{h: out}\n", ptrGoType)
+			fmt.Fprintf(&b, "}\n\n")
+			continue
+		}
+
 		goRet := strings.TrimPrefix(ret, "JPH_")
 
 		if ret == "void" {
 			// No return value.
 			fmt.Fprintf(&b, "func (%s *%s) %s(%s) {\n", recvVar, goRecv, goMethod, paramList)
 			fmt.Fprintf(&b, "    cjolt.%s(%s)\n", f.Name, argList)
+			for _, ka := range settingsKeepAlives {
+				fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", ka)
+			}
 			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
 			fmt.Fprintf(&b, "}\n\n")
 		} else if mathReturnTypes[goRet] {
 			// Math type: use unsafe.Pointer cast.
 			fmt.Fprintf(&b, "func (%s *%s) %s(%s) %s {\n", recvVar, goRecv, goMethod, paramList, goRet)
 			fmt.Fprintf(&b, "    out := cjolt.%s(%s)\n", f.Name, argList)
+			for _, ka := range settingsKeepAlives {
+				fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", ka)
+			}
 			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
 			fmt.Fprintf(&b, "    return *(*%s)(unsafe.Pointer(&out))\n", goRet)
 			fmt.Fprintf(&b, "}\n\n")
@@ -523,6 +632,9 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 			// Scalar or other return: direct return.
 			fmt.Fprintf(&b, "func (%s *%s) %s(%s) %s {\n", recvVar, goRecv, goMethod, paramList, goRet)
 			fmt.Fprintf(&b, "    result := cjolt.%s(%s)\n", f.Name, argList)
+			for _, ka := range settingsKeepAlives {
+				fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", ka)
+			}
 			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
 			fmt.Fprintf(&b, "    return result\n")
 			fmt.Fprintf(&b, "}\n\n")
