@@ -30,3 +30,40 @@ func (v Vec3) Normalized() Vec3 {
 	}
 	return v.Scale(1 / l)
 }
+
+// Quat is a single-precision unit quaternion. Layout matches JPH_Quat.
+type Quat struct{ X, Y, Z, W float32 }
+
+func QuatIdentity() Quat { return Quat{W: 1} }
+
+func (q Quat) Mul(o Quat) Quat {
+	return Quat{
+		X: q.W*o.X + q.X*o.W + q.Y*o.Z - q.Z*o.Y,
+		Y: q.W*o.Y - q.X*o.Z + q.Y*o.W + q.Z*o.X,
+		Z: q.W*o.Z + q.X*o.Y - q.Y*o.X + q.Z*o.W,
+		W: q.W*o.W - q.X*o.X - q.Y*o.Y - q.Z*o.Z,
+	}
+}
+
+func (q Quat) Conjugate() Quat { return Quat{-q.X, -q.Y, -q.Z, q.W} }
+
+func (q Quat) Inverse() Quat {
+	n := q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W
+	if n == 0 {
+		return Quat{}
+	}
+	inv := 1 / n
+	c := q.Conjugate()
+	return Quat{c.X * inv, c.Y * inv, c.Z * inv, c.W * inv}
+}
+
+func (q Quat) RotateVec3(v Vec3) Vec3 {
+	// v' = q * (0,v) * q^-1, simplified for unit quats
+	u := Vec3{q.X, q.Y, q.Z}
+	s := q.W
+	return u.Scale(2 * u.Dot(v)).Add(
+		v.Scale(s*s - u.Dot(u)).Add(
+			u.Cross(v).Scale(2 * s),
+		),
+	)
+}

@@ -57,3 +57,23 @@ var _ = Describe("Vec3 geometry", func() {
 		Expect(n.Length()).To(BeNumerically("~", 1, 1e-6))
 	})
 })
+
+var _ = Describe("Quat", func() {
+	It("Identity multiplied is identity", func() {
+		q := jolt.QuatIdentity()
+		Expect(q).To(Equal(jolt.Quat{W: 1}))
+		Expect(q.Mul(q)).To(Equal(q))
+	})
+	It("Inverse of unit quat equals Conjugate", func() {
+		q := jolt.Quat{X: 0, Y: 0, Z: 0.7071068, W: 0.7071068}
+		inv := q.Inverse()
+		Expect(inv.X).To(BeNumerically("~", q.Conjugate().X, 1e-5))
+		Expect(inv.Y).To(BeNumerically("~", q.Conjugate().Y, 1e-5))
+		Expect(inv.Z).To(BeNumerically("~", q.Conjugate().Z, 1e-5))
+		Expect(inv.W).To(BeNumerically("~", q.Conjugate().W, 1e-5))
+	})
+	It("RotateVec3 of identity is identity", func() {
+		v := jolt.Vec3{1, 2, 3}
+		Expect(jolt.QuatIdentity().RotateVec3(v)).To(Equal(v))
+	})
+})
