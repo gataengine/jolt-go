@@ -34,6 +34,9 @@ var _ = runtime.GC
 		b.WriteString(emitOwned(p))
 	}
 
+	// Emit ref-counted type definitions and constructors.
+	b.WriteString(emitRefCountedTypes(h))
+
 	out, err := format.Source([]byte(b.String()))
 	if err != nil {
 		return b.String()
@@ -76,6 +79,141 @@ func pairCreateDestroy(h *Header) []ownedPair {
 // isRefCounted reports whether a type is in the RefCounted sidecar list.
 func isRefCounted(t string) bool {
 	return slices.Contains(Annotations.RefCounted, t)
+}
+
+// emitRefCountedTypes emits struct definitions for all RefCounted types
+// (using Annotations.Inheritance for parents) and constructors with
+// finalizer-registered Release for types that have a JPH_X_Create function.
+func emitRefCountedTypes(h *Header) string {
+	var b strings.Builder
+
+	// 1. Type definitions for every RefCounted type.
+	for _, name := range Annotations.RefCounted {
+		if parent, ok := Annotations.Inheritance[name]; ok {
+			// Embedded inheritance.
+			fmt.Fprintf(&b, "type %s struct{ %s }\n", name, parent)
+		} else {
+			// Root of hierarchy (Shape, PhysicsMaterial) — holds the cjolt handle.
+			fmt.Fprintf(&b, "type %s struct{ h *cjolt.C_JPH_%s }\n", name, name)
+		}
+	}
+	b.WriteString("\n")
+
+	// 2. Constructors for types that have a JPH_X_Create function.
+	creates := map[string]Func{}
+	for _, f := range h.Funcs {
+		recv, method, ok := SplitMethod(f.Name)
+		if ok && method == "Create" && isRefCounted(recv) {
+			creates[recv] = f
+		}
+	}
+	// Emit in stable order: iterate Annotations.RefCounted to preserve declaration order.
+	for _, goType := range Annotations.RefCounted {
+		f, ok := creates[goType]
+		if !ok {
+			continue
+		}
+		b.WriteString(emitRefCountedConstructor(goType, f))
+	}
+	return b.String()
+}
+
+// emitRefCountedConstructor emits the public constructor and hidden finalizer
+// for a single ref-counted type.
+func emitRefCountedConstructor(goType string, f Func) string {
+	var b strings.Builder
+
+	// Build Go param signature and cjolt call arguments.
+	var goParams []string
+	var cjoltArgs []string
+	for _, p := range f.Params {
+		goName := safeParamName(p.Name)
+		gt, callExpr := joltParamFromCType(p.CType, goName)
+		goParams = append(goParams, goName+" "+gt)
+		cjoltArgs = append(cjoltArgs, callExpr)
+	}
+
+	paramList := strings.Join(goParams, ", ")
+	argList := strings.Join(cjoltArgs, ", ")
+
+	fmt.Fprintf(&b, "func New%s(%s) *%s {\n", goType, paramList, goType)
+	fmt.Fprintf(&b, "    h := cjolt.%s(%s)\n", f.Name, argList)
+	chain := buildEmbeddedChain(goType)
+	fmt.Fprintf(&b, "    s := &%s{%s}\n", goType, chain)
+	fmt.Fprintf(&b, "    runtime.SetFinalizer(s, (*%s).finalize)\n", goType)
+	fmt.Fprintf(&b, "    return s\n}\n\n")
+
+	// finalize method — calls JPH_Shape_Release (Shape is the root for all shapes).
+	fmt.Fprintf(&b, "func (s *%s) finalize() {\n", goType)
+	fmt.Fprintf(&b, "    if s.h != nil {\n")
+	fmt.Fprintf(&b, "        cjolt.JPH_Shape_Release(s.h)\n")
+	fmt.Fprintf(&b, "        s.h = nil\n")
+	fmt.Fprintf(&b, "    }\n}\n\n")
+
+	return b.String()
+}
+
+// joltParamFromCType maps a C type string to (goType, cjoltCallExpr) for use in
+// the public jolt API.
+func joltParamFromCType(cType, argName string) (goType, callExpr string) {
+	s := strings.TrimPrefix(cType, "const ")
+	s = strings.TrimSpace(s)
+	// Pointer type: strip trailing '*'.
+	if base, ok := strings.CutSuffix(s, "*"); ok {
+		base = strings.TrimSpace(base)
+		switch base {
+		case "JPH_Vec3":
+			return "Vec3", "(*cjolt.C_JPH_Vec3)(unsafe.Pointer(&" + argName + "))"
+		case "JPH_Quat":
+			return "Quat", "(*cjolt.C_JPH_Quat)(unsafe.Pointer(&" + argName + "))"
+		case "JPH_RVec3":
+			return "RVec3", "(*cjolt.C_JPH_RVec3)(unsafe.Pointer(&" + argName + "))"
+		}
+		// Other pointer: pass through opaque handle.
+		return "*" + strings.TrimPrefix(base, "JPH_"), argName + ".h"
+	}
+	// Scalars — map to Go-native; no cast needed (cjolt wrapper already accepts Go-native).
+	switch s {
+	case "float":
+		return "float32", argName
+	case "double":
+		return "float64", argName
+	case "bool":
+		return "bool", argName
+	case "int", "int32_t":
+		return "int32", argName
+	case "unsigned int", "uint32_t":
+		return "uint32", argName
+	case "uint8_t":
+		return "uint8", argName
+	case "int8_t":
+		return "int8", argName
+	case "uint16_t":
+		return "uint16", argName
+	case "int16_t":
+		return "int16", argName
+	case "uint64_t":
+		return "uint64", argName
+	case "int64_t":
+		return "int64", argName
+	}
+	// Unknown: pass through (will fail to compile for exotic types — Task 33).
+	return s, argName
+}
+
+// buildEmbeddedChain produces the struct literal initialiser for a ref-counted
+// type with embedded parents, e.g.:
+//
+//	BoxShape    → "ConvexShape: ConvexShape{Shape: Shape{h: h}}"
+//	ConvexShape → "Shape: Shape{h: h}"
+//	Shape       → "h: h"
+func buildEmbeddedChain(goType string) string {
+	parent, ok := Annotations.Inheritance[goType]
+	if !ok {
+		// Root type: just the handle field.
+		return "h: h"
+	}
+	return parent + ": " + parent + "{" + buildEmbeddedChain(parent) + "}"
 }
 
 // emitOwned emits the public Go API for one owned-type pair: type, constructor with finalizer, Close, finalize.

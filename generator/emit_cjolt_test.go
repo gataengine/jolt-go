@@ -97,6 +97,86 @@ var _ = Describe("EmitCjolt — math types", func() {
 	})
 })
 
+var _ = Describe("EmitCjolt — scalar Go-native types", func() {
+	Context("float and double params use Go-native types", func() {
+		h := &generator.Header{
+			Funcs: []generator.Func{
+				{
+					Name:   "JPH_BoxShape_Create",
+					Return: "JPH_Shape*",
+					Params: []generator.Param{
+						{Name: "halfExtent", CType: "const JPH_Vec3 *"},
+						{Name: "convexRadius", CType: "float"},
+					},
+				},
+			},
+		}
+		It("emits float32 for float param with C.float cast in body", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring(
+				"func JPH_BoxShape_Create(halfExtent *C.JPH_Vec3, convexRadius float32) *C.JPH_Shape {",
+			))
+			Expect(src).To(ContainSubstring(
+				"return C.JPH_BoxShape_Create(halfExtent, C.float(convexRadius))",
+			))
+		})
+	})
+
+	Context("integer scalar params use Go-native types", func() {
+		h := &generator.Header{
+			Funcs: []generator.Func{
+				{
+					Name:   "JPH_Foo_SetCount",
+					Return: "void",
+					Params: []generator.Param{
+						{Name: "n", CType: "int"},
+					},
+				},
+				{
+					Name:   "JPH_Foo_SetUCount",
+					Return: "void",
+					Params: []generator.Param{
+						{Name: "n", CType: "unsigned int"},
+					},
+				},
+			},
+		}
+		It("emits int32 for int param with C.int cast", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring(
+				"func JPH_Foo_SetCount(n int32) { C.JPH_Foo_SetCount(C.int(n)) }",
+			))
+		})
+		It("emits uint32 for unsigned int param with C.uint cast", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring(
+				"func JPH_Foo_SetUCount(n uint32) { C.JPH_Foo_SetUCount(C.uint(n)) }",
+			))
+		})
+	})
+
+	Context("JPH_* enum types still use C types (no Go-native mapping)", func() {
+		h := &generator.Header{
+			Funcs: []generator.Func{
+				{
+					Name:   "JPH_Body_SetMotionType",
+					Return: "void",
+					Params: []generator.Param{
+						{Name: "self", CType: "JPH_Body *"},
+						{Name: "type", CType: "JPH_MotionType"},
+					},
+				},
+			},
+		}
+		It("keeps C.JPH_MotionType for enum params", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring(
+				"func JPH_Body_SetMotionType(self *C.JPH_Body, type_ C.JPH_MotionType) {",
+			))
+		})
+	})
+})
+
 var _ = Describe("EmitCjolt — opaque type re-exports", func() {
 	Context("opaque type re-exports", func() {
 		h := &generator.Header{

@@ -26,10 +26,37 @@ func safeParamName(name string) string {
 	return name
 }
 
+// cScalarToGoNative maps C basic scalar type names to their Go-native equivalents.
+// Types in this map are passed as Go-native in cjolt wrappers and cast to C at the call site.
+var cScalarToGoNative = map[string]string{
+	"float":        "float32",
+	"double":       "float64",
+	"bool":         "bool",
+	"int":          "int32",
+	"unsigned int": "uint32",
+	"uint8_t":      "uint8",
+	"int8_t":       "int8",
+	"uint16_t":     "uint16",
+	"int16_t":      "int16",
+	"uint32_t":     "uint32",
+	"int32_t":      "int32",
+	"uint64_t":     "uint64",
+	"int64_t":      "int64",
+}
+
+// cScalarToCCastName maps C type names to the cgo cast identifier.
+// For most types this is the same as the key, but multi-word types like
+// "unsigned int" need their cgo alias ("uint").
+var cScalarToCCastName = map[string]string{
+	"unsigned int": "uint",
+	// All others: same as the C type name.
+}
+
 // cjoltGoType converts a C type string to its Go/cgo representation for the
 // cjolt layer.
 //
 //   - "const T *" | "T *"  →  "*C.T"
+//   - C basic scalar       →  Go-native type (float32, int32, etc.)
 //   - scalar/enum (no *)   →  "C.T"
 func cjoltGoType(cType string) string {
 	s := cType
@@ -40,7 +67,24 @@ func cjoltGoType(cType string) string {
 	if base, ok := strings.CutSuffix(s, "*"); ok {
 		return "*C." + strings.TrimSpace(base)
 	}
+	// Check scalar map first.
+	if goNative, ok := cScalarToGoNative[s]; ok {
+		return goNative
+	}
 	// Scalar / enum type.
+	return "C." + s
+}
+
+// cjoltReturnType converts a C return type string (no const, no leading qualifier)
+// to its Go/cgo representation for the cjolt layer.
+//
+//   - "T*" or "T *"  → "*C.T"
+//   - otherwise      → "C.T"
+func cjoltReturnType(ret string) string {
+	s := strings.TrimSpace(ret)
+	if base, ok := strings.CutSuffix(s, "*"); ok {
+		return "*C." + strings.TrimSpace(base)
+	}
 	return "C." + s
 }
 
@@ -66,6 +110,28 @@ func EmitCjolt(h *Header) string {
 	return string(out)
 }
 
+// cjoltArgExpr returns the expression to use when passing a Go-side param of the
+// given C type to the C function. For Go-native scalar types, wraps in a C cast;
+// for pointer and enum types passes through unchanged.
+func cjoltArgExpr(cType, argName string) string {
+	s := strings.TrimPrefix(cType, "const ")
+	s = strings.TrimSpace(s)
+	// Pointers pass through unchanged.
+	if _, ok := strings.CutSuffix(s, "*"); ok {
+		return argName
+	}
+	// If it maps to a Go-native type, emit C.<castname>(argName).
+	if _, ok := cScalarToGoNative[s]; ok {
+		castName := s
+		if alias, ok2 := cScalarToCCastName[s]; ok2 {
+			castName = alias
+		}
+		return "C." + castName + "(" + argName + ")"
+	}
+	// Enum / JPH_* type: pass through.
+	return argName
+}
+
 func emitCjoltFunc(f Func) string {
 	// Build parameter list and argument list.
 	paramParts := make([]string, 0, len(f.Params))
@@ -74,7 +140,7 @@ func emitCjoltFunc(f Func) string {
 		safe := safeParamName(p.Name)
 		goType := cjoltGoType(p.CType)
 		paramParts = append(paramParts, safe+" "+goType)
-		argParts = append(argParts, safe)
+		argParts = append(argParts, cjoltArgExpr(p.CType, safe))
 	}
 	paramList := strings.Join(paramParts, ", ")
 	argList := strings.Join(argParts, ", ")
@@ -83,7 +149,7 @@ func emitCjoltFunc(f Func) string {
 		return fmt.Sprintf("func %s(%s) { C.%s(%s) }\n\n",
 			f.Name, paramList, f.Name, argList)
 	}
-	retType := "C." + f.Return
+	retType := cjoltReturnType(f.Return)
 	return fmt.Sprintf("func %s(%s) %s {\nreturn C.%s(%s)\n}\n\n",
 		f.Name, paramList, retType, f.Name, argList)
 }
