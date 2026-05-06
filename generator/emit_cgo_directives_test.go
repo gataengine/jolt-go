@@ -13,6 +13,8 @@ var _ = Describe("EmitCgoDirectives", func() {
 		Expect(out).To(ContainSubstring(`#cgo CXXFLAGS: -std=c++17`))
 		Expect(out).To(ContainSubstring(`#cgo CXXFLAGS: -I${SRCDIR}/../../third_party/joltc/include`))
 		Expect(out).To(ContainSubstring(`#cgo CXXFLAGS: -I${SRCDIR}/../../third_party/JoltPhysics`))
+		Expect(out).To(ContainSubstring(`#cgo CXXFLAGS: -DJPH_OBJECT_LAYER_BITS=32`))
+		Expect(out).To(ContainSubstring(`#cgo CFLAGS: -I${SRCDIR}/../../third_party/joltc/include`))
 		Expect(out).To(ContainSubstring(`#cgo amd64 CXXFLAGS: -DJPH_USE_SSE4_1 -DJPH_USE_SSE4_2 -DJPH_USE_AVX`))
 		Expect(out).To(ContainSubstring(`#cgo arm64 CXXFLAGS: -DJPH_USE_NEON`))
 		Expect(out).To(ContainSubstring(`#cgo joltdouble CXXFLAGS: -DJPH_DOUBLE_PRECISION`))
