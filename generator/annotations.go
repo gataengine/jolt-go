@@ -25,8 +25,8 @@ type ListenerMethod struct {
 
 // Sidecar covers the things joltc.h alone can't express.
 type Sidecar struct {
-	Inheritance      map[string]string   // child Go type -> direct parent Go type
-	RefCounted       []string            // Go types using AddRef/Release
+	Inheritance      map[string]string // child Go type -> direct parent Go type
+	RefCounted       []string          // Go types using AddRef/Release
 	Listeners        []ListenerSpec
 	SettingsInit     map[string]string   // settings type -> JPH_*_Init function
 	SettingsStrategy map[string]Strategy // override per type
@@ -84,7 +84,7 @@ var Annotations = Sidecar{
 		// ref/owned type via JPH_BodyCreationSettings_Create/_Destroy.
 	},
 	SettingsStrategy: map[string]Strategy{},
-	SettingsSizes: map[string]int{
+	SettingsSizes:    map[string]int{
 		// Empirical sizes — populated after the first successful build.
 		// Task 33 will discover these by running unsafe.Sizeof on the cgo C type.
 		// Empty for Task 28; entries added in Task 33.

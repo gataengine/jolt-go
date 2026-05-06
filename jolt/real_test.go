@@ -1,3 +1,5 @@
+//go:build !joltdouble
+
 package jolt_test
 
 import (

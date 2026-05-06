@@ -140,15 +140,15 @@ func NewObjectVsBroadPhaseLayerFilterMask(bpli *BroadPhaseLayerInterface) *Objec
 // so that Go's GC does not move the objects out from under us during the
 // Create call.
 type goPhysicsSystemSettings struct {
-	maxBodies             uint32
-	numBodyMutexes        uint32
-	maxBodyPairs          uint32
-	maxContactConstraints uint32
-	_padding              uint32
-	_alignpad             uint32 // 4 bytes to reach offset 24 on 64-bit
-	broadPhaseLayerInterface       unsafe.Pointer
-	objectLayerPairFilter          unsafe.Pointer
-	objectVsBroadPhaseLayerFilter  unsafe.Pointer
+	maxBodies                     uint32
+	numBodyMutexes                uint32
+	maxBodyPairs                  uint32
+	maxContactConstraints         uint32
+	_padding                      uint32
+	_alignpad                     uint32 // 4 bytes to reach offset 24 on 64-bit
+	broadPhaseLayerInterface      unsafe.Pointer
+	objectLayerPairFilter         unsafe.Pointer
+	objectVsBroadPhaseLayerFilter unsafe.Pointer
 }
 
 // ---------------------------------------------------------------------------
@@ -163,7 +163,7 @@ type goPhysicsSystemSettings struct {
 // JobSystemThreadPoolConfig struct whose fields are unexported from Go.
 // C layout: uint32 maxJobs, uint32 maxBarriers, int32 numThreads
 type goJobSystemThreadPoolConfig struct {
-	maxJobs    uint32
+	maxJobs     uint32
 	maxBarriers uint32
 	numThreads  int32
 }
@@ -174,7 +174,7 @@ type goJobSystemThreadPoolConfig struct {
 //   - numThreads: number of worker threads; -1 lets Jolt choose (= CPU count - 1)
 func NewJobSystemThreadPool(maxJobs, maxBarriers uint32, numThreads int32) *JobSystem {
 	cfg := goJobSystemThreadPoolConfig{
-		maxJobs:    maxJobs,
+		maxJobs:     maxJobs,
 		maxBarriers: maxBarriers,
 		numThreads:  numThreads,
 	}
@@ -257,7 +257,8 @@ func NewPlaneShapeFromGoPlane(p GoPlane, material *PhysicsMaterial, halfExtent f
 // first and use NewPhysicsSystem directly.
 //
 // Parameters use the joltc defaults:
-//   maxBodies = 10240, maxBodyPairs = 65536, maxContactConstraints = 10240
+//
+//	maxBodies = 10240, maxBodyPairs = 65536, maxContactConstraints = 10240
 func NewPhysicsSystemWithMaskFilters(
 	maxBodies, maxBodyPairs, maxContactConstraints uint32,
 	bpli *BroadPhaseLayerInterface,
@@ -265,11 +266,11 @@ func NewPhysicsSystemWithMaskFilters(
 	ovbplf *ObjectVsBroadPhaseLayerFilter,
 ) *PhysicsSystem {
 	s := goPhysicsSystemSettings{
-		maxBodies:                    maxBodies,
-		maxBodyPairs:                 maxBodyPairs,
-		maxContactConstraints:        maxContactConstraints,
-		broadPhaseLayerInterface:     unsafe.Pointer(bpli.h),
-		objectLayerPairFilter:        unsafe.Pointer(olpf.h),
+		maxBodies:                     maxBodies,
+		maxBodyPairs:                  maxBodyPairs,
+		maxContactConstraints:         maxContactConstraints,
+		broadPhaseLayerInterface:      unsafe.Pointer(bpli.h),
+		objectLayerPairFilter:         unsafe.Pointer(olpf.h),
 		objectVsBroadPhaseLayerFilter: unsafe.Pointer(ovbplf.h),
 	}
 	return NewPhysicsSystem(unsafe.Pointer(&s))
