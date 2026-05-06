@@ -143,10 +143,11 @@ func emitRefCountedConstructor(goType string, f Func) string {
 	fmt.Fprintf(&b, "    runtime.SetFinalizer(s, (*%s).finalize)\n", goType)
 	fmt.Fprintf(&b, "    return s\n}\n\n")
 
-	// finalize method — calls JPH_Shape_Release (Shape is the root for all shapes).
+	// finalize method — calls the root type's Release (walks up Inheritance to find root).
+	root := rootRefCountedType(goType)
 	fmt.Fprintf(&b, "func (s *%s) finalize() {\n", goType)
 	fmt.Fprintf(&b, "    if s.h != nil {\n")
-	fmt.Fprintf(&b, "        cjolt.JPH_Shape_Release(s.h)\n")
+	fmt.Fprintf(&b, "        cjolt.JPH_%s_Release(s.h)\n", root)
 	fmt.Fprintf(&b, "        s.h = nil\n")
 	fmt.Fprintf(&b, "    }\n}\n\n")
 
@@ -199,6 +200,20 @@ func joltParamFromCType(cType, argName string) (goType, callExpr string) {
 	}
 	// Unknown: pass through (will fail to compile for exotic types — Task 33).
 	return s, argName
+}
+
+// rootRefCountedType walks up Annotations.Inheritance from goType to find
+// the topmost ancestor (the type that holds the actual cjolt handle).
+// For a root type with no parent, returns goType unchanged.
+func rootRefCountedType(goType string) string {
+	cur := goType
+	for {
+		parent, ok := Annotations.Inheritance[cur]
+		if !ok {
+			return cur
+		}
+		cur = parent
+	}
 }
 
 // buildEmbeddedChain produces the struct literal initialiser for a ref-counted

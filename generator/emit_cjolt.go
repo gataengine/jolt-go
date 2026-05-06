@@ -97,7 +97,7 @@ func EmitCjolt(h *Header) string {
 		if !s.Opaque {
 			continue
 		}
-		b.WriteString(fmt.Sprintf("type C_%s = C.%s\n", s.Name, s.Name))
+		fmt.Fprintf(&b, "type C_%s = C.%s\n", s.Name, s.Name)
 	}
 	b.WriteString("\n")
 	for _, f := range h.Funcs {

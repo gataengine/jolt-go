@@ -84,3 +84,22 @@ var _ = Describe("EmitJolt — ref-counted types", func() {
 		Expect(src).NotTo(ContainSubstring("func (s *Shape) Release()"))
 	})
 })
+
+var _ = Describe("EmitJolt — non-Shape ref-counted root", func() {
+	h := &generator.Header{
+		Funcs: []generator.Func{
+			{Name: "JPH_PhysicsMaterial_Create", Return: "JPH_PhysicsMaterial*"},
+			{Name: "JPH_PhysicsMaterial_AddRef", Return: "void",
+				Params: []generator.Param{{Name: "self", CType: "JPH_PhysicsMaterial *"}}},
+			{Name: "JPH_PhysicsMaterial_Release", Return: "void",
+				Params: []generator.Param{{Name: "self", CType: "JPH_PhysicsMaterial *"}}},
+		},
+	}
+	It("emits constructor with correct root-type Release call", func() {
+		src := generator.EmitJolt(h)
+		Expect(src).To(ContainSubstring("func NewPhysicsMaterial() *PhysicsMaterial {"))
+		// Critical: finalize must use PhysicsMaterial_Release, not Shape_Release
+		Expect(src).To(ContainSubstring("cjolt.JPH_PhysicsMaterial_Release(s.h)"))
+		Expect(src).NotTo(ContainSubstring("cjolt.JPH_Shape_Release(s.h)"))
+	})
+})
