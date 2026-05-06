@@ -40,3 +40,20 @@ var _ = Describe("Vec3 arithmetic", func() {
 		Expect(a.Neg()).To(Equal(jolt.Vec3{X: -1, Y: -2, Z: -3}))
 	})
 })
+
+var _ = Describe("Vec3 geometry", func() {
+	It("Dot", func() {
+		Expect(jolt.Vec3{1, 2, 3}.Dot(jolt.Vec3{4, -5, 6})).
+			To(BeNumerically("~", 12, 1e-6))
+	})
+	It("Cross", func() {
+		c := jolt.Vec3{1, 0, 0}.Cross(jolt.Vec3{0, 1, 0})
+		Expect(c).To(Equal(jolt.Vec3{0, 0, 1}))
+	})
+	It("Length and Normalized", func() {
+		v := jolt.Vec3{0, 3, 4}
+		Expect(v.Length()).To(BeNumerically("~", 5, 1e-6))
+		n := v.Normalized()
+		Expect(n.Length()).To(BeNumerically("~", 1, 1e-6))
+	})
+})
