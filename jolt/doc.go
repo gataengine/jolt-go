@@ -5,3 +5,5 @@
 // state shared with their listener implementations. The binding does not
 // serialize callbacks.
 package jolt
+
+//go:generate go run ../generator/cmd/gen
