@@ -96,3 +96,19 @@ var _ = Describe("EmitCjolt — math types", func() {
 		})
 	})
 })
+
+var _ = Describe("EmitCjolt — opaque type re-exports", func() {
+	Context("opaque type re-exports", func() {
+		h := &generator.Header{
+			Structs: []generator.Struct{
+				{Name: "JPH_PhysicsSystem", Opaque: true},
+				{Name: "JPH_BodyInterface", Opaque: true},
+			},
+		}
+		It("emits Go aliases for each opaque type", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring("type C_JPH_PhysicsSystem = C.JPH_PhysicsSystem"))
+			Expect(src).To(ContainSubstring("type C_JPH_BodyInterface = C.JPH_BodyInterface"))
+		})
+	})
+})
