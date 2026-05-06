@@ -24,6 +24,9 @@ var _ = runtime.GC
 
 `)
 
+	// Track which Go types have already been emitted as struct definitions.
+	alreadyEmitted := map[string]bool{}
+
 	// Pair Create/Destroy by type name and emit one OwnedType block per pair
 	// that is *not* in the RefCounted set.
 	pairs := pairCreateDestroy(h)
@@ -32,10 +35,27 @@ var _ = runtime.GC
 			continue
 		}
 		b.WriteString(emitOwned(p))
+		alreadyEmitted[p.GoType] = true
 	}
 
 	// Emit ref-counted type definitions and constructors.
 	b.WriteString(emitRefCountedTypes(h))
+	for _, name := range Annotations.RefCounted {
+		alreadyEmitted[name] = true
+	}
+
+	// Emit plain handle wrappers for opaque structs not covered above.
+	b.WriteString(emitPlainHandleTypes(h, alreadyEmitted))
+	// Update alreadyEmitted with any new types from plain handle pass.
+	for _, s := range h.Structs {
+		if s.Opaque {
+			goName := strings.TrimPrefix(s.Name, "JPH_")
+			alreadyEmitted[goName] = true
+		}
+	}
+
+	// Emit method bindings on receiver types.
+	b.WriteString(emitReceiverMethods(h, alreadyEmitted))
 
 	out, err := format.Source([]byte(b.String()))
 	if err != nil {
@@ -255,4 +275,126 @@ func (p *%[1]s) Close() error {
 func (p *%[1]s) finalize() { _ = p.Close() }
 
 `, p.GoType)
+}
+
+// mathReturnTypes is the set of Go math types that require the unsafe.Pointer
+// cast pattern when returned from cjolt functions.
+var mathReturnTypes = map[string]bool{
+	"Vec3": true, "Quat": true, "Mat44": true,
+	"RVec3": true, "RMat44": true,
+}
+
+// skipMethods lists C method names that are handled by dedicated emitters and
+// must not be turned into receiver methods.
+var skipMethods = map[string]bool{
+	"Create":   true,
+	"Destroy":  true,
+	"AddRef":   true,
+	"Release":  true,
+	"Init":     true,
+	"SetProcs": true,
+}
+
+// emitPlainHandleTypes emits "type Foo struct{ h *cjolt.C_JPH_Foo }" for each
+// opaque struct that doesn't have a Create/Destroy pair (Owned) and isn't
+// in the RefCounted set.
+func emitPlainHandleTypes(h *Header, alreadyEmitted map[string]bool) string {
+	var b strings.Builder
+	for _, s := range h.Structs {
+		if !s.Opaque {
+			continue
+		}
+		goName := strings.TrimPrefix(s.Name, "JPH_")
+		if alreadyEmitted[goName] {
+			continue
+		}
+		fmt.Fprintf(&b, "type %s struct{ h *cjolt.C_JPH_%s }\n\n", goName, goName)
+	}
+	return b.String()
+}
+
+// emitReceiverMethods walks Funcs and emits Go methods on receiver types for
+// functions matching JPH_<Recv>_<Method> where the first param is the receiver.
+func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
+	var b strings.Builder
+	for _, f := range h.Funcs {
+		recv, method, ok := SplitMethod(f.Name)
+		if !ok {
+			continue
+		}
+		if skipMethods[method] {
+			continue
+		}
+		if len(f.Params) == 0 {
+			continue
+		}
+
+		// Verify the first param is a receiver (self) for this type.
+		// recv is already without JPH_ prefix (SplitMethod strips it).
+		// C type looks like "JPH_Body *" or "const JPH_Body *".
+		firstParam := f.Params[0]
+		stripped := strings.TrimPrefix(firstParam.CType, "const ")
+		stripped = strings.TrimSpace(stripped)
+		// The C type retains the JPH_ prefix; recv does not.
+		expectedPtr := "JPH_" + recv + " *"
+		if stripped != expectedPtr {
+			continue
+		}
+
+		// Only emit methods if the receiver type has been defined somewhere.
+		goRecv := recv // recv is already without JPH_ prefix
+		if !alreadyEmitted[goRecv] {
+			continue
+		}
+
+		// Receiver variable: first letter of the Go type, lowercased.
+		recvVar := strings.ToLower(string(goRecv[0]))
+
+		// Go method name: strip "Get" prefix if followed by uppercase letter.
+		goMethod := method
+		if strings.HasPrefix(method, "Get") && len(method) > 3 && method[3] >= 'A' && method[3] <= 'Z' {
+			goMethod = method[3:]
+		}
+
+		// Build params and call args (skip first self param).
+		var goParams []string
+		var callArgs []string
+		callArgs = append(callArgs, recvVar+".h")
+		for _, p := range f.Params[1:] {
+			paramName := safeParamName(p.Name)
+			gt, callExpr := joltParamFromCType(p.CType, paramName)
+			goParams = append(goParams, paramName+" "+gt)
+			callArgs = append(callArgs, callExpr)
+		}
+
+		paramList := strings.Join(goParams, ", ")
+		argList := strings.Join(callArgs, ", ")
+
+		// Determine return type and body.
+		ret := strings.TrimSpace(f.Return)
+		goRet := strings.TrimPrefix(ret, "JPH_")
+
+		if ret == "void" {
+			// No return value.
+			fmt.Fprintf(&b, "func (%s *%s) %s(%s) {\n", recvVar, goRecv, goMethod, paramList)
+			fmt.Fprintf(&b, "    cjolt.%s(%s)\n", f.Name, argList)
+			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
+			fmt.Fprintf(&b, "}\n\n")
+		} else if mathReturnTypes[goRet] {
+			// Math type: use unsafe.Pointer cast.
+			fmt.Fprintf(&b, "func (%s *%s) %s(%s) %s {\n", recvVar, goRecv, goMethod, paramList, goRet)
+			fmt.Fprintf(&b, "    out := cjolt.%s(%s)\n", f.Name, argList)
+			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
+			fmt.Fprintf(&b, "    return *(*%s)(unsafe.Pointer(&out))\n", goRet)
+			fmt.Fprintf(&b, "}\n\n")
+		} else {
+			// Scalar or other return: direct return.
+			fmt.Fprintf(&b, "func (%s *%s) %s(%s) %s {\n", recvVar, goRecv, goMethod, paramList, goRet)
+			fmt.Fprintf(&b, "    result := cjolt.%s(%s)\n", f.Name, argList)
+			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
+			fmt.Fprintf(&b, "    return result\n")
+			fmt.Fprintf(&b, "}\n\n")
+		}
+	}
+	return b.String()
 }

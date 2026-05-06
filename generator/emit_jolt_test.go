@@ -103,3 +103,31 @@ var _ = Describe("EmitJolt — non-Shape ref-counted root", func() {
 		Expect(src).NotTo(ContainSubstring("cjolt.JPH_Shape_Release(s.h)"))
 	})
 })
+
+var _ = Describe("EmitJolt — methods on receiver types", func() {
+	Context("methods on receiver types", func() {
+		h := &generator.Header{
+			Funcs: []generator.Func{
+				{Name: "JPH_Body_GetPosition", Return: "JPH_RVec3",
+					Params: []generator.Param{{Name: "self", CType: "const JPH_Body *"}}},
+				{Name: "JPH_Body_SetLinearVelocity", Return: "void",
+					Params: []generator.Param{
+						{Name: "self", CType: "JPH_Body *"},
+						{Name: "v", CType: "const JPH_Vec3 *"},
+					}},
+			},
+			Structs: []generator.Struct{{Name: "JPH_Body", Opaque: true}},
+		}
+		It("emits getter returning value", func() {
+			src := generator.EmitJolt(h)
+			Expect(src).To(ContainSubstring("func (b *Body) Position() RVec3 {"))
+			Expect(src).To(ContainSubstring("return *(*RVec3)(unsafe.Pointer(&out))"))
+		})
+		It("emits setter taking value, KeepAlive on receiver", func() {
+			src := generator.EmitJolt(h)
+			Expect(src).To(ContainSubstring("func (b *Body) SetLinearVelocity(v Vec3) {"))
+			Expect(src).To(ContainSubstring("cjolt.JPH_Body_SetLinearVelocity(b.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&v)))"))
+			Expect(src).To(ContainSubstring("runtime.KeepAlive(b)"))
+		})
+	})
+})
