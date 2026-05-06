@@ -5,6 +5,7 @@
 *.dll
 *.test
 *.out
+/gen
 
 # Editor
 .idea/

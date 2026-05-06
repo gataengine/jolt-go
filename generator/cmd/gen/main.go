@@ -8,48 +8,29 @@ import (
 	gen "github.com/gataengine/jolt-go/generator"
 )
 
+var joltcUnitySources = []string{
+	"src/joltc.cpp",
+	"src/joltc_assert.cpp",
+	// joltc.c is empty (4 lines, just #include) — skipped.
+}
+
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("usage: gen <command> [args...]\n  commands: emit-cgo, emit-unity")
+		log.Fatal("usage: gen --emit-cgo | --emit-unity <jolt.cmake-path>")
 	}
 	switch os.Args[1] {
-	case "emit-cgo":
+	case "--emit-cgo":
 		fmt.Print(gen.EmitCgoDirectives())
-	case "emit-unity":
-		if len(os.Args) != 4 {
-			log.Fatal("usage: gen emit-unity <jolt-cmake-path> <joltc-source-list-comma-separated>")
+	case "--emit-unity":
+		if len(os.Args) < 3 {
+			log.Fatal("usage: gen --emit-unity <jolt.cmake-path>")
 		}
 		joltSources, err := gen.ExtractJoltSources(os.Args[2])
 		if err != nil {
-			log.Fatalf("extract: %v", err)
+			log.Fatalf("extract jolt sources: %v", err)
 		}
-		// Parse joltc sources from arg 3 (comma-separated)
-		joltcSources := []string{}
-		for _, p := range splitCSV(os.Args[3]) {
-			joltcSources = append(joltcSources, p)
-		}
-		fmt.Print(gen.EmitUnity(joltSources, joltcSources))
+		fmt.Print(gen.EmitUnity(joltSources, joltcUnitySources))
 	default:
-		log.Fatalf("unknown command: %s", os.Args[1])
+		log.Fatalf("unknown mode: %s", os.Args[1])
 	}
-}
-
-func splitCSV(s string) []string {
-	if s == "" {
-		return nil
-	}
-	out := []string{}
-	cur := ""
-	for _, c := range s {
-		if c == ',' {
-			out = append(out, cur)
-			cur = ""
-			continue
-		}
-		cur += string(c)
-	}
-	if cur != "" {
-		out = append(out, cur)
-	}
-	return out
 }
