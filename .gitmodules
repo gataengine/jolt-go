@@ -1,1 +1,7 @@
 # Submodules added in Task 3
+[submodule "third_party/joltc"]
+	path = third_party/joltc
+	url = https://github.com/amerkoleci/joltc.git
+[submodule "third_party/JoltPhysics"]
+	path = third_party/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics.git
