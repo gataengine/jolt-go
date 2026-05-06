@@ -3,6 +3,7 @@ package generator
 import (
 	"fmt"
 	"go/format"
+	"slices"
 	"strings"
 )
 
@@ -74,12 +75,7 @@ func pairCreateDestroy(h *Header) []ownedPair {
 
 // isRefCounted reports whether a type is in the RefCounted sidecar list.
 func isRefCounted(t string) bool {
-	for _, r := range Annotations.RefCounted {
-		if r == t {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(Annotations.RefCounted, t)
 }
 
 // emitOwned emits the public Go API for one owned-type pair: type, constructor with finalizer, Close, finalize.
@@ -96,7 +92,7 @@ func New%[1]s() *%[1]s {
 
 func (p *%[1]s) Close() error {
     if p.h != nil {
-        C.JPH_%[1]s_Destroy(p.h)
+        cjolt.JPH_%[1]s_Destroy(p.h)
         p.h = nil
         runtime.SetFinalizer(p, nil)
     }

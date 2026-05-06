@@ -21,7 +21,7 @@ var _ = Describe("EmitJolt — owned types", func() {
 		Expect(src).To(ContainSubstring("func NewPhysicsSystem() *PhysicsSystem {"))
 		Expect(src).To(ContainSubstring("runtime.SetFinalizer(p, (*PhysicsSystem).finalize)"))
 		Expect(src).To(ContainSubstring("func (p *PhysicsSystem) Close() error {"))
-		Expect(src).To(ContainSubstring("C.JPH_PhysicsSystem_Destroy(p.h)"))
+		Expect(src).To(ContainSubstring("cjolt.JPH_PhysicsSystem_Destroy(p.h)"))
 		Expect(src).To(ContainSubstring("runtime.SetFinalizer(p, nil)"))
 	})
 })
