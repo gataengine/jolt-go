@@ -1,6 +1,7 @@
 package jolt
 
 import (
+	"runtime"
 	"unsafe"
 
 	"github.com/gataengine/jolt-go/internal/cjolt"
@@ -85,6 +86,105 @@ type goPhysicsSystemSettings struct {
 	broadPhaseLayerInterface       unsafe.Pointer
 	objectLayerPairFilter          unsafe.Pointer
 	objectVsBroadPhaseLayerFilter  unsafe.Pointer
+}
+
+// ---------------------------------------------------------------------------
+// JobSystem — thread-pool variant
+//
+// The generator emits the JobSystem type but no constructor because the C
+// function takes a settings struct by pointer and returns the type via a
+// shared handle.  We add the missing constructor and Close here.
+// ---------------------------------------------------------------------------
+
+// goJobSystemThreadPoolConfig is a layout-compatible mirror of the CGo
+// JobSystemThreadPoolConfig struct whose fields are unexported from Go.
+// C layout: uint32 maxJobs, uint32 maxBarriers, int32 numThreads
+type goJobSystemThreadPoolConfig struct {
+	maxJobs    uint32
+	maxBarriers uint32
+	numThreads  int32
+}
+
+// NewJobSystemThreadPool creates a Jolt thread-pool job system.
+//   - maxJobs: maximum number of jobs in the queue (e.g. 2048)
+//   - maxBarriers: maximum number of barrier objects (e.g. 8)
+//   - numThreads: number of worker threads; -1 lets Jolt choose (= CPU count - 1)
+func NewJobSystemThreadPool(maxJobs, maxBarriers uint32, numThreads int32) *JobSystem {
+	cfg := goJobSystemThreadPoolConfig{
+		maxJobs:    maxJobs,
+		maxBarriers: maxBarriers,
+		numThreads:  numThreads,
+	}
+	js := &JobSystem{h: cjolt.JPH_JobSystemThreadPool_Create((*cjolt.C_JobSystemThreadPoolConfig)(unsafe.Pointer(&cfg)))}
+	runtime.SetFinalizer(js, (*JobSystem).finalize)
+	return js
+}
+
+// Close destroys the underlying job system and releases its resources.
+func (js *JobSystem) Close() error {
+	if js.h != nil {
+		cjolt.JPH_JobSystem_Destroy(js.h)
+		js.h = nil
+		runtime.SetFinalizer(js, nil)
+	}
+	return nil
+}
+
+func (js *JobSystem) finalize() { _ = js.Close() }
+
+// ---------------------------------------------------------------------------
+// Shape-settings constructors missing from the generator
+// ---------------------------------------------------------------------------
+
+// NewTaperedCapsuleShapeSettings creates a TaperedCapsuleShapeSettings.
+// halfHeight is the half-height of the central cylinder portion;
+// topRadius and bottomRadius are the sphere radii at each end.
+func NewTaperedCapsuleShapeSettings(halfHeight, topRadius, bottomRadius float32) *TaperedCapsuleShapeSettings {
+	h := cjolt.JPH_TaperedCapsuleShapeSettings_Create(halfHeight, topRadius, bottomRadius)
+	return &TaperedCapsuleShapeSettings{h: h}
+}
+
+// NewTaperedCylinderShapeSettings creates a TaperedCylinderShapeSettings.
+// halfHeight is half the cylinder height; topRadius and bottomRadius are the
+// radii at the two flat ends; convexRadius is the edge-rounding radius.
+func NewTaperedCylinderShapeSettings(halfHeight, topRadius, bottomRadius, convexRadius float32) *TaperedCylinderShapeSettings {
+	h := cjolt.JPH_TaperedCylinderShapeSettings_Create(halfHeight, topRadius, bottomRadius, convexRadius, nil)
+	return &TaperedCylinderShapeSettings{h: h}
+}
+
+// NewEmptyShapeSettings creates an EmptyShapeSettings with the given
+// center-of-mass offset.
+func NewEmptyShapeSettings(centerOfMass Vec3) *EmptyShapeSettings {
+	h := cjolt.JPH_EmptyShapeSettings_Create((*cjolt.C_JPH_Vec3)(unsafe.Pointer(&centerOfMass)))
+	return &EmptyShapeSettings{h: h}
+}
+
+// ---------------------------------------------------------------------------
+// PlaneShape — Go-native layout-compatible Plane helper
+//
+// cjolt.C_JPH_Plane (= C.JPH_Plane) has unexported CGo fields; we provide
+// a Go-native mirror so callers do not need unsafe outside this package.
+// ---------------------------------------------------------------------------
+
+// GoPlane is a layout-compatible mirror of JPH_Plane.
+// C layout: JPH_Vec3 normal (12 bytes) + float distance (4 bytes) = 16 bytes.
+type GoPlane struct {
+	Normal   Vec3
+	Distance float32
+}
+
+// NewPlaneShapeFromGoPlane creates a PlaneShape from a GoPlane and an optional
+// half-extent.  Pass nil for material to use the default material.
+func NewPlaneShapeFromGoPlane(p GoPlane, material *PhysicsMaterial, halfExtent float32) *PlaneShape {
+	var mh *cjolt.C_JPH_PhysicsMaterial
+	if material != nil {
+		mh = material.h
+	}
+	raw := cjolt.JPH_PlaneShape_Create((*cjolt.C_JPH_Plane)(unsafe.Pointer(&p)), mh, halfExtent)
+	h := (*cjolt.C_JPH_Shape)(unsafe.Pointer(raw))
+	s := &PlaneShape{ConvexShape: ConvexShape{Shape: Shape{h: h}}}
+	runtime.SetFinalizer(s, (*PlaneShape).finalize)
+	return s
 }
 
 // NewPhysicsSystemMask is a convenience constructor that wires up the Mask
