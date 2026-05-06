@@ -451,8 +451,10 @@ func emitPlainHandleTypes(h *Header, alreadyEmitted map[string]bool) string {
 }
 
 // emitListenerTypes emits public Go API + NewX factory for each entry in
-// Annotations.Listeners.
-func emitListenerTypes(h *Header) string {
+// Annotations.Listeners. Listener specs come from the global sidecar, not
+// from the parsed header — the *Header parameter is unused by design but
+// kept for emitter signature consistency.
+func emitListenerTypes(_ *Header) string {
 	var b strings.Builder
 	for _, spec := range Annotations.Listeners {
 		b.WriteString(emitOneListener(spec))
@@ -585,11 +587,9 @@ func methodParamFromCType(cType, argName string) (goType, callExpr string, needs
 	}
 
 	// Non-pointer JPH_X type: treat as Go-side typedef/enum.
-	if strings.HasPrefix(s, "JPH_") {
-		stripped := strings.TrimPrefix(s, "JPH_")
-		goT := stripped
+	if stripped, ok := strings.CutPrefix(s, "JPH_"); ok {
 		cast := "cjolt.C_JPH_" + stripped + "(" + argName + ")"
-		return goT, cast, false
+		return stripped, cast, false
 	}
 
 	// Delegate to existing scalar logic.
