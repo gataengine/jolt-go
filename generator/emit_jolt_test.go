@@ -163,29 +163,32 @@ var _ = Describe("EmitJolt — settings call site", func() {
 })
 
 var _ = Describe("EmitJolt — settings struct", func() {
-	Context("settings struct (Approach 1)", func() {
+	// JPH_BodyCreationSettings is opaque in joltc (Create/Destroy + accessor methods,
+	// no public field layout).  The generator must emit it as an Owned handle type
+	// (not a layout-mirror struct) so call sites use s.h, not unsafe.Pointer(s).
+	Context("BodyCreationSettings is opaque — emitted as owned handle", func() {
 		var h *generator.Header
 		BeforeEach(func() {
 			var err error
 			h, err = generator.ParseHeader("testdata/settings.h")
 			Expect(err).NotTo(HaveOccurred())
 		})
-		It("emits a layout-match Go struct", func() {
+		It("emits BodyCreationSettings as an opaque handle struct (not layout-mirror)", func() {
 			src := generator.EmitJolt(h)
+			// Must have the opaque-handle form with a single .h field.
 			Expect(src).To(ContainSubstring("type BodyCreationSettings struct {"))
-			Expect(src).To(ContainSubstring("Position        RVec3"))
-			Expect(src).To(ContainSubstring("Rotation        Quat"))
-			Expect(src).To(ContainSubstring("UserData        uint64"))
-			Expect(src).To(ContainSubstring("ObjectLayer     ObjectLayer"))
-			Expect(src).To(ContainSubstring("MotionType      MotionType"))
-			Expect(src).To(ContainSubstring("AllowSleeping   bool"))
-			Expect(src).To(ContainSubstring("shape           uintptr"))
+			Expect(src).To(ContainSubstring("h *cjolt.C_JPH_BodyCreationSettings"))
+			// Must NOT expose any C layout fields.
+			Expect(src).NotTo(ContainSubstring("Position"))
+			Expect(src).NotTo(ContainSubstring("AllowSleeping"))
 		})
-		It("emits SetShape using uintptr", func() {
+		It("emits constructor, Close and accessor methods for the opaque handle", func() {
 			src := generator.EmitJolt(h)
-			Expect(src).To(ContainSubstring("func (s *BodyCreationSettings) SetShape(shape *Shape) {"))
-			Expect(src).To(ContainSubstring("s.shape = uintptr(unsafe.Pointer(shape.h))"))
-			Expect(src).To(ContainSubstring("runtime.KeepAlive(shape)"))
+			Expect(src).To(ContainSubstring("func NewBodyCreationSettings() *BodyCreationSettings {"))
+			Expect(src).To(ContainSubstring("func (p *BodyCreationSettings) Close() error {"))
+			// Accessor methods should use bcs.h, not unsafe.Pointer(bcs).
+			Expect(src).To(ContainSubstring("func (bcs *BodyCreationSettings) Friction("))
+			Expect(src).To(ContainSubstring("bcs.h"))
 		})
 	})
 })

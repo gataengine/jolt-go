@@ -807,6 +807,12 @@ func methodParamFromCType(cType, argName string) (goType, callExpr string, needs
 		stripped := strings.TrimPrefix(base, "JPH_")
 		if strings.HasSuffix(stripped, "Settings") {
 			goT := "*" + stripped
+			// If this Settings type is an opaque handle wrapper (has a .h field),
+			// use argName.h so cgo receives the underlying *C.JPH_XSettings pointer.
+			// Otherwise (concrete layout-mirror struct) cast via unsafe.Pointer.
+			if joltHandleTypes[stripped] {
+				return goT, argName + ".h", true
+			}
 			cast := "(*cjolt.C_JPH_" + stripped + ")(unsafe.Pointer(" + argName + "))"
 			return goT, cast, true
 		}

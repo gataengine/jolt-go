@@ -79,7 +79,9 @@ var Annotations = Sidecar{
 		},
 	}},
 	SettingsInit: map[string]string{
-		"BodyCreationSettings": "JPH_BodyCreationSettings_Init",
+		// BodyCreationSettings is NOT layout-mirrorable in joltc — it's exposed
+		// as an opaque handle. Removed from this list; treated as a plain
+		// ref/owned type via JPH_BodyCreationSettings_Create/_Destroy.
 	},
 	SettingsStrategy: map[string]Strategy{},
 	SettingsSizes: map[string]int{

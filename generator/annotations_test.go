@@ -12,7 +12,10 @@ var _ = Describe("Annotations", func() {
 		a := generator.Annotations
 		Expect(a.RefCounted).To(ContainElement("Shape"))
 		Expect(a.Inheritance["BoxShape"]).To(Equal("ConvexShape"))
-		Expect(a.SettingsInit["BodyCreationSettings"]).To(Equal("JPH_BodyCreationSettings_Init"))
+		// BodyCreationSettings is opaque in joltc (Create/Destroy + accessor
+		// methods, no public field layout).  It must NOT appear in SettingsInit
+		// which is the layout-mirror (Approach 1) map.
+		Expect(a.SettingsInit).NotTo(HaveKey("BodyCreationSettings"))
 	})
 	It("flags listener procs structs", func() {
 		l := findListener(generator.Annotations.Listeners, "JPH_ContactListener")
