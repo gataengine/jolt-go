@@ -384,8 +384,8 @@ func mapCFieldTypeToGo(cType string) string {
 	cType = strings.TrimSpace(cType)
 	// JPH_-prefixed types: strip the prefix; the type is defined either in math.go
 	// (Vec3/Quat/...) or via emitTypedefs (ObjectLayer/MotionType) or as opaque struct.
-	if strings.HasPrefix(cType, "JPH_") {
-		return strings.TrimPrefix(cType, "JPH_")
+	if rest, ok := strings.CutPrefix(cType, "JPH_"); ok {
+		return rest
 	}
 	// C scalars.
 	cToGo := map[string]string{
