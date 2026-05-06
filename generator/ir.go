@@ -39,3 +39,26 @@ type Header struct {
 	Enums    []Enum
 	Typedefs map[string]string // alias -> underlying
 }
+
+// SplitMethod splits a JPH_<Receiver>_<Method> name. Returns ok=false if the
+// name doesn't match (free function, e.g. JPH_RegisterTypes).
+//
+// Disambiguation rule for multi-segment receivers like BodyInterface: the
+// receiver is determined by matching against KnownTypes (set elsewhere by
+// the caller). For Phase 2 we use a simple heuristic — recv is the part
+// up to the last underscore — and refine in Phase 3 once we have a type set.
+func SplitMethod(name string) (recv, method string, ok bool) {
+	const prefix = "JPH_"
+	if len(name) < len(prefix) || name[:len(prefix)] != prefix {
+		return "", "", false
+	}
+	rest := name[len(prefix):]
+	// Find last underscore; everything before is the receiver, everything
+	// after is the method.
+	for i := len(rest) - 1; i >= 0; i-- {
+		if rest[i] == '_' {
+			return rest[:i], rest[i+1:], true
+		}
+	}
+	return "", "", false
+}

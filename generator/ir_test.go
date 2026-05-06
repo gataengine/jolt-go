@@ -14,3 +14,22 @@ var _ = Describe("IR", func() {
 		Expect(f.Params).To(HaveLen(1))
 	})
 })
+
+var _ = Describe("MethodPattern", func() {
+	It("splits JPH_Body_GetPosition", func() {
+		recv, method, ok := generator.SplitMethod("JPH_Body_GetPosition")
+		Expect(ok).To(BeTrue())
+		Expect(recv).To(Equal("Body"))
+		Expect(method).To(Equal("GetPosition"))
+	})
+	It("returns ok=false for free functions", func() {
+		_, _, ok := generator.SplitMethod("JPH_RegisterTypes")
+		Expect(ok).To(BeFalse())
+	})
+	It("respects multi-segment receivers (JPH_BodyInterface_CreateBody)", func() {
+		// JPH_BodyInterface_CreateBody → recv="BodyInterface", method="CreateBody"
+		recv, method, _ := generator.SplitMethod("JPH_BodyInterface_CreateBody")
+		Expect(recv).To(Equal("BodyInterface"))
+		Expect(method).To(Equal("CreateBody"))
+	})
+})
