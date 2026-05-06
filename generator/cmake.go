@@ -31,6 +31,9 @@ func ExtractJoltSources(cmakePath string) ([]string, error) {
 		case inBlock && strings.Contains(line, ")"):
 			inBlock = false
 		case inBlock:
+			if strings.HasPrefix(strings.TrimSpace(line), "#") {
+				continue
+			}
 			if m := rx.FindStringSubmatch(line); m != nil {
 				out = append(out, m[1])
 			}
