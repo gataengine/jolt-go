@@ -103,3 +103,10 @@ func (m Mat44) Transform(v Vec3) Vec3 {
 		Z: m.M[2]*v.X + m.M[6]*v.Y + m.M[10]*v.Z + m.M[14],
 	}
 }
+
+// RVec3 is a Real-precision 3-component vector. Layout matches JPH_RVec3
+// (which is JPH_Vec3 in single precision, JPH_DVec3 in double precision).
+type RVec3 struct{ X, Y, Z Real }
+
+// RMat44 is a Real-precision column-major 4x4 matrix. Layout matches JPH_RMat4.
+type RMat44 struct{ M [16]Real }

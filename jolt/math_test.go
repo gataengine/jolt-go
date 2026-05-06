@@ -99,3 +99,16 @@ var _ = Describe("Mat44", func() {
 		Expect(m.Transform(jolt.Vec3{0, 0, 0})).To(Equal(jolt.Vec3{1, 2, 3}))
 	})
 })
+
+var _ = Describe("RVec3 / RMat44", func() {
+	It("RVec3 size matches Real * 3", func() {
+		var r jolt.RVec3
+		var s jolt.Real
+		Expect(unsafe.Sizeof(r)).To(Equal(unsafe.Sizeof(s) * 3))
+	})
+	It("RMat44 size is 16 * sizeof(Real)", func() {
+		var r jolt.RMat44
+		var s jolt.Real
+		Expect(unsafe.Sizeof(r)).To(Equal(unsafe.Sizeof(s) * 16))
+	})
+})
