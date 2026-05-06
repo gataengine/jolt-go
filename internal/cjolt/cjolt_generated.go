@@ -7,8 +7,5238 @@ package cjolt
 */
 import "C"
 
-// RegisterTypes initializes the Jolt Physics type system (calls JPH_Init internally).
-func RegisterTypes() { C.JPH_Init() }
+import (
+	"runtime/cgo"
+	"unsafe"
+)
 
-// UnregisterTypes shuts down the Jolt Physics type system (calls JPH_Shutdown internally).
-func UnregisterTypes() { C.JPH_Shutdown() }
+type C_JPH_BroadPhaseLayerInterface = C.JPH_BroadPhaseLayerInterface
+type C_JPH_ObjectVsBroadPhaseLayerFilter = C.JPH_ObjectVsBroadPhaseLayerFilter
+type C_JPH_ObjectLayerPairFilter = C.JPH_ObjectLayerPairFilter
+type C_JPH_BroadPhaseLayerFilter = C.JPH_BroadPhaseLayerFilter
+type C_JPH_ObjectLayerFilter = C.JPH_ObjectLayerFilter
+type C_JPH_BodyFilter = C.JPH_BodyFilter
+type C_JPH_ShapeFilter = C.JPH_ShapeFilter
+type C_JPH_SimShapeFilter = C.JPH_SimShapeFilter
+type C_JPH_PhysicsStepListener = C.JPH_PhysicsStepListener
+type C_JPH_PhysicsSystem = C.JPH_PhysicsSystem
+type C_JPH_PhysicsMaterial = C.JPH_PhysicsMaterial
+type C_JPH_LinearCurve = C.JPH_LinearCurve
+type C_JPH_ShapeSettings = C.JPH_ShapeSettings
+type C_JPH_ConvexShapeSettings = C.JPH_ConvexShapeSettings
+type C_JPH_SphereShapeSettings = C.JPH_SphereShapeSettings
+type C_JPH_BoxShapeSettings = C.JPH_BoxShapeSettings
+type C_JPH_PlaneShapeSettings = C.JPH_PlaneShapeSettings
+type C_JPH_TriangleShapeSettings = C.JPH_TriangleShapeSettings
+type C_JPH_CapsuleShapeSettings = C.JPH_CapsuleShapeSettings
+type C_JPH_TaperedCapsuleShapeSettings = C.JPH_TaperedCapsuleShapeSettings
+type C_JPH_CylinderShapeSettings = C.JPH_CylinderShapeSettings
+type C_JPH_TaperedCylinderShapeSettings = C.JPH_TaperedCylinderShapeSettings
+type C_JPH_ConvexHullShapeSettings = C.JPH_ConvexHullShapeSettings
+type C_JPH_CompoundShapeSettings = C.JPH_CompoundShapeSettings
+type C_JPH_StaticCompoundShapeSettings = C.JPH_StaticCompoundShapeSettings
+type C_JPH_MutableCompoundShapeSettings = C.JPH_MutableCompoundShapeSettings
+type C_JPH_MeshShapeSettings = C.JPH_MeshShapeSettings
+type C_JPH_HeightFieldShapeSettings = C.JPH_HeightFieldShapeSettings
+type C_JPH_RotatedTranslatedShapeSettings = C.JPH_RotatedTranslatedShapeSettings
+type C_JPH_ScaledShapeSettings = C.JPH_ScaledShapeSettings
+type C_JPH_OffsetCenterOfMassShapeSettings = C.JPH_OffsetCenterOfMassShapeSettings
+type C_JPH_EmptyShapeSettings = C.JPH_EmptyShapeSettings
+type C_JPH_Shape = C.JPH_Shape
+type C_JPH_ConvexShape = C.JPH_ConvexShape
+type C_JPH_SphereShape = C.JPH_SphereShape
+type C_JPH_BoxShape = C.JPH_BoxShape
+type C_JPH_PlaneShape = C.JPH_PlaneShape
+type C_JPH_CapsuleShape = C.JPH_CapsuleShape
+type C_JPH_CylinderShape = C.JPH_CylinderShape
+type C_JPH_TaperedCylinderShape = C.JPH_TaperedCylinderShape
+type C_JPH_TriangleShape = C.JPH_TriangleShape
+type C_JPH_TaperedCapsuleShape = C.JPH_TaperedCapsuleShape
+type C_JPH_ConvexHullShape = C.JPH_ConvexHullShape
+type C_JPH_CompoundShape = C.JPH_CompoundShape
+type C_JPH_StaticCompoundShape = C.JPH_StaticCompoundShape
+type C_JPH_MutableCompoundShape = C.JPH_MutableCompoundShape
+type C_JPH_MeshShape = C.JPH_MeshShape
+type C_JPH_HeightFieldShape = C.JPH_HeightFieldShape
+type C_JPH_DecoratedShape = C.JPH_DecoratedShape
+type C_JPH_RotatedTranslatedShape = C.JPH_RotatedTranslatedShape
+type C_JPH_ScaledShape = C.JPH_ScaledShape
+type C_JPH_OffsetCenterOfMassShape = C.JPH_OffsetCenterOfMassShape
+type C_JPH_EmptyShape = C.JPH_EmptyShape
+type C_JPH_BodyCreationSettings = C.JPH_BodyCreationSettings
+type C_JPH_SoftBodyCreationSettings = C.JPH_SoftBodyCreationSettings
+type C_JPH_SoftBodySharedSettings = C.JPH_SoftBodySharedSettings
+type C_JPH_BodyInterface = C.JPH_BodyInterface
+type C_JPH_BodyLockInterface = C.JPH_BodyLockInterface
+type C_JPH_BroadPhaseQuery = C.JPH_BroadPhaseQuery
+type C_JPH_NarrowPhaseQuery = C.JPH_NarrowPhaseQuery
+type C_JPH_MotionProperties = C.JPH_MotionProperties
+type C_JPH_MassProperties = C.JPH_MassProperties
+type C_JPH_Body = C.JPH_Body
+type C_JPH_CollideShapeResult = C.JPH_CollideShapeResult
+type C_JPH_ContactListener = C.JPH_ContactListener
+type C_JPH_ContactManifold = C.JPH_ContactManifold
+type C_JPH_GroupFilter = C.JPH_GroupFilter
+type C_JPH_GroupFilterTable = C.JPH_GroupFilterTable
+type C_JPH_Vec3 = C.JPH_Vec3
+type C_JPH_Vec4 = C.JPH_Vec4
+type C_JPH_Quat = C.JPH_Quat
+type C_JPH_Plane = C.JPH_Plane
+type C_JPH_Mat4 = C.JPH_Mat4
+type C_JPH_Point = C.JPH_Point
+type C_JPH_AABox = C.JPH_AABox
+type C_JPH_Triangle = C.JPH_Triangle
+type C_JPH_IndexedTriangleNoMaterial = C.JPH_IndexedTriangleNoMaterial
+type C_JPH_IndexedTriangle = C.JPH_IndexedTriangle
+type C_JPH_SoftVertex = C.JPH_SoftVertex
+type C_JPH_SoftFace = C.JPH_SoftFace
+type C_JPH_ContactSettings = C.JPH_ContactSettings
+type C_JPH_CollideSettingsBase = C.JPH_CollideSettingsBase
+type C_JPH_CollideShapeSettings = C.JPH_CollideShapeSettings
+type C_JPH_ShapeCastSettings = C.JPH_ShapeCastSettings
+type C_JPH_RayCastSettings = C.JPH_RayCastSettings
+type C_JPH_SpringSettings = C.JPH_SpringSettings
+type C_JPH_MotorSettings = C.JPH_MotorSettings
+type C_JPH_SubShapeIDPair = C.JPH_SubShapeIDPair
+type C_JPH_BroadPhaseCastResult = C.JPH_BroadPhaseCastResult
+type C_JPH_RayCastResult = C.JPH_RayCastResult
+type C_JPH_CollidePointResult = C.JPH_CollidePointResult
+type C_JPH_ShapeCastResult = C.JPH_ShapeCastResult
+type C_JPH_DrawSettings = C.JPH_DrawSettings
+type C_JPH_SupportingFace = C.JPH_SupportingFace
+type C_JPH_CollisionGroup = C.JPH_CollisionGroup
+type C_JPH_CollisionEstimationResultImpulse = C.JPH_CollisionEstimationResultImpulse
+type C_JPH_CollisionEstimationResult = C.JPH_CollisionEstimationResult
+type C_JPH_BodyActivationListener = C.JPH_BodyActivationListener
+type C_JPH_BodyDrawFilter = C.JPH_BodyDrawFilter
+type C_JPH_SharedMutex = C.JPH_SharedMutex
+type C_JPH_DebugRenderer = C.JPH_DebugRenderer
+type C_JPH_Constraint = C.JPH_Constraint
+type C_JPH_TwoBodyConstraint = C.JPH_TwoBodyConstraint
+type C_JPH_FixedConstraint = C.JPH_FixedConstraint
+type C_JPH_DistanceConstraint = C.JPH_DistanceConstraint
+type C_JPH_PointConstraint = C.JPH_PointConstraint
+type C_JPH_HingeConstraint = C.JPH_HingeConstraint
+type C_JPH_SliderConstraint = C.JPH_SliderConstraint
+type C_JPH_ConeConstraint = C.JPH_ConeConstraint
+type C_JPH_SwingTwistConstraint = C.JPH_SwingTwistConstraint
+type C_JPH_SixDOFConstraint = C.JPH_SixDOFConstraint
+type C_JPH_GearConstraint = C.JPH_GearConstraint
+type C_JPH_CharacterBase = C.JPH_CharacterBase
+type C_JPH_Character = C.JPH_Character
+type C_JPH_CharacterVirtual = C.JPH_CharacterVirtual
+type C_JPH_CharacterContactListener = C.JPH_CharacterContactListener
+type C_JPH_CharacterVsCharacterCollision = C.JPH_CharacterVsCharacterCollision
+type C_JPH_Skeleton = C.JPH_Skeleton
+type C_JPH_SkeletonPose = C.JPH_SkeletonPose
+type C_JPH_SkeletalAnimation = C.JPH_SkeletalAnimation
+type C_JPH_SkeletonMapper = C.JPH_SkeletonMapper
+type C_JPH_RagdollSettings = C.JPH_RagdollSettings
+type C_JPH_Ragdoll = C.JPH_Ragdoll
+type C_JPH_ConstraintSettings = C.JPH_ConstraintSettings
+type C_JPH_FixedConstraintSettings = C.JPH_FixedConstraintSettings
+type C_JPH_DistanceConstraintSettings = C.JPH_DistanceConstraintSettings
+type C_JPH_PointConstraintSettings = C.JPH_PointConstraintSettings
+type C_JPH_HingeConstraintSettings = C.JPH_HingeConstraintSettings
+type C_JPH_SliderConstraintSettings = C.JPH_SliderConstraintSettings
+type C_JPH_ConeConstraintSettings = C.JPH_ConeConstraintSettings
+type C_JPH_SwingTwistConstraintSettings = C.JPH_SwingTwistConstraintSettings
+type C_JPH_SixDOFConstraintSettings = C.JPH_SixDOFConstraintSettings
+type C_JPH_GearConstraintSettings = C.JPH_GearConstraintSettings
+type C_JPH_BodyLockRead = C.JPH_BodyLockRead
+type C_JPH_BodyLockWrite = C.JPH_BodyLockWrite
+type C_JPH_BodyLockMultiRead = C.JPH_BodyLockMultiRead
+type C_JPH_BodyLockMultiWrite = C.JPH_BodyLockMultiWrite
+type C_JPH_ExtendedUpdateSettings = C.JPH_ExtendedUpdateSettings
+type C_JPH_CharacterBaseSettings = C.JPH_CharacterBaseSettings
+type C_JPH_CharacterSettings = C.JPH_CharacterSettings
+type C_JPH_CharacterVirtualSettings = C.JPH_CharacterVirtualSettings
+type C_JPH_CharacterContactSettings = C.JPH_CharacterContactSettings
+type C_JPH_CharacterVirtualContact = C.JPH_CharacterVirtualContact
+type C_JobSystemThreadPoolConfig = C.JobSystemThreadPoolConfig
+type C_JPH_JobSystemConfig = C.JPH_JobSystemConfig
+type C_JPH_JobSystem = C.JPH_JobSystem
+type C_JPH_PhysicsSystemSettings = C.JPH_PhysicsSystemSettings
+type C_JPH_PhysicsSettings = C.JPH_PhysicsSettings
+type C_JPH_PhysicsStepListenerContext = C.JPH_PhysicsStepListenerContext
+type C_JPH_PhysicsStepListener_Procs = C.JPH_PhysicsStepListener_Procs
+type C_JPH_BroadPhaseLayerFilter_Procs = C.JPH_BroadPhaseLayerFilter_Procs
+type C_JPH_ObjectLayerFilter_Procs = C.JPH_ObjectLayerFilter_Procs
+type C_JPH_BodyFilter_Procs = C.JPH_BodyFilter_Procs
+type C_JPH_ShapeFilter_Procs = C.JPH_ShapeFilter_Procs
+type C_JPH_SimShapeFilter_Procs = C.JPH_SimShapeFilter_Procs
+type C_JPH_ContactListener_Procs = C.JPH_ContactListener_Procs
+type C_JPH_BodyActivationListener_Procs = C.JPH_BodyActivationListener_Procs
+type C_JPH_BodyDrawFilter_Procs = C.JPH_BodyDrawFilter_Procs
+type C_JPH_CharacterContactListener_Procs = C.JPH_CharacterContactListener_Procs
+type C_JPH_CharacterVsCharacterCollision_Procs = C.JPH_CharacterVsCharacterCollision_Procs
+type C_JPH_DebugRenderer_Procs = C.JPH_DebugRenderer_Procs
+type C_JPH_SkeletonJoint = C.JPH_SkeletonJoint
+type C_JPH_WheelSettings = C.JPH_WheelSettings
+type C_JPH_WheelSettingsWV = C.JPH_WheelSettingsWV
+type C_JPH_WheelSettingsTV = C.JPH_WheelSettingsTV
+type C_JPH_Wheel = C.JPH_Wheel
+type C_JPH_WheelWV = C.JPH_WheelWV
+type C_JPH_WheelTV = C.JPH_WheelTV
+type C_JPH_VehicleEngine = C.JPH_VehicleEngine
+type C_JPH_VehicleTransmission = C.JPH_VehicleTransmission
+type C_JPH_VehicleTransmissionSettings = C.JPH_VehicleTransmissionSettings
+type C_JPH_VehicleCollisionTester = C.JPH_VehicleCollisionTester
+type C_JPH_VehicleCollisionTesterRay = C.JPH_VehicleCollisionTesterRay
+type C_JPH_VehicleCollisionTesterCastSphere = C.JPH_VehicleCollisionTesterCastSphere
+type C_JPH_VehicleCollisionTesterCastCylinder = C.JPH_VehicleCollisionTesterCastCylinder
+type C_JPH_VehicleConstraint = C.JPH_VehicleConstraint
+type C_JPH_VehicleControllerSettings = C.JPH_VehicleControllerSettings
+type C_JPH_WheeledVehicleControllerSettings = C.JPH_WheeledVehicleControllerSettings
+type C_JPH_MotorcycleControllerSettings = C.JPH_MotorcycleControllerSettings
+type C_JPH_TrackedVehicleControllerSettings = C.JPH_TrackedVehicleControllerSettings
+type C_JPH_WheeledVehicleController = C.JPH_WheeledVehicleController
+type C_JPH_MotorcycleController = C.JPH_MotorcycleController
+type C_JPH_TrackedVehicleController = C.JPH_TrackedVehicleController
+type C_JPH_VehicleController = C.JPH_VehicleController
+type C_JPH_VehicleAntiRollBar = C.JPH_VehicleAntiRollBar
+type C_JPH_VehicleConstraintSettings = C.JPH_VehicleConstraintSettings
+type C_JPH_VehicleEngineSettings = C.JPH_VehicleEngineSettings
+type C_JPH_VehicleDifferentialSettings = C.JPH_VehicleDifferentialSettings
+type C_JPH_VehicleTrackSettings = C.JPH_VehicleTrackSettings
+type C_JPH_VehicleTrack = C.JPH_VehicleTrack
+type C_JPH_TempAllocator = C.JPH_TempAllocator
+type C_JPH_PhysicsUpdateError = C.JPH_PhysicsUpdateError
+type C_JPH_BodyType = C.JPH_BodyType
+type C_JPH_MotionType = C.JPH_MotionType
+type C_JPH_Activation = C.JPH_Activation
+type C_JPH_ValidateResult = C.JPH_ValidateResult
+type C_JPH_ShapeType = C.JPH_ShapeType
+type C_JPH_ShapeSubType = C.JPH_ShapeSubType
+type C_JPH_ConstraintType = C.JPH_ConstraintType
+type C_JPH_ConstraintSubType = C.JPH_ConstraintSubType
+type C_JPH_ConstraintSpace = C.JPH_ConstraintSpace
+type C_JPH_MotionQuality = C.JPH_MotionQuality
+type C_JPH_OverrideMassProperties = C.JPH_OverrideMassProperties
+type C_JPH_AllowedDOFs = C.JPH_AllowedDOFs
+type C_JPH_GroundState = C.JPH_GroundState
+type C_JPH_BackFaceMode = C.JPH_BackFaceMode
+type C_JPH_ActiveEdgeMode = C.JPH_ActiveEdgeMode
+type C_JPH_CollectFacesMode = C.JPH_CollectFacesMode
+type C_JPH_MotorState = C.JPH_MotorState
+type C_JPH_CollisionCollectorType = C.JPH_CollisionCollectorType
+type C_JPH_SwingType = C.JPH_SwingType
+type C_JPH_SixDOFConstraintAxis = C.JPH_SixDOFConstraintAxis
+type C_JPH_SpringMode = C.JPH_SpringMode
+type C_JPH_SoftBodyConstraintColor = C.JPH_SoftBodyConstraintColor
+type C_JPH_SoftBodyBendType = C.JPH_SoftBodyBendType
+type C_JPH_BodyManager_ShapeColor = C.JPH_BodyManager_ShapeColor
+type C_JPH_DebugRenderer_CastShadow = C.JPH_DebugRenderer_CastShadow
+type C_JPH_DebugRenderer_DrawMode = C.JPH_DebugRenderer_DrawMode
+type C_JPH_Mesh_Shape_BuildQuality = C.JPH_Mesh_Shape_BuildQuality
+type C_JPH_TransmissionMode = C.JPH_TransmissionMode
+type C_JPH_TrackSide = C.JPH_TrackSide
+type C_JPH_BodyID = C.JPH_BodyID
+type C_JPH_Bool = C.JPH_Bool
+type C_JPH_BroadPhaseLayer = C.JPH_BroadPhaseLayer
+type C_JPH_CharacterID = C.JPH_CharacterID
+type C_JPH_CollisionGroupID = C.JPH_CollisionGroupID
+type C_JPH_CollisionSubGroupID = C.JPH_CollisionSubGroupID
+type C_JPH_Color = C.JPH_Color
+type C_JPH_ObjectLayer = C.JPH_ObjectLayer
+type C_JPH_RMat4 = C.JPH_RMat4
+type C_JPH_RVec3 = C.JPH_RVec3
+type C_JPH_SubShapeID = C.JPH_SubShapeID
+type C_JPH_CastRayResultCallback = C.JPH_CastRayResultCallback
+type C_JPH_RayCastBodyResultCallback = C.JPH_RayCastBodyResultCallback
+type C_JPH_CollideShapeBodyResultCallback = C.JPH_CollideShapeBodyResultCallback
+type C_JPH_CollidePointResultCallback = C.JPH_CollidePointResultCallback
+type C_JPH_CollideShapeResultCallback = C.JPH_CollideShapeResultCallback
+type C_JPH_CastShapeResultCallback = C.JPH_CastShapeResultCallback
+type C_JPH_CastRayCollectorCallback = C.JPH_CastRayCollectorCallback
+type C_JPH_RayCastBodyCollectorCallback = C.JPH_RayCastBodyCollectorCallback
+type C_JPH_CollideShapeBodyCollectorCallback = C.JPH_CollideShapeBodyCollectorCallback
+type C_JPH_CollidePointCollectorCallback = C.JPH_CollidePointCollectorCallback
+type C_JPH_CollideShapeCollectorCallback = C.JPH_CollideShapeCollectorCallback
+type C_JPH_CastShapeCollectorCallback = C.JPH_CastShapeCollectorCallback
+type C_JPH_TraceFunc = C.JPH_TraceFunc
+type C_JPH_AssertFailureFunc = C.JPH_AssertFailureFunc
+type C_JPH_JobFunction = C.JPH_JobFunction
+type C_JPH_QueueJobCallback = C.JPH_QueueJobCallback
+type C_JPH_QueueJobsCallback = C.JPH_QueueJobsCallback
+type C_JPH_TireMaxImpulseCallback = C.JPH_TireMaxImpulseCallback
+
+// ContactListenerHandle is the value type stored in cgo.Handle for joltc
+// ContactListener instances. The Go-side bridge in package jolt sets the
+// non-nil func fields.
+type ContactListenerHandle struct {
+	OnContactValidate  func(b1, b2 *C.JPH_Body, baseOffset *C.JPH_RVec3, result *C.JPH_CollideShapeResult) C.JPH_ValidateResult
+	OnContactAdded     func(b1, b2 *C.JPH_Body, manifold *C.JPH_ContactManifold, settings *C.JPH_ContactSettings)
+	OnContactPersisted func(b1, b2 *C.JPH_Body, manifold *C.JPH_ContactManifold, settings *C.JPH_ContactSettings)
+	OnContactRemoved   func(subShapePair *C.JPH_SubShapeIDPair)
+}
+
+//export jolt_go_contactListener_OnContactValidate
+func jolt_go_contactListener_OnContactValidate(userData unsafe.Pointer, b1, b2 *C.JPH_Body, baseOffset *C.JPH_RVec3, result *C.JPH_CollideShapeResult) C.JPH_ValidateResult {
+	h := cgo.Handle(uintptr(userData))
+	cl := h.Value().(*ContactListenerHandle)
+	if cl.OnContactValidate != nil {
+		return cl.OnContactValidate(b1, b2, baseOffset, result)
+	}
+	return 0
+}
+
+//export jolt_go_contactListener_OnContactAdded
+func jolt_go_contactListener_OnContactAdded(userData unsafe.Pointer, b1, b2 *C.JPH_Body, manifold *C.JPH_ContactManifold, settings *C.JPH_ContactSettings) {
+	h := cgo.Handle(uintptr(userData))
+	cl := h.Value().(*ContactListenerHandle)
+	if cl.OnContactAdded != nil {
+		cl.OnContactAdded(b1, b2, manifold, settings)
+	}
+}
+
+//export jolt_go_contactListener_OnContactPersisted
+func jolt_go_contactListener_OnContactPersisted(userData unsafe.Pointer, b1, b2 *C.JPH_Body, manifold *C.JPH_ContactManifold, settings *C.JPH_ContactSettings) {
+	h := cgo.Handle(uintptr(userData))
+	cl := h.Value().(*ContactListenerHandle)
+	if cl.OnContactPersisted != nil {
+		cl.OnContactPersisted(b1, b2, manifold, settings)
+	}
+}
+
+//export jolt_go_contactListener_OnContactRemoved
+func jolt_go_contactListener_OnContactRemoved(userData unsafe.Pointer, subShapePair *C.JPH_SubShapeIDPair) {
+	h := cgo.Handle(uintptr(userData))
+	cl := h.Value().(*ContactListenerHandle)
+	if cl.OnContactRemoved != nil {
+		cl.OnContactRemoved(subShapePair)
+	}
+}
+
+func init() {
+	// TODO(Task 41): ContactListener trampoline registration moved to
+	// internal/cjolt/contact_listener_procs.c — see comment in emitListenerProcsInit.
+}
+
+func JPH_JobSystemThreadPool_Create(config *C.JobSystemThreadPoolConfig) *C.JPH_JobSystem {
+	return C.JPH_JobSystemThreadPool_Create(config)
+}
+
+func JPH_JobSystemCallback_Create(config *C.JPH_JobSystemConfig) *C.JPH_JobSystem {
+	return C.JPH_JobSystemCallback_Create(config)
+}
+
+func JPH_JobSystem_Destroy(jobSystem *C.JPH_JobSystem) { C.JPH_JobSystem_Destroy(jobSystem) }
+
+func JPH_Init() bool {
+	return bool(C.JPH_Init())
+}
+
+func JPH_Shutdown() { C.JPH_Shutdown() }
+
+func JPH_SetTraceHandler(handler C.JPH_TraceFunc) { C.JPH_SetTraceHandler(handler) }
+
+func JPH_SetAssertFailureHandler(handler C.JPH_AssertFailureFunc) {
+	C.JPH_SetAssertFailureHandler(handler)
+}
+
+func JPH_CollideShapeResult_FreeMembers(result *C.JPH_CollideShapeResult) {
+	C.JPH_CollideShapeResult_FreeMembers(result)
+}
+
+func JPH_CollisionEstimationResult_FreeMembers(result *C.JPH_CollisionEstimationResult) {
+	C.JPH_CollisionEstimationResult_FreeMembers(result)
+}
+
+func JPH_BroadPhaseLayerInterface_Destroy(bpInterface *C.JPH_BroadPhaseLayerInterface) {
+	C.JPH_BroadPhaseLayerInterface_Destroy(bpInterface)
+}
+
+func JPH_BroadPhaseLayerInterfaceMask_Create(numBroadPhaseLayers uint32) *C.JPH_BroadPhaseLayerInterface {
+	return C.JPH_BroadPhaseLayerInterfaceMask_Create(C.uint32_t(numBroadPhaseLayers))
+}
+
+func JPH_BroadPhaseLayerInterfaceMask_ConfigureLayer(bpInterface *C.JPH_BroadPhaseLayerInterface, broadPhaseLayer C.JPH_BroadPhaseLayer, groupsToInclude uint32, groupsToExclude uint32) {
+	C.JPH_BroadPhaseLayerInterfaceMask_ConfigureLayer(bpInterface, broadPhaseLayer, C.uint32_t(groupsToInclude), C.uint32_t(groupsToExclude))
+}
+
+func JPH_BroadPhaseLayerInterfaceTable_Create(numObjectLayers uint32, numBroadPhaseLayers uint32) *C.JPH_BroadPhaseLayerInterface {
+	return C.JPH_BroadPhaseLayerInterfaceTable_Create(C.uint32_t(numObjectLayers), C.uint32_t(numBroadPhaseLayers))
+}
+
+func JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(bpInterface *C.JPH_BroadPhaseLayerInterface, objectLayer C.JPH_ObjectLayer, broadPhaseLayer C.JPH_BroadPhaseLayer) {
+	C.JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(bpInterface, objectLayer, broadPhaseLayer)
+}
+
+func JPH_ObjectLayerPairFilter_Destroy(filter *C.JPH_ObjectLayerPairFilter) {
+	C.JPH_ObjectLayerPairFilter_Destroy(filter)
+}
+
+func JPH_ObjectLayerPairFilterMask_Create() *C.JPH_ObjectLayerPairFilter {
+	return C.JPH_ObjectLayerPairFilterMask_Create()
+}
+
+func JPH_ObjectLayerPairFilterMask_GetObjectLayer(group uint32, mask uint32) C.JPH_ObjectLayer {
+	return C.JPH_ObjectLayerPairFilterMask_GetObjectLayer(C.uint32_t(group), C.uint32_t(mask))
+}
+
+func JPH_ObjectLayerPairFilterMask_GetGroup(layer C.JPH_ObjectLayer) uint32 {
+	return uint32(C.JPH_ObjectLayerPairFilterMask_GetGroup(layer))
+}
+
+func JPH_ObjectLayerPairFilterMask_GetMask(layer C.JPH_ObjectLayer) uint32 {
+	return uint32(C.JPH_ObjectLayerPairFilterMask_GetMask(layer))
+}
+
+func JPH_ObjectLayerPairFilterTable_Create(numObjectLayers uint32) *C.JPH_ObjectLayerPairFilter {
+	return C.JPH_ObjectLayerPairFilterTable_Create(C.uint32_t(numObjectLayers))
+}
+
+func JPH_ObjectLayerPairFilterTable_DisableCollision(objectFilter *C.JPH_ObjectLayerPairFilter, layer1 C.JPH_ObjectLayer, layer2 C.JPH_ObjectLayer) {
+	C.JPH_ObjectLayerPairFilterTable_DisableCollision(objectFilter, layer1, layer2)
+}
+
+func JPH_ObjectLayerPairFilterTable_EnableCollision(objectFilter *C.JPH_ObjectLayerPairFilter, layer1 C.JPH_ObjectLayer, layer2 C.JPH_ObjectLayer) {
+	C.JPH_ObjectLayerPairFilterTable_EnableCollision(objectFilter, layer1, layer2)
+}
+
+func JPH_ObjectLayerPairFilterTable_ShouldCollide(objectFilter *C.JPH_ObjectLayerPairFilter, layer1 C.JPH_ObjectLayer, layer2 C.JPH_ObjectLayer) bool {
+	return bool(C.JPH_ObjectLayerPairFilterTable_ShouldCollide(objectFilter, layer1, layer2))
+}
+
+func JPH_ObjectVsBroadPhaseLayerFilter_Destroy(filter *C.JPH_ObjectVsBroadPhaseLayerFilter) {
+	C.JPH_ObjectVsBroadPhaseLayerFilter_Destroy(filter)
+}
+
+func JPH_ObjectVsBroadPhaseLayerFilterMask_Create(broadPhaseLayerInterface *C.JPH_BroadPhaseLayerInterface) *C.JPH_ObjectVsBroadPhaseLayerFilter {
+	return C.JPH_ObjectVsBroadPhaseLayerFilterMask_Create(broadPhaseLayerInterface)
+}
+
+func JPH_ObjectVsBroadPhaseLayerFilterTable_Create(broadPhaseLayerInterface *C.JPH_BroadPhaseLayerInterface, numBroadPhaseLayers uint32, objectLayerPairFilter *C.JPH_ObjectLayerPairFilter, numObjectLayers uint32) *C.JPH_ObjectVsBroadPhaseLayerFilter {
+	return C.JPH_ObjectVsBroadPhaseLayerFilterTable_Create(broadPhaseLayerInterface, C.uint32_t(numBroadPhaseLayers), objectLayerPairFilter, C.uint32_t(numObjectLayers))
+}
+
+func JPH_DrawSettings_InitDefault(settings *C.JPH_DrawSettings) {
+	C.JPH_DrawSettings_InitDefault(settings)
+}
+
+func JPH_PhysicsSystem_Create(settings *C.JPH_PhysicsSystemSettings) *C.JPH_PhysicsSystem {
+	return C.JPH_PhysicsSystem_Create(settings)
+}
+
+func JPH_PhysicsSystem_Destroy(system *C.JPH_PhysicsSystem) { C.JPH_PhysicsSystem_Destroy(system) }
+
+func JPH_PhysicsSystem_SetPhysicsSettings(system *C.JPH_PhysicsSystem, settings *C.JPH_PhysicsSettings) {
+	C.JPH_PhysicsSystem_SetPhysicsSettings(system, settings)
+}
+
+func JPH_PhysicsSystem_GetPhysicsSettings(system *C.JPH_PhysicsSystem, result *C.JPH_PhysicsSettings) {
+	C.JPH_PhysicsSystem_GetPhysicsSettings(system, result)
+}
+
+func JPH_PhysicsSystem_OptimizeBroadPhase(system *C.JPH_PhysicsSystem) {
+	C.JPH_PhysicsSystem_OptimizeBroadPhase(system)
+}
+
+func JPH_PhysicsSystem_Update(system *C.JPH_PhysicsSystem, deltaTime float32, collisionSteps int32, jobSystem *C.JPH_JobSystem) C.JPH_PhysicsUpdateError {
+	return C.JPH_PhysicsSystem_Update(system, C.float(deltaTime), C.int(collisionSteps), jobSystem)
+}
+
+func JPH_PhysicsSystem_GetBodyInterface(system *C.JPH_PhysicsSystem) *C.JPH_BodyInterface {
+	return C.JPH_PhysicsSystem_GetBodyInterface(system)
+}
+
+func JPH_PhysicsSystem_GetBodyInterfaceNoLock(system *C.JPH_PhysicsSystem) *C.JPH_BodyInterface {
+	return C.JPH_PhysicsSystem_GetBodyInterfaceNoLock(system)
+}
+
+func JPH_PhysicsSystem_GetBodyLockInterface(system *C.JPH_PhysicsSystem) *C.JPH_BodyLockInterface {
+	return C.JPH_PhysicsSystem_GetBodyLockInterface(system)
+}
+
+func JPH_PhysicsSystem_GetBodyLockInterfaceNoLock(system *C.JPH_PhysicsSystem) *C.JPH_BodyLockInterface {
+	return C.JPH_PhysicsSystem_GetBodyLockInterfaceNoLock(system)
+}
+
+func JPH_PhysicsSystem_GetBroadPhaseQuery(system *C.JPH_PhysicsSystem) *C.JPH_BroadPhaseQuery {
+	return C.JPH_PhysicsSystem_GetBroadPhaseQuery(system)
+}
+
+func JPH_PhysicsSystem_GetNarrowPhaseQuery(system *C.JPH_PhysicsSystem) *C.JPH_NarrowPhaseQuery {
+	return C.JPH_PhysicsSystem_GetNarrowPhaseQuery(system)
+}
+
+func JPH_PhysicsSystem_GetNarrowPhaseQueryNoLock(system *C.JPH_PhysicsSystem) *C.JPH_NarrowPhaseQuery {
+	return C.JPH_PhysicsSystem_GetNarrowPhaseQueryNoLock(system)
+}
+
+func JPH_PhysicsSystem_SetContactListener(system *C.JPH_PhysicsSystem, listener *C.JPH_ContactListener) {
+	C.JPH_PhysicsSystem_SetContactListener(system, listener)
+}
+
+func JPH_PhysicsSystem_SetBodyActivationListener(system *C.JPH_PhysicsSystem, listener *C.JPH_BodyActivationListener) {
+	C.JPH_PhysicsSystem_SetBodyActivationListener(system, listener)
+}
+
+func JPH_PhysicsSystem_SetSimShapeFilter(system *C.JPH_PhysicsSystem, filter *C.JPH_SimShapeFilter) {
+	C.JPH_PhysicsSystem_SetSimShapeFilter(system, filter)
+}
+
+func JPH_PhysicsSystem_WereBodiesInContact(system *C.JPH_PhysicsSystem, body1 C.JPH_BodyID, body2 C.JPH_BodyID) bool {
+	return bool(C.JPH_PhysicsSystem_WereBodiesInContact(system, body1, body2))
+}
+
+func JPH_PhysicsSystem_GetNumBodies(system *C.JPH_PhysicsSystem) uint32 {
+	return uint32(C.JPH_PhysicsSystem_GetNumBodies(system))
+}
+
+func JPH_PhysicsSystem_GetNumActiveBodies(system *C.JPH_PhysicsSystem, type_ C.JPH_BodyType) uint32 {
+	return uint32(C.JPH_PhysicsSystem_GetNumActiveBodies(system, type_))
+}
+
+func JPH_PhysicsSystem_GetMaxBodies(system *C.JPH_PhysicsSystem) uint32 {
+	return uint32(C.JPH_PhysicsSystem_GetMaxBodies(system))
+}
+
+func JPH_PhysicsSystem_GetNumConstraints(system *C.JPH_PhysicsSystem) uint32 {
+	return uint32(C.JPH_PhysicsSystem_GetNumConstraints(system))
+}
+
+func JPH_PhysicsSystem_SetGravity(system *C.JPH_PhysicsSystem, value *C.JPH_Vec3) {
+	C.JPH_PhysicsSystem_SetGravity(system, value)
+}
+
+func JPH_PhysicsSystem_GetGravity(system *C.JPH_PhysicsSystem, result *C.JPH_Vec3) {
+	C.JPH_PhysicsSystem_GetGravity(system, result)
+}
+
+func JPH_PhysicsSystem_AddConstraint(system *C.JPH_PhysicsSystem, constraint *C.JPH_Constraint) {
+	C.JPH_PhysicsSystem_AddConstraint(system, constraint)
+}
+
+func JPH_PhysicsSystem_RemoveConstraint(system *C.JPH_PhysicsSystem, constraint *C.JPH_Constraint) {
+	C.JPH_PhysicsSystem_RemoveConstraint(system, constraint)
+}
+
+func JPH_PhysicsSystem_AddConstraints(system *C.JPH_PhysicsSystem, constraints unsafe.Pointer, count uint32) {
+	C.JPH_PhysicsSystem_AddConstraints(system, (**C.JPH_Constraint)(unsafe.Pointer(constraints)), C.uint32_t(count))
+}
+
+func JPH_PhysicsSystem_RemoveConstraints(system *C.JPH_PhysicsSystem, constraints unsafe.Pointer, count uint32) {
+	C.JPH_PhysicsSystem_RemoveConstraints(system, (**C.JPH_Constraint)(unsafe.Pointer(constraints)), C.uint32_t(count))
+}
+
+func JPH_PhysicsSystem_AddStepListener(system *C.JPH_PhysicsSystem, listener *C.JPH_PhysicsStepListener) {
+	C.JPH_PhysicsSystem_AddStepListener(system, listener)
+}
+
+func JPH_PhysicsSystem_RemoveStepListener(system *C.JPH_PhysicsSystem, listener *C.JPH_PhysicsStepListener) {
+	C.JPH_PhysicsSystem_RemoveStepListener(system, listener)
+}
+
+func JPH_PhysicsSystem_GetBodies(system *C.JPH_PhysicsSystem, ids *C.JPH_BodyID, count uint32) {
+	C.JPH_PhysicsSystem_GetBodies(system, ids, C.uint32_t(count))
+}
+
+func JPH_PhysicsSystem_GetActiveBodies(system *C.JPH_PhysicsSystem, type_ C.JPH_BodyType, ids *C.JPH_BodyID, count uint32) {
+	C.JPH_PhysicsSystem_GetActiveBodies(system, type_, ids, C.uint32_t(count))
+}
+
+func JPH_PhysicsSystem_GetActiveBodiesUnsafe(system *C.JPH_PhysicsSystem, type_ C.JPH_BodyType) *C.JPH_BodyID {
+	return C.JPH_PhysicsSystem_GetActiveBodiesUnsafe(system, type_)
+}
+
+func JPH_PhysicsSystem_GetConstraints(system *C.JPH_PhysicsSystem, constraints unsafe.Pointer, count uint32) {
+	C.JPH_PhysicsSystem_GetConstraints(system, (**C.JPH_Constraint)(unsafe.Pointer(constraints)), C.uint32_t(count))
+}
+
+func JPH_PhysicsSystem_ActivateBodiesInAABox(system *C.JPH_PhysicsSystem, box *C.JPH_AABox, layer C.JPH_ObjectLayer) {
+	C.JPH_PhysicsSystem_ActivateBodiesInAABox(system, box, layer)
+}
+
+func JPH_PhysicsSystem_DrawBodies(system *C.JPH_PhysicsSystem, settings *C.JPH_DrawSettings, renderer *C.JPH_DebugRenderer, bodyFilter *C.JPH_BodyDrawFilter) {
+	C.JPH_PhysicsSystem_DrawBodies(system, settings, renderer, bodyFilter)
+}
+
+func JPH_PhysicsSystem_DrawConstraints(system *C.JPH_PhysicsSystem, renderer *C.JPH_DebugRenderer) {
+	C.JPH_PhysicsSystem_DrawConstraints(system, renderer)
+}
+
+func JPH_PhysicsSystem_DrawConstraintLimits(system *C.JPH_PhysicsSystem, renderer *C.JPH_DebugRenderer) {
+	C.JPH_PhysicsSystem_DrawConstraintLimits(system, renderer)
+}
+
+func JPH_PhysicsSystem_DrawConstraintReferenceFrame(system *C.JPH_PhysicsSystem, renderer *C.JPH_DebugRenderer) {
+	C.JPH_PhysicsSystem_DrawConstraintReferenceFrame(system, renderer)
+}
+
+func JPH_PhysicsStepListener_SetProcs(procs *C.JPH_PhysicsStepListener_Procs) {
+	C.JPH_PhysicsStepListener_SetProcs(procs)
+}
+
+func JPH_PhysicsStepListener_Create(userData unsafe.Pointer) *C.JPH_PhysicsStepListener {
+	return C.JPH_PhysicsStepListener_Create(userData)
+}
+
+func JPH_PhysicsStepListener_Destroy(listener *C.JPH_PhysicsStepListener) {
+	C.JPH_PhysicsStepListener_Destroy(listener)
+}
+
+func JPH_Math_Sin(value float32) float32 {
+	return float32(C.JPH_Math_Sin(C.float(value)))
+}
+
+func JPH_Math_Cos(value float32) float32 {
+	return float32(C.JPH_Math_Cos(C.float(value)))
+}
+
+func JPH_Quat_FromTo(from *C.JPH_Vec3, to *C.JPH_Vec3, quat *C.JPH_Quat) {
+	C.JPH_Quat_FromTo(from, to, quat)
+}
+
+func JPH_Quat_GetAxisAngle(quat *C.JPH_Quat, outAxis *C.JPH_Vec3, outAngle unsafe.Pointer) {
+	C.JPH_Quat_GetAxisAngle(quat, outAxis, (*C.float)(unsafe.Pointer(outAngle)))
+}
+
+func JPH_Quat_GetEulerAngles(quat *C.JPH_Quat, result *C.JPH_Vec3) {
+	C.JPH_Quat_GetEulerAngles(quat, result)
+}
+
+func JPH_Quat_RotateAxisX(quat *C.JPH_Quat, result *C.JPH_Vec3) { C.JPH_Quat_RotateAxisX(quat, result) }
+
+func JPH_Quat_RotateAxisY(quat *C.JPH_Quat, result *C.JPH_Vec3) { C.JPH_Quat_RotateAxisY(quat, result) }
+
+func JPH_Quat_RotateAxisZ(quat *C.JPH_Quat, result *C.JPH_Vec3) { C.JPH_Quat_RotateAxisZ(quat, result) }
+
+func JPH_Quat_Inversed(quat *C.JPH_Quat, result *C.JPH_Quat) { C.JPH_Quat_Inversed(quat, result) }
+
+func JPH_Quat_GetPerpendicular(quat *C.JPH_Quat, result *C.JPH_Quat) {
+	C.JPH_Quat_GetPerpendicular(quat, result)
+}
+
+func JPH_Quat_GetRotationAngle(quat *C.JPH_Quat, axis *C.JPH_Vec3) float32 {
+	return float32(C.JPH_Quat_GetRotationAngle(quat, axis))
+}
+
+func JPH_Quat_FromEulerAngles(angles *C.JPH_Vec3, result *C.JPH_Quat) {
+	C.JPH_Quat_FromEulerAngles(angles, result)
+}
+
+func JPH_Quat_Add(q1 *C.JPH_Quat, q2 *C.JPH_Quat, result *C.JPH_Quat) { C.JPH_Quat_Add(q1, q2, result) }
+
+func JPH_Quat_Subtract(q1 *C.JPH_Quat, q2 *C.JPH_Quat, result *C.JPH_Quat) {
+	C.JPH_Quat_Subtract(q1, q2, result)
+}
+
+func JPH_Quat_Multiply(q1 *C.JPH_Quat, q2 *C.JPH_Quat, result *C.JPH_Quat) {
+	C.JPH_Quat_Multiply(q1, q2, result)
+}
+
+func JPH_Quat_MultiplyScalar(q *C.JPH_Quat, scalar float32, result *C.JPH_Quat) {
+	C.JPH_Quat_MultiplyScalar(q, C.float(scalar), result)
+}
+
+func JPH_Quat_DivideScalar(q *C.JPH_Quat, scalar float32, result *C.JPH_Quat) {
+	C.JPH_Quat_DivideScalar(q, C.float(scalar), result)
+}
+
+func JPH_Quat_Dot(q1 *C.JPH_Quat, q2 *C.JPH_Quat, result unsafe.Pointer) {
+	C.JPH_Quat_Dot(q1, q2, (*C.float)(unsafe.Pointer(result)))
+}
+
+func JPH_Quat_Conjugated(quat *C.JPH_Quat, result *C.JPH_Quat) { C.JPH_Quat_Conjugated(quat, result) }
+
+func JPH_Quat_GetTwist(quat *C.JPH_Quat, axis *C.JPH_Vec3, result *C.JPH_Quat) {
+	C.JPH_Quat_GetTwist(quat, axis, result)
+}
+
+func JPH_Quat_GetSwingTwist(quat *C.JPH_Quat, outSwing *C.JPH_Quat, outTwist *C.JPH_Quat) {
+	C.JPH_Quat_GetSwingTwist(quat, outSwing, outTwist)
+}
+
+func JPH_Quat_Lerp(from *C.JPH_Quat, to *C.JPH_Quat, fraction float32, result *C.JPH_Quat) {
+	C.JPH_Quat_Lerp(from, to, C.float(fraction), result)
+}
+
+func JPH_Quat_Slerp(from *C.JPH_Quat, to *C.JPH_Quat, fraction float32, result *C.JPH_Quat) {
+	C.JPH_Quat_Slerp(from, to, C.float(fraction), result)
+}
+
+func JPH_Quat_Rotate(quat *C.JPH_Quat, vec *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Quat_Rotate(quat, vec, result)
+}
+
+func JPH_Quat_InverseRotate(quat *C.JPH_Quat, vec *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Quat_InverseRotate(quat, vec, result)
+}
+
+func JPH_Vec3_AxisX(result *C.JPH_Vec3) { C.JPH_Vec3_AxisX(result) }
+
+func JPH_Vec3_AxisY(result *C.JPH_Vec3) { C.JPH_Vec3_AxisY(result) }
+
+func JPH_Vec3_AxisZ(result *C.JPH_Vec3) { C.JPH_Vec3_AxisZ(result) }
+
+func JPH_Vec3_IsClose(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, maxDistSq float32) bool {
+	return bool(C.JPH_Vec3_IsClose(v1, v2, C.float(maxDistSq)))
+}
+
+func JPH_Vec3_IsNearZero(v *C.JPH_Vec3, maxDistSq float32) bool {
+	return bool(C.JPH_Vec3_IsNearZero(v, C.float(maxDistSq)))
+}
+
+func JPH_Vec3_IsNormalized(v *C.JPH_Vec3, tolerance float32) bool {
+	return bool(C.JPH_Vec3_IsNormalized(v, C.float(tolerance)))
+}
+
+func JPH_Vec3_IsNaN(v *C.JPH_Vec3) bool {
+	return bool(C.JPH_Vec3_IsNaN(v))
+}
+
+func JPH_Vec3_Negate(v *C.JPH_Vec3, result *C.JPH_Vec3) { C.JPH_Vec3_Negate(v, result) }
+
+func JPH_Vec3_Normalized(v *C.JPH_Vec3, result *C.JPH_Vec3) { C.JPH_Vec3_Normalized(v, result) }
+
+func JPH_Vec3_Cross(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Vec3_Cross(v1, v2, result)
+}
+
+func JPH_Vec3_Abs(v *C.JPH_Vec3, result *C.JPH_Vec3) { C.JPH_Vec3_Abs(v, result) }
+
+func JPH_Vec3_Length(v *C.JPH_Vec3) float32 {
+	return float32(C.JPH_Vec3_Length(v))
+}
+
+func JPH_Vec3_LengthSquared(v *C.JPH_Vec3) float32 {
+	return float32(C.JPH_Vec3_LengthSquared(v))
+}
+
+func JPH_Vec3_DotProduct(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, result unsafe.Pointer) {
+	C.JPH_Vec3_DotProduct(v1, v2, (*C.float)(unsafe.Pointer(result)))
+}
+
+func JPH_Vec3_Normalize(v *C.JPH_Vec3, result *C.JPH_Vec3) { C.JPH_Vec3_Normalize(v, result) }
+
+func JPH_Vec3_Add(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, result *C.JPH_Vec3) { C.JPH_Vec3_Add(v1, v2, result) }
+
+func JPH_Vec3_Subtract(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Vec3_Subtract(v1, v2, result)
+}
+
+func JPH_Vec3_Multiply(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Vec3_Multiply(v1, v2, result)
+}
+
+func JPH_Vec3_MultiplyScalar(v *C.JPH_Vec3, scalar float32, result *C.JPH_Vec3) {
+	C.JPH_Vec3_MultiplyScalar(v, C.float(scalar), result)
+}
+
+func JPH_Vec3_MultiplyMatrix(left *C.JPH_Mat4, right *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Vec3_MultiplyMatrix(left, right, result)
+}
+
+func JPH_Vec3_Divide(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Vec3_Divide(v1, v2, result)
+}
+
+func JPH_Vec3_DivideScalar(v *C.JPH_Vec3, scalar float32, result *C.JPH_Vec3) {
+	C.JPH_Vec3_DivideScalar(v, C.float(scalar), result)
+}
+
+func JPH_Vec3_GetNormalizedPerpendicular(v *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Vec3_GetNormalizedPerpendicular(v, result)
+}
+
+func JPH_Mat4_Add(m1 *C.JPH_Mat4, m2 *C.JPH_Mat4, result *C.JPH_Mat4) { C.JPH_Mat4_Add(m1, m2, result) }
+
+func JPH_Mat4_Subtract(m1 *C.JPH_Mat4, m2 *C.JPH_Mat4, result *C.JPH_Mat4) {
+	C.JPH_Mat4_Subtract(m1, m2, result)
+}
+
+func JPH_Mat4_Multiply(m1 *C.JPH_Mat4, m2 *C.JPH_Mat4, result *C.JPH_Mat4) {
+	C.JPH_Mat4_Multiply(m1, m2, result)
+}
+
+func JPH_Mat4_MultiplyScalar(m *C.JPH_Mat4, scalar float32, result *C.JPH_Mat4) {
+	C.JPH_Mat4_MultiplyScalar(m, C.float(scalar), result)
+}
+
+func JPH_Mat4_Zero(result *C.JPH_Mat4) { C.JPH_Mat4_Zero(result) }
+
+func JPH_Mat4_Identity(result *C.JPH_Mat4) { C.JPH_Mat4_Identity(result) }
+
+func JPH_Mat4_Rotation(result *C.JPH_Mat4, rotation *C.JPH_Quat) {
+	C.JPH_Mat4_Rotation(result, rotation)
+}
+
+func JPH_Mat4_Rotation2(result *C.JPH_Mat4, axis *C.JPH_Vec3, angle float32) {
+	C.JPH_Mat4_Rotation2(result, axis, C.float(angle))
+}
+
+func JPH_Mat4_Translation(result *C.JPH_Mat4, translation *C.JPH_Vec3) {
+	C.JPH_Mat4_Translation(result, translation)
+}
+
+func JPH_Mat4_RotationTranslation(result *C.JPH_Mat4, rotation *C.JPH_Quat, translation *C.JPH_Vec3) {
+	C.JPH_Mat4_RotationTranslation(result, rotation, translation)
+}
+
+func JPH_Mat4_InverseRotationTranslation(result *C.JPH_Mat4, rotation *C.JPH_Quat, translation *C.JPH_Vec3) {
+	C.JPH_Mat4_InverseRotationTranslation(result, rotation, translation)
+}
+
+func JPH_Mat4_Scale(result *C.JPH_Mat4, scale *C.JPH_Vec3) { C.JPH_Mat4_Scale(result, scale) }
+
+func JPH_Mat4_Transposed(m *C.JPH_Mat4, result *C.JPH_Mat4) { C.JPH_Mat4_Transposed(m, result) }
+
+func JPH_Mat4_Inversed(matrix *C.JPH_Mat4, result *C.JPH_Mat4) { C.JPH_Mat4_Inversed(matrix, result) }
+
+func JPH_Mat4_GetAxisX(matrix *C.JPH_Mat4, result *C.JPH_Vec3) { C.JPH_Mat4_GetAxisX(matrix, result) }
+
+func JPH_Mat4_GetAxisY(matrix *C.JPH_Mat4, result *C.JPH_Vec3) { C.JPH_Mat4_GetAxisY(matrix, result) }
+
+func JPH_Mat4_GetAxisZ(matrix *C.JPH_Mat4, result *C.JPH_Vec3) { C.JPH_Mat4_GetAxisZ(matrix, result) }
+
+func JPH_Mat4_GetTranslation(matrix *C.JPH_Mat4, result *C.JPH_Vec3) {
+	C.JPH_Mat4_GetTranslation(matrix, result)
+}
+
+func JPH_Mat4_GetQuaternion(matrix *C.JPH_Mat4, result *C.JPH_Quat) {
+	C.JPH_Mat4_GetQuaternion(matrix, result)
+}
+
+func JPH_PhysicsMaterial_Create(name unsafe.Pointer, color uint32) *C.JPH_PhysicsMaterial {
+	return C.JPH_PhysicsMaterial_Create((*C.char)(unsafe.Pointer(name)), C.uint32_t(color))
+}
+
+func JPH_PhysicsMaterial_Destroy(material *C.JPH_PhysicsMaterial) {
+	C.JPH_PhysicsMaterial_Destroy(material)
+}
+
+func JPH_PhysicsMaterial_GetDebugName(material *C.JPH_PhysicsMaterial) *C.char {
+	return C.JPH_PhysicsMaterial_GetDebugName(material)
+}
+
+func JPH_PhysicsMaterial_GetDebugColor(material *C.JPH_PhysicsMaterial) uint32 {
+	return uint32(C.JPH_PhysicsMaterial_GetDebugColor(material))
+}
+
+func JPH_GroupFilter_Destroy(groupFilter *C.JPH_GroupFilter) { C.JPH_GroupFilter_Destroy(groupFilter) }
+
+func JPH_GroupFilter_CanCollide(groupFilter *C.JPH_GroupFilter, group1 *C.JPH_CollisionGroup, group2 *C.JPH_CollisionGroup) bool {
+	return bool(C.JPH_GroupFilter_CanCollide(groupFilter, group1, group2))
+}
+
+func JPH_GroupFilterTable_Create(numSubGroups uint32) *C.JPH_GroupFilterTable {
+	return C.JPH_GroupFilterTable_Create(C.uint32_t(numSubGroups))
+}
+
+func JPH_GroupFilterTable_DisableCollision(table *C.JPH_GroupFilterTable, subGroup1 C.JPH_CollisionSubGroupID, subGroup2 C.JPH_CollisionSubGroupID) {
+	C.JPH_GroupFilterTable_DisableCollision(table, subGroup1, subGroup2)
+}
+
+func JPH_GroupFilterTable_EnableCollision(table *C.JPH_GroupFilterTable, subGroup1 C.JPH_CollisionSubGroupID, subGroup2 C.JPH_CollisionSubGroupID) {
+	C.JPH_GroupFilterTable_EnableCollision(table, subGroup1, subGroup2)
+}
+
+func JPH_GroupFilterTable_IsCollisionEnabled(table *C.JPH_GroupFilterTable, subGroup1 C.JPH_CollisionSubGroupID, subGroup2 C.JPH_CollisionSubGroupID) bool {
+	return bool(C.JPH_GroupFilterTable_IsCollisionEnabled(table, subGroup1, subGroup2))
+}
+
+func JPH_ShapeSettings_Destroy(settings *C.JPH_ShapeSettings) { C.JPH_ShapeSettings_Destroy(settings) }
+
+func JPH_ShapeSettings_GetUserData(settings *C.JPH_ShapeSettings) uint64 {
+	return uint64(C.JPH_ShapeSettings_GetUserData(settings))
+}
+
+func JPH_ShapeSettings_SetUserData(settings *C.JPH_ShapeSettings, userData uint64) {
+	C.JPH_ShapeSettings_SetUserData(settings, C.uint64_t(userData))
+}
+
+func JPH_Shape_Draw(shape *C.JPH_Shape, renderer *C.JPH_DebugRenderer, centerOfMassTransform *C.JPH_RMat4, scale *C.JPH_Vec3, color C.JPH_Color, useMaterialColors bool, drawWireframe bool) {
+	C.JPH_Shape_Draw(shape, renderer, centerOfMassTransform, scale, color, C.bool(useMaterialColors), C.bool(drawWireframe))
+}
+
+func JPH_Shape_Destroy(shape *C.JPH_Shape) { C.JPH_Shape_Destroy(shape) }
+
+func JPH_Shape_GetType(shape *C.JPH_Shape) C.JPH_ShapeType {
+	return C.JPH_Shape_GetType(shape)
+}
+
+func JPH_Shape_GetSubType(shape *C.JPH_Shape) C.JPH_ShapeSubType {
+	return C.JPH_Shape_GetSubType(shape)
+}
+
+func JPH_Shape_GetUserData(shape *C.JPH_Shape) uint64 {
+	return uint64(C.JPH_Shape_GetUserData(shape))
+}
+
+func JPH_Shape_SetUserData(shape *C.JPH_Shape, userData uint64) {
+	C.JPH_Shape_SetUserData(shape, C.uint64_t(userData))
+}
+
+func JPH_Shape_MustBeStatic(shape *C.JPH_Shape) bool {
+	return bool(C.JPH_Shape_MustBeStatic(shape))
+}
+
+func JPH_Shape_GetCenterOfMass(shape *C.JPH_Shape, result *C.JPH_Vec3) {
+	C.JPH_Shape_GetCenterOfMass(shape, result)
+}
+
+func JPH_Shape_GetLocalBounds(shape *C.JPH_Shape, result *C.JPH_AABox) {
+	C.JPH_Shape_GetLocalBounds(shape, result)
+}
+
+func JPH_Shape_GetSubShapeIDBitsRecursive(shape *C.JPH_Shape) uint32 {
+	return uint32(C.JPH_Shape_GetSubShapeIDBitsRecursive(shape))
+}
+
+func JPH_Shape_GetWorldSpaceBounds(shape *C.JPH_Shape, centerOfMassTransform *C.JPH_RMat4, scale *C.JPH_Vec3, result *C.JPH_AABox) {
+	C.JPH_Shape_GetWorldSpaceBounds(shape, centerOfMassTransform, scale, result)
+}
+
+func JPH_Shape_GetInnerRadius(shape *C.JPH_Shape) float32 {
+	return float32(C.JPH_Shape_GetInnerRadius(shape))
+}
+
+func JPH_Shape_GetMassProperties(shape *C.JPH_Shape, result *C.JPH_MassProperties) {
+	C.JPH_Shape_GetMassProperties(shape, result)
+}
+
+func JPH_Shape_GetLeafShape(shape *C.JPH_Shape, subShapeID C.JPH_SubShapeID, remainder *C.JPH_SubShapeID) *C.JPH_Shape {
+	return C.JPH_Shape_GetLeafShape(shape, subShapeID, remainder)
+}
+
+func JPH_Shape_GetMaterial(shape *C.JPH_Shape, subShapeID C.JPH_SubShapeID) *C.JPH_PhysicsMaterial {
+	return C.JPH_Shape_GetMaterial(shape, subShapeID)
+}
+
+func JPH_Shape_GetSurfaceNormal(shape *C.JPH_Shape, subShapeID C.JPH_SubShapeID, localPosition *C.JPH_Vec3, normal *C.JPH_Vec3) {
+	C.JPH_Shape_GetSurfaceNormal(shape, subShapeID, localPosition, normal)
+}
+
+func JPH_Shape_GetSupportingFace(shape *C.JPH_Shape, subShapeID C.JPH_SubShapeID, direction *C.JPH_Vec3, scale *C.JPH_Vec3, centerOfMassTransform *C.JPH_Mat4, outVertices *C.JPH_SupportingFace) {
+	C.JPH_Shape_GetSupportingFace(shape, subShapeID, direction, scale, centerOfMassTransform, outVertices)
+}
+
+func JPH_Shape_GetVolume(shape *C.JPH_Shape) float32 {
+	return float32(C.JPH_Shape_GetVolume(shape))
+}
+
+func JPH_Shape_IsValidScale(shape *C.JPH_Shape, scale *C.JPH_Vec3) bool {
+	return bool(C.JPH_Shape_IsValidScale(shape, scale))
+}
+
+func JPH_Shape_MakeScaleValid(shape *C.JPH_Shape, scale *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_Shape_MakeScaleValid(shape, scale, result)
+}
+
+func JPH_Shape_ScaleShape(shape *C.JPH_Shape, scale *C.JPH_Vec3) *C.JPH_Shape {
+	return C.JPH_Shape_ScaleShape(shape, scale)
+}
+
+func JPH_Shape_CastRay(shape *C.JPH_Shape, origin *C.JPH_Vec3, direction *C.JPH_Vec3, hit *C.JPH_RayCastResult) bool {
+	return bool(C.JPH_Shape_CastRay(shape, origin, direction, hit))
+}
+
+func JPH_Shape_CastRay2(shape *C.JPH_Shape, origin *C.JPH_Vec3, direction *C.JPH_Vec3, rayCastSettings *C.JPH_RayCastSettings, collectorType C.JPH_CollisionCollectorType, callback *C.JPH_CastRayResultCallback, userData unsafe.Pointer, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_Shape_CastRay2(shape, origin, direction, rayCastSettings, collectorType, callback, userData, shapeFilter))
+}
+
+func JPH_Shape_CollidePoint(shape *C.JPH_Shape, point *C.JPH_Vec3, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_Shape_CollidePoint(shape, point, shapeFilter))
+}
+
+func JPH_Shape_CollidePoint2(shape *C.JPH_Shape, point *C.JPH_Vec3, collectorType C.JPH_CollisionCollectorType, callback *C.JPH_CollidePointResultCallback, userData unsafe.Pointer, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_Shape_CollidePoint2(shape, point, collectorType, callback, userData, shapeFilter))
+}
+
+func JPH_ConvexShapeSettings_GetDensity(shape *C.JPH_ConvexShapeSettings) float32 {
+	return float32(C.JPH_ConvexShapeSettings_GetDensity(shape))
+}
+
+func JPH_ConvexShapeSettings_SetDensity(shape *C.JPH_ConvexShapeSettings, value float32) {
+	C.JPH_ConvexShapeSettings_SetDensity(shape, C.float(value))
+}
+
+func JPH_ConvexShape_GetDensity(shape *C.JPH_ConvexShape) float32 {
+	return float32(C.JPH_ConvexShape_GetDensity(shape))
+}
+
+func JPH_ConvexShape_SetDensity(shape *C.JPH_ConvexShape, inDensity float32) {
+	C.JPH_ConvexShape_SetDensity(shape, C.float(inDensity))
+}
+
+func JPH_BoxShapeSettings_Create(halfExtent *C.JPH_Vec3, convexRadius float32) *C.JPH_BoxShapeSettings {
+	return C.JPH_BoxShapeSettings_Create(halfExtent, C.float(convexRadius))
+}
+
+func JPH_BoxShapeSettings_CreateShape(settings *C.JPH_BoxShapeSettings) *C.JPH_BoxShape {
+	return C.JPH_BoxShapeSettings_CreateShape(settings)
+}
+
+func JPH_BoxShape_Create(halfExtent *C.JPH_Vec3, convexRadius float32) *C.JPH_BoxShape {
+	return C.JPH_BoxShape_Create(halfExtent, C.float(convexRadius))
+}
+
+func JPH_BoxShape_GetHalfExtent(shape *C.JPH_BoxShape, halfExtent *C.JPH_Vec3) {
+	C.JPH_BoxShape_GetHalfExtent(shape, halfExtent)
+}
+
+func JPH_BoxShape_GetConvexRadius(shape *C.JPH_BoxShape) float32 {
+	return float32(C.JPH_BoxShape_GetConvexRadius(shape))
+}
+
+func JPH_SphereShapeSettings_Create(radius float32) *C.JPH_SphereShapeSettings {
+	return C.JPH_SphereShapeSettings_Create(C.float(radius))
+}
+
+func JPH_SphereShapeSettings_CreateShape(settings *C.JPH_SphereShapeSettings) *C.JPH_SphereShape {
+	return C.JPH_SphereShapeSettings_CreateShape(settings)
+}
+
+func JPH_SphereShapeSettings_GetRadius(settings *C.JPH_SphereShapeSettings) float32 {
+	return float32(C.JPH_SphereShapeSettings_GetRadius(settings))
+}
+
+func JPH_SphereShapeSettings_SetRadius(settings *C.JPH_SphereShapeSettings, radius float32) {
+	C.JPH_SphereShapeSettings_SetRadius(settings, C.float(radius))
+}
+
+func JPH_SphereShape_Create(radius float32) *C.JPH_SphereShape {
+	return C.JPH_SphereShape_Create(C.float(radius))
+}
+
+func JPH_SphereShape_GetRadius(shape *C.JPH_SphereShape) float32 {
+	return float32(C.JPH_SphereShape_GetRadius(shape))
+}
+
+func JPH_PlaneShapeSettings_Create(plane *C.JPH_Plane, material *C.JPH_PhysicsMaterial, halfExtent float32) *C.JPH_PlaneShapeSettings {
+	return C.JPH_PlaneShapeSettings_Create(plane, material, C.float(halfExtent))
+}
+
+func JPH_PlaneShapeSettings_CreateShape(settings *C.JPH_PlaneShapeSettings) *C.JPH_PlaneShape {
+	return C.JPH_PlaneShapeSettings_CreateShape(settings)
+}
+
+func JPH_PlaneShape_Create(plane *C.JPH_Plane, material *C.JPH_PhysicsMaterial, halfExtent float32) *C.JPH_PlaneShape {
+	return C.JPH_PlaneShape_Create(plane, material, C.float(halfExtent))
+}
+
+func JPH_PlaneShape_GetPlane(shape *C.JPH_PlaneShape, result *C.JPH_Plane) {
+	C.JPH_PlaneShape_GetPlane(shape, result)
+}
+
+func JPH_PlaneShape_GetHalfExtent(shape *C.JPH_PlaneShape) float32 {
+	return float32(C.JPH_PlaneShape_GetHalfExtent(shape))
+}
+
+func JPH_TriangleShapeSettings_Create(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, v3 *C.JPH_Vec3, convexRadius float32) *C.JPH_TriangleShapeSettings {
+	return C.JPH_TriangleShapeSettings_Create(v1, v2, v3, C.float(convexRadius))
+}
+
+func JPH_TriangleShapeSettings_CreateShape(settings *C.JPH_TriangleShapeSettings) *C.JPH_TriangleShape {
+	return C.JPH_TriangleShapeSettings_CreateShape(settings)
+}
+
+func JPH_TriangleShape_Create(v1 *C.JPH_Vec3, v2 *C.JPH_Vec3, v3 *C.JPH_Vec3, convexRadius float32) *C.JPH_TriangleShape {
+	return C.JPH_TriangleShape_Create(v1, v2, v3, C.float(convexRadius))
+}
+
+func JPH_TriangleShape_GetConvexRadius(shape *C.JPH_TriangleShape) float32 {
+	return float32(C.JPH_TriangleShape_GetConvexRadius(shape))
+}
+
+func JPH_TriangleShape_GetVertex1(shape *C.JPH_TriangleShape, result *C.JPH_Vec3) {
+	C.JPH_TriangleShape_GetVertex1(shape, result)
+}
+
+func JPH_TriangleShape_GetVertex2(shape *C.JPH_TriangleShape, result *C.JPH_Vec3) {
+	C.JPH_TriangleShape_GetVertex2(shape, result)
+}
+
+func JPH_TriangleShape_GetVertex3(shape *C.JPH_TriangleShape, result *C.JPH_Vec3) {
+	C.JPH_TriangleShape_GetVertex3(shape, result)
+}
+
+func JPH_CapsuleShapeSettings_Create(halfHeightOfCylinder float32, radius float32) *C.JPH_CapsuleShapeSettings {
+	return C.JPH_CapsuleShapeSettings_Create(C.float(halfHeightOfCylinder), C.float(radius))
+}
+
+func JPH_CapsuleShapeSettings_CreateShape(settings *C.JPH_CapsuleShapeSettings) *C.JPH_CapsuleShape {
+	return C.JPH_CapsuleShapeSettings_CreateShape(settings)
+}
+
+func JPH_CapsuleShape_Create(halfHeightOfCylinder float32, radius float32) *C.JPH_CapsuleShape {
+	return C.JPH_CapsuleShape_Create(C.float(halfHeightOfCylinder), C.float(radius))
+}
+
+func JPH_CapsuleShape_GetRadius(shape *C.JPH_CapsuleShape) float32 {
+	return float32(C.JPH_CapsuleShape_GetRadius(shape))
+}
+
+func JPH_CapsuleShape_GetHalfHeightOfCylinder(shape *C.JPH_CapsuleShape) float32 {
+	return float32(C.JPH_CapsuleShape_GetHalfHeightOfCylinder(shape))
+}
+
+func JPH_CylinderShapeSettings_Create(halfHeight float32, radius float32, convexRadius float32) *C.JPH_CylinderShapeSettings {
+	return C.JPH_CylinderShapeSettings_Create(C.float(halfHeight), C.float(radius), C.float(convexRadius))
+}
+
+func JPH_CylinderShapeSettings_CreateShape(settings *C.JPH_CylinderShapeSettings) *C.JPH_CylinderShape {
+	return C.JPH_CylinderShapeSettings_CreateShape(settings)
+}
+
+func JPH_CylinderShape_Create(halfHeight float32, radius float32) *C.JPH_CylinderShape {
+	return C.JPH_CylinderShape_Create(C.float(halfHeight), C.float(radius))
+}
+
+func JPH_CylinderShape_GetRadius(shape *C.JPH_CylinderShape) float32 {
+	return float32(C.JPH_CylinderShape_GetRadius(shape))
+}
+
+func JPH_CylinderShape_GetHalfHeight(shape *C.JPH_CylinderShape) float32 {
+	return float32(C.JPH_CylinderShape_GetHalfHeight(shape))
+}
+
+func JPH_TaperedCylinderShapeSettings_Create(halfHeightOfTaperedCylinder float32, topRadius float32, bottomRadius float32, convexRadius float32, material *C.JPH_PhysicsMaterial) *C.JPH_TaperedCylinderShapeSettings {
+	return C.JPH_TaperedCylinderShapeSettings_Create(C.float(halfHeightOfTaperedCylinder), C.float(topRadius), C.float(bottomRadius), C.float(convexRadius), material)
+}
+
+func JPH_TaperedCylinderShapeSettings_CreateShape(settings *C.JPH_TaperedCylinderShapeSettings) *C.JPH_TaperedCylinderShape {
+	return C.JPH_TaperedCylinderShapeSettings_CreateShape(settings)
+}
+
+func JPH_TaperedCylinderShape_GetTopRadius(shape *C.JPH_TaperedCylinderShape) float32 {
+	return float32(C.JPH_TaperedCylinderShape_GetTopRadius(shape))
+}
+
+func JPH_TaperedCylinderShape_GetBottomRadius(shape *C.JPH_TaperedCylinderShape) float32 {
+	return float32(C.JPH_TaperedCylinderShape_GetBottomRadius(shape))
+}
+
+func JPH_TaperedCylinderShape_GetConvexRadius(shape *C.JPH_TaperedCylinderShape) float32 {
+	return float32(C.JPH_TaperedCylinderShape_GetConvexRadius(shape))
+}
+
+func JPH_TaperedCylinderShape_GetHalfHeight(shape *C.JPH_TaperedCylinderShape) float32 {
+	return float32(C.JPH_TaperedCylinderShape_GetHalfHeight(shape))
+}
+
+func JPH_ConvexHullShapeSettings_Create(points *C.JPH_Vec3, pointsCount uint32, maxConvexRadius float32) *C.JPH_ConvexHullShapeSettings {
+	return C.JPH_ConvexHullShapeSettings_Create(points, C.uint32_t(pointsCount), C.float(maxConvexRadius))
+}
+
+func JPH_ConvexHullShapeSettings_CreateShape(settings *C.JPH_ConvexHullShapeSettings) *C.JPH_ConvexHullShape {
+	return C.JPH_ConvexHullShapeSettings_CreateShape(settings)
+}
+
+func JPH_ConvexHullShape_GetNumPoints(shape *C.JPH_ConvexHullShape) uint32 {
+	return uint32(C.JPH_ConvexHullShape_GetNumPoints(shape))
+}
+
+func JPH_ConvexHullShape_GetPoint(shape *C.JPH_ConvexHullShape, index uint32, result *C.JPH_Vec3) {
+	C.JPH_ConvexHullShape_GetPoint(shape, C.uint32_t(index), result)
+}
+
+func JPH_ConvexHullShape_GetNumFaces(shape *C.JPH_ConvexHullShape) uint32 {
+	return uint32(C.JPH_ConvexHullShape_GetNumFaces(shape))
+}
+
+func JPH_ConvexHullShape_GetNumVerticesInFace(shape *C.JPH_ConvexHullShape, faceIndex uint32) uint32 {
+	return uint32(C.JPH_ConvexHullShape_GetNumVerticesInFace(shape, C.uint32_t(faceIndex)))
+}
+
+func JPH_ConvexHullShape_GetFaceVertices(shape *C.JPH_ConvexHullShape, faceIndex uint32, maxVertices uint32, vertices unsafe.Pointer) uint32 {
+	return uint32(C.JPH_ConvexHullShape_GetFaceVertices(shape, C.uint32_t(faceIndex), C.uint32_t(maxVertices), (*C.uint32_t)(unsafe.Pointer(vertices))))
+}
+
+func JPH_MeshShapeSettings_Create(triangles *C.JPH_Triangle, triangleCount uint32) *C.JPH_MeshShapeSettings {
+	return C.JPH_MeshShapeSettings_Create(triangles, C.uint32_t(triangleCount))
+}
+
+func JPH_MeshShapeSettings_Create2(vertices *C.JPH_Vec3, verticesCount uint32, triangles *C.JPH_IndexedTriangle, triangleCount uint32) *C.JPH_MeshShapeSettings {
+	return C.JPH_MeshShapeSettings_Create2(vertices, C.uint32_t(verticesCount), triangles, C.uint32_t(triangleCount))
+}
+
+func JPH_MeshShapeSettings_GetMaxTrianglesPerLeaf(settings *C.JPH_MeshShapeSettings) uint32 {
+	return uint32(C.JPH_MeshShapeSettings_GetMaxTrianglesPerLeaf(settings))
+}
+
+func JPH_MeshShapeSettings_SetMaxTrianglesPerLeaf(settings *C.JPH_MeshShapeSettings, value uint32) {
+	C.JPH_MeshShapeSettings_SetMaxTrianglesPerLeaf(settings, C.uint32_t(value))
+}
+
+func JPH_MeshShapeSettings_GetActiveEdgeCosThresholdAngle(settings *C.JPH_MeshShapeSettings) float32 {
+	return float32(C.JPH_MeshShapeSettings_GetActiveEdgeCosThresholdAngle(settings))
+}
+
+func JPH_MeshShapeSettings_SetActiveEdgeCosThresholdAngle(settings *C.JPH_MeshShapeSettings, value float32) {
+	C.JPH_MeshShapeSettings_SetActiveEdgeCosThresholdAngle(settings, C.float(value))
+}
+
+func JPH_MeshShapeSettings_GetPerTriangleUserData(settings *C.JPH_MeshShapeSettings) bool {
+	return bool(C.JPH_MeshShapeSettings_GetPerTriangleUserData(settings))
+}
+
+func JPH_MeshShapeSettings_SetPerTriangleUserData(settings *C.JPH_MeshShapeSettings, value bool) {
+	C.JPH_MeshShapeSettings_SetPerTriangleUserData(settings, C.bool(value))
+}
+
+func JPH_MeshShapeSettings_GetBuildQuality(settings *C.JPH_MeshShapeSettings) C.JPH_Mesh_Shape_BuildQuality {
+	return C.JPH_MeshShapeSettings_GetBuildQuality(settings)
+}
+
+func JPH_MeshShapeSettings_SetBuildQuality(settings *C.JPH_MeshShapeSettings, value C.JPH_Mesh_Shape_BuildQuality) {
+	C.JPH_MeshShapeSettings_SetBuildQuality(settings, value)
+}
+
+func JPH_MeshShapeSettings_Sanitize(settings *C.JPH_MeshShapeSettings) {
+	C.JPH_MeshShapeSettings_Sanitize(settings)
+}
+
+func JPH_MeshShapeSettings_CreateShape(settings *C.JPH_MeshShapeSettings) *C.JPH_MeshShape {
+	return C.JPH_MeshShapeSettings_CreateShape(settings)
+}
+
+func JPH_MeshShape_GetTriangleUserData(shape *C.JPH_MeshShape, id C.JPH_SubShapeID) uint32 {
+	return uint32(C.JPH_MeshShape_GetTriangleUserData(shape, id))
+}
+
+func JPH_HeightFieldShapeSettings_Create(samples unsafe.Pointer, offset *C.JPH_Vec3, scale *C.JPH_Vec3, sampleCount uint32, materialIndices unsafe.Pointer) *C.JPH_HeightFieldShapeSettings {
+	return C.JPH_HeightFieldShapeSettings_Create((*C.float)(unsafe.Pointer(samples)), offset, scale, C.uint32_t(sampleCount), (*C.uint8_t)(unsafe.Pointer(materialIndices)))
+}
+
+func JPH_HeightFieldShapeSettings_DetermineMinAndMaxSample(settings *C.JPH_HeightFieldShapeSettings, pOutMinValue unsafe.Pointer, pOutMaxValue unsafe.Pointer, pOutQuantizationScale unsafe.Pointer) {
+	C.JPH_HeightFieldShapeSettings_DetermineMinAndMaxSample(settings, (*C.float)(unsafe.Pointer(pOutMinValue)), (*C.float)(unsafe.Pointer(pOutMaxValue)), (*C.float)(unsafe.Pointer(pOutQuantizationScale)))
+}
+
+func JPH_HeightFieldShapeSettings_CalculateBitsPerSampleForError(settings *C.JPH_HeightFieldShapeSettings, maxError float32) uint32 {
+	return uint32(C.JPH_HeightFieldShapeSettings_CalculateBitsPerSampleForError(settings, C.float(maxError)))
+}
+
+func JPH_HeightFieldShapeSettings_GetOffset(shape *C.JPH_HeightFieldShapeSettings, result *C.JPH_Vec3) {
+	C.JPH_HeightFieldShapeSettings_GetOffset(shape, result)
+}
+
+func JPH_HeightFieldShapeSettings_SetOffset(settings *C.JPH_HeightFieldShapeSettings, value *C.JPH_Vec3) {
+	C.JPH_HeightFieldShapeSettings_SetOffset(settings, value)
+}
+
+func JPH_HeightFieldShapeSettings_GetScale(shape *C.JPH_HeightFieldShapeSettings, result *C.JPH_Vec3) {
+	C.JPH_HeightFieldShapeSettings_GetScale(shape, result)
+}
+
+func JPH_HeightFieldShapeSettings_SetScale(settings *C.JPH_HeightFieldShapeSettings, value *C.JPH_Vec3) {
+	C.JPH_HeightFieldShapeSettings_SetScale(settings, value)
+}
+
+func JPH_HeightFieldShapeSettings_GetSampleCount(settings *C.JPH_HeightFieldShapeSettings) uint32 {
+	return uint32(C.JPH_HeightFieldShapeSettings_GetSampleCount(settings))
+}
+
+func JPH_HeightFieldShapeSettings_SetSampleCount(settings *C.JPH_HeightFieldShapeSettings, value uint32) {
+	C.JPH_HeightFieldShapeSettings_SetSampleCount(settings, C.uint32_t(value))
+}
+
+func JPH_HeightFieldShapeSettings_GetMinHeightValue(settings *C.JPH_HeightFieldShapeSettings) float32 {
+	return float32(C.JPH_HeightFieldShapeSettings_GetMinHeightValue(settings))
+}
+
+func JPH_HeightFieldShapeSettings_SetMinHeightValue(settings *C.JPH_HeightFieldShapeSettings, value float32) {
+	C.JPH_HeightFieldShapeSettings_SetMinHeightValue(settings, C.float(value))
+}
+
+func JPH_HeightFieldShapeSettings_GetMaxHeightValue(settings *C.JPH_HeightFieldShapeSettings) float32 {
+	return float32(C.JPH_HeightFieldShapeSettings_GetMaxHeightValue(settings))
+}
+
+func JPH_HeightFieldShapeSettings_SetMaxHeightValue(settings *C.JPH_HeightFieldShapeSettings, value float32) {
+	C.JPH_HeightFieldShapeSettings_SetMaxHeightValue(settings, C.float(value))
+}
+
+func JPH_HeightFieldShapeSettings_GetBlockSize(settings *C.JPH_HeightFieldShapeSettings) uint32 {
+	return uint32(C.JPH_HeightFieldShapeSettings_GetBlockSize(settings))
+}
+
+func JPH_HeightFieldShapeSettings_SetBlockSize(settings *C.JPH_HeightFieldShapeSettings, value uint32) {
+	C.JPH_HeightFieldShapeSettings_SetBlockSize(settings, C.uint32_t(value))
+}
+
+func JPH_HeightFieldShapeSettings_GetBitsPerSample(settings *C.JPH_HeightFieldShapeSettings) uint32 {
+	return uint32(C.JPH_HeightFieldShapeSettings_GetBitsPerSample(settings))
+}
+
+func JPH_HeightFieldShapeSettings_SetBitsPerSample(settings *C.JPH_HeightFieldShapeSettings, value uint32) {
+	C.JPH_HeightFieldShapeSettings_SetBitsPerSample(settings, C.uint32_t(value))
+}
+
+func JPH_HeightFieldShapeSettings_GetActiveEdgeCosThresholdAngle(settings *C.JPH_HeightFieldShapeSettings) float32 {
+	return float32(C.JPH_HeightFieldShapeSettings_GetActiveEdgeCosThresholdAngle(settings))
+}
+
+func JPH_HeightFieldShapeSettings_SetActiveEdgeCosThresholdAngle(settings *C.JPH_HeightFieldShapeSettings, value float32) {
+	C.JPH_HeightFieldShapeSettings_SetActiveEdgeCosThresholdAngle(settings, C.float(value))
+}
+
+func JPH_HeightFieldShapeSettings_CreateShape(settings *C.JPH_HeightFieldShapeSettings) *C.JPH_HeightFieldShape {
+	return C.JPH_HeightFieldShapeSettings_CreateShape(settings)
+}
+
+func JPH_HeightFieldShape_GetSampleCount(shape *C.JPH_HeightFieldShape) uint32 {
+	return uint32(C.JPH_HeightFieldShape_GetSampleCount(shape))
+}
+
+func JPH_HeightFieldShape_GetBlockSize(shape *C.JPH_HeightFieldShape) uint32 {
+	return uint32(C.JPH_HeightFieldShape_GetBlockSize(shape))
+}
+
+func JPH_HeightFieldShape_GetMaterial(shape *C.JPH_HeightFieldShape, x uint32, y uint32) *C.JPH_PhysicsMaterial {
+	return C.JPH_HeightFieldShape_GetMaterial(shape, C.uint32_t(x), C.uint32_t(y))
+}
+
+func JPH_HeightFieldShape_GetPosition(shape *C.JPH_HeightFieldShape, x uint32, y uint32, result *C.JPH_Vec3) {
+	C.JPH_HeightFieldShape_GetPosition(shape, C.uint32_t(x), C.uint32_t(y), result)
+}
+
+func JPH_HeightFieldShape_IsNoCollision(shape *C.JPH_HeightFieldShape, x uint32, y uint32) bool {
+	return bool(C.JPH_HeightFieldShape_IsNoCollision(shape, C.uint32_t(x), C.uint32_t(y)))
+}
+
+func JPH_HeightFieldShape_ProjectOntoSurface(shape *C.JPH_HeightFieldShape, localPosition *C.JPH_Vec3, outSurfacePosition *C.JPH_Vec3, outSubShapeID *C.JPH_SubShapeID) bool {
+	return bool(C.JPH_HeightFieldShape_ProjectOntoSurface(shape, localPosition, outSurfacePosition, outSubShapeID))
+}
+
+func JPH_HeightFieldShape_GetMinHeightValue(shape *C.JPH_HeightFieldShape) float32 {
+	return float32(C.JPH_HeightFieldShape_GetMinHeightValue(shape))
+}
+
+func JPH_HeightFieldShape_GetMaxHeightValue(shape *C.JPH_HeightFieldShape) float32 {
+	return float32(C.JPH_HeightFieldShape_GetMaxHeightValue(shape))
+}
+
+func JPH_TaperedCapsuleShapeSettings_Create(halfHeightOfTaperedCylinder float32, topRadius float32, bottomRadius float32) *C.JPH_TaperedCapsuleShapeSettings {
+	return C.JPH_TaperedCapsuleShapeSettings_Create(C.float(halfHeightOfTaperedCylinder), C.float(topRadius), C.float(bottomRadius))
+}
+
+func JPH_TaperedCapsuleShapeSettings_CreateShape(settings *C.JPH_TaperedCapsuleShapeSettings) *C.JPH_TaperedCapsuleShape {
+	return C.JPH_TaperedCapsuleShapeSettings_CreateShape(settings)
+}
+
+func JPH_TaperedCapsuleShape_GetTopRadius(shape *C.JPH_TaperedCapsuleShape) float32 {
+	return float32(C.JPH_TaperedCapsuleShape_GetTopRadius(shape))
+}
+
+func JPH_TaperedCapsuleShape_GetBottomRadius(shape *C.JPH_TaperedCapsuleShape) float32 {
+	return float32(C.JPH_TaperedCapsuleShape_GetBottomRadius(shape))
+}
+
+func JPH_TaperedCapsuleShape_GetHalfHeight(shape *C.JPH_TaperedCapsuleShape) float32 {
+	return float32(C.JPH_TaperedCapsuleShape_GetHalfHeight(shape))
+}
+
+func JPH_CompoundShapeSettings_AddShape(settings *C.JPH_CompoundShapeSettings, position *C.JPH_Vec3, rotation *C.JPH_Quat, shapeSettings *C.JPH_ShapeSettings, userData uint32) {
+	C.JPH_CompoundShapeSettings_AddShape(settings, position, rotation, shapeSettings, C.uint32_t(userData))
+}
+
+func JPH_CompoundShapeSettings_AddShape2(settings *C.JPH_CompoundShapeSettings, position *C.JPH_Vec3, rotation *C.JPH_Quat, shape *C.JPH_Shape, userData uint32) {
+	C.JPH_CompoundShapeSettings_AddShape2(settings, position, rotation, shape, C.uint32_t(userData))
+}
+
+func JPH_CompoundShape_GetNumSubShapes(shape *C.JPH_CompoundShape) uint32 {
+	return uint32(C.JPH_CompoundShape_GetNumSubShapes(shape))
+}
+
+func JPH_CompoundShape_GetSubShape(shape *C.JPH_CompoundShape, index uint32, subShape unsafe.Pointer, positionCOM *C.JPH_Vec3, rotation *C.JPH_Quat, userData unsafe.Pointer) {
+	C.JPH_CompoundShape_GetSubShape(shape, C.uint32_t(index), (**C.JPH_Shape)(unsafe.Pointer(subShape)), positionCOM, rotation, (*C.uint32_t)(unsafe.Pointer(userData)))
+}
+
+func JPH_CompoundShape_GetSubShapeIndexFromID(shape *C.JPH_CompoundShape, id C.JPH_SubShapeID, remainder *C.JPH_SubShapeID) uint32 {
+	return uint32(C.JPH_CompoundShape_GetSubShapeIndexFromID(shape, id, remainder))
+}
+
+func JPH_StaticCompoundShapeSettings_Create() *C.JPH_StaticCompoundShapeSettings {
+	return C.JPH_StaticCompoundShapeSettings_Create()
+}
+
+func JPH_StaticCompoundShape_Create(settings *C.JPH_StaticCompoundShapeSettings) *C.JPH_StaticCompoundShape {
+	return C.JPH_StaticCompoundShape_Create(settings)
+}
+
+func JPH_MutableCompoundShapeSettings_Create() *C.JPH_MutableCompoundShapeSettings {
+	return C.JPH_MutableCompoundShapeSettings_Create()
+}
+
+func JPH_MutableCompoundShape_Create(settings *C.JPH_MutableCompoundShapeSettings) *C.JPH_MutableCompoundShape {
+	return C.JPH_MutableCompoundShape_Create(settings)
+}
+
+func JPH_MutableCompoundShape_AddShape(shape *C.JPH_MutableCompoundShape, position *C.JPH_Vec3, rotation *C.JPH_Quat, child *C.JPH_Shape, userData uint32, index uint32) uint32 {
+	return uint32(C.JPH_MutableCompoundShape_AddShape(shape, position, rotation, child, C.uint32_t(userData), C.uint32_t(index)))
+}
+
+func JPH_MutableCompoundShape_RemoveShape(shape *C.JPH_MutableCompoundShape, index uint32) {
+	C.JPH_MutableCompoundShape_RemoveShape(shape, C.uint32_t(index))
+}
+
+func JPH_MutableCompoundShape_ModifyShape(shape *C.JPH_MutableCompoundShape, index uint32, position *C.JPH_Vec3, rotation *C.JPH_Quat) {
+	C.JPH_MutableCompoundShape_ModifyShape(shape, C.uint32_t(index), position, rotation)
+}
+
+func JPH_MutableCompoundShape_ModifyShape2(shape *C.JPH_MutableCompoundShape, index uint32, position *C.JPH_Vec3, rotation *C.JPH_Quat, newShape *C.JPH_Shape) {
+	C.JPH_MutableCompoundShape_ModifyShape2(shape, C.uint32_t(index), position, rotation, newShape)
+}
+
+func JPH_MutableCompoundShape_AdjustCenterOfMass(shape *C.JPH_MutableCompoundShape) {
+	C.JPH_MutableCompoundShape_AdjustCenterOfMass(shape)
+}
+
+func JPH_DecoratedShape_GetInnerShape(shape *C.JPH_DecoratedShape) *C.JPH_Shape {
+	return C.JPH_DecoratedShape_GetInnerShape(shape)
+}
+
+func JPH_RotatedTranslatedShapeSettings_Create(position *C.JPH_Vec3, rotation *C.JPH_Quat, shapeSettings *C.JPH_ShapeSettings) *C.JPH_RotatedTranslatedShapeSettings {
+	return C.JPH_RotatedTranslatedShapeSettings_Create(position, rotation, shapeSettings)
+}
+
+func JPH_RotatedTranslatedShapeSettings_Create2(position *C.JPH_Vec3, rotation *C.JPH_Quat, shape *C.JPH_Shape) *C.JPH_RotatedTranslatedShapeSettings {
+	return C.JPH_RotatedTranslatedShapeSettings_Create2(position, rotation, shape)
+}
+
+func JPH_RotatedTranslatedShapeSettings_CreateShape(settings *C.JPH_RotatedTranslatedShapeSettings) *C.JPH_RotatedTranslatedShape {
+	return C.JPH_RotatedTranslatedShapeSettings_CreateShape(settings)
+}
+
+func JPH_RotatedTranslatedShape_Create(position *C.JPH_Vec3, rotation *C.JPH_Quat, shape *C.JPH_Shape) *C.JPH_RotatedTranslatedShape {
+	return C.JPH_RotatedTranslatedShape_Create(position, rotation, shape)
+}
+
+func JPH_RotatedTranslatedShape_GetPosition(shape *C.JPH_RotatedTranslatedShape, position *C.JPH_Vec3) {
+	C.JPH_RotatedTranslatedShape_GetPosition(shape, position)
+}
+
+func JPH_RotatedTranslatedShape_GetRotation(shape *C.JPH_RotatedTranslatedShape, rotation *C.JPH_Quat) {
+	C.JPH_RotatedTranslatedShape_GetRotation(shape, rotation)
+}
+
+func JPH_ScaledShapeSettings_Create(shapeSettings *C.JPH_ShapeSettings, scale *C.JPH_Vec3) *C.JPH_ScaledShapeSettings {
+	return C.JPH_ScaledShapeSettings_Create(shapeSettings, scale)
+}
+
+func JPH_ScaledShapeSettings_Create2(shape *C.JPH_Shape, scale *C.JPH_Vec3) *C.JPH_ScaledShapeSettings {
+	return C.JPH_ScaledShapeSettings_Create2(shape, scale)
+}
+
+func JPH_ScaledShapeSettings_CreateShape(settings *C.JPH_ScaledShapeSettings) *C.JPH_ScaledShape {
+	return C.JPH_ScaledShapeSettings_CreateShape(settings)
+}
+
+func JPH_ScaledShape_Create(shape *C.JPH_Shape, scale *C.JPH_Vec3) *C.JPH_ScaledShape {
+	return C.JPH_ScaledShape_Create(shape, scale)
+}
+
+func JPH_ScaledShape_GetScale(shape *C.JPH_ScaledShape, result *C.JPH_Vec3) {
+	C.JPH_ScaledShape_GetScale(shape, result)
+}
+
+func JPH_OffsetCenterOfMassShapeSettings_Create(offset *C.JPH_Vec3, shapeSettings *C.JPH_ShapeSettings) *C.JPH_OffsetCenterOfMassShapeSettings {
+	return C.JPH_OffsetCenterOfMassShapeSettings_Create(offset, shapeSettings)
+}
+
+func JPH_OffsetCenterOfMassShapeSettings_Create2(offset *C.JPH_Vec3, shape *C.JPH_Shape) *C.JPH_OffsetCenterOfMassShapeSettings {
+	return C.JPH_OffsetCenterOfMassShapeSettings_Create2(offset, shape)
+}
+
+func JPH_OffsetCenterOfMassShapeSettings_CreateShape(settings *C.JPH_OffsetCenterOfMassShapeSettings) *C.JPH_OffsetCenterOfMassShape {
+	return C.JPH_OffsetCenterOfMassShapeSettings_CreateShape(settings)
+}
+
+func JPH_OffsetCenterOfMassShape_Create(offset *C.JPH_Vec3, shape *C.JPH_Shape) *C.JPH_OffsetCenterOfMassShape {
+	return C.JPH_OffsetCenterOfMassShape_Create(offset, shape)
+}
+
+func JPH_OffsetCenterOfMassShape_GetOffset(shape *C.JPH_OffsetCenterOfMassShape, result *C.JPH_Vec3) {
+	C.JPH_OffsetCenterOfMassShape_GetOffset(shape, result)
+}
+
+func JPH_EmptyShapeSettings_Create(centerOfMass *C.JPH_Vec3) *C.JPH_EmptyShapeSettings {
+	return C.JPH_EmptyShapeSettings_Create(centerOfMass)
+}
+
+func JPH_EmptyShapeSettings_CreateShape(settings *C.JPH_EmptyShapeSettings) *C.JPH_EmptyShape {
+	return C.JPH_EmptyShapeSettings_CreateShape(settings)
+}
+
+func JPH_BodyCreationSettings_Create() *C.JPH_BodyCreationSettings {
+	return C.JPH_BodyCreationSettings_Create()
+}
+
+func JPH_BodyCreationSettings_Create2(settings *C.JPH_ShapeSettings, position *C.JPH_RVec3, rotation *C.JPH_Quat, motionType C.JPH_MotionType, objectLayer C.JPH_ObjectLayer) *C.JPH_BodyCreationSettings {
+	return C.JPH_BodyCreationSettings_Create2(settings, position, rotation, motionType, objectLayer)
+}
+
+func JPH_BodyCreationSettings_Create3(shape *C.JPH_Shape, position *C.JPH_RVec3, rotation *C.JPH_Quat, motionType C.JPH_MotionType, objectLayer C.JPH_ObjectLayer) *C.JPH_BodyCreationSettings {
+	return C.JPH_BodyCreationSettings_Create3(shape, position, rotation, motionType, objectLayer)
+}
+
+func JPH_BodyCreationSettings_Destroy(settings *C.JPH_BodyCreationSettings) {
+	C.JPH_BodyCreationSettings_Destroy(settings)
+}
+
+func JPH_BodyCreationSettings_GetPosition(settings *C.JPH_BodyCreationSettings, result *C.JPH_RVec3) {
+	C.JPH_BodyCreationSettings_GetPosition(settings, result)
+}
+
+func JPH_BodyCreationSettings_SetPosition(settings *C.JPH_BodyCreationSettings, value *C.JPH_RVec3) {
+	C.JPH_BodyCreationSettings_SetPosition(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetRotation(settings *C.JPH_BodyCreationSettings, result *C.JPH_Quat) {
+	C.JPH_BodyCreationSettings_GetRotation(settings, result)
+}
+
+func JPH_BodyCreationSettings_SetRotation(settings *C.JPH_BodyCreationSettings, value *C.JPH_Quat) {
+	C.JPH_BodyCreationSettings_SetRotation(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetLinearVelocity(settings *C.JPH_BodyCreationSettings, velocity *C.JPH_Vec3) {
+	C.JPH_BodyCreationSettings_GetLinearVelocity(settings, velocity)
+}
+
+func JPH_BodyCreationSettings_SetLinearVelocity(settings *C.JPH_BodyCreationSettings, velocity *C.JPH_Vec3) {
+	C.JPH_BodyCreationSettings_SetLinearVelocity(settings, velocity)
+}
+
+func JPH_BodyCreationSettings_GetAngularVelocity(settings *C.JPH_BodyCreationSettings, velocity *C.JPH_Vec3) {
+	C.JPH_BodyCreationSettings_GetAngularVelocity(settings, velocity)
+}
+
+func JPH_BodyCreationSettings_SetAngularVelocity(settings *C.JPH_BodyCreationSettings, velocity *C.JPH_Vec3) {
+	C.JPH_BodyCreationSettings_SetAngularVelocity(settings, velocity)
+}
+
+func JPH_BodyCreationSettings_GetUserData(settings *C.JPH_BodyCreationSettings) uint64 {
+	return uint64(C.JPH_BodyCreationSettings_GetUserData(settings))
+}
+
+func JPH_BodyCreationSettings_SetUserData(settings *C.JPH_BodyCreationSettings, value uint64) {
+	C.JPH_BodyCreationSettings_SetUserData(settings, C.uint64_t(value))
+}
+
+func JPH_BodyCreationSettings_GetObjectLayer(settings *C.JPH_BodyCreationSettings) C.JPH_ObjectLayer {
+	return C.JPH_BodyCreationSettings_GetObjectLayer(settings)
+}
+
+func JPH_BodyCreationSettings_SetObjectLayer(settings *C.JPH_BodyCreationSettings, value C.JPH_ObjectLayer) {
+	C.JPH_BodyCreationSettings_SetObjectLayer(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetCollisionGroup(settings *C.JPH_BodyCreationSettings, result *C.JPH_CollisionGroup) {
+	C.JPH_BodyCreationSettings_GetCollisionGroup(settings, result)
+}
+
+func JPH_BodyCreationSettings_SetCollisionGroup(settings *C.JPH_BodyCreationSettings, value *C.JPH_CollisionGroup) {
+	C.JPH_BodyCreationSettings_SetCollisionGroup(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetMotionType(settings *C.JPH_BodyCreationSettings) C.JPH_MotionType {
+	return C.JPH_BodyCreationSettings_GetMotionType(settings)
+}
+
+func JPH_BodyCreationSettings_SetMotionType(settings *C.JPH_BodyCreationSettings, value C.JPH_MotionType) {
+	C.JPH_BodyCreationSettings_SetMotionType(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetAllowedDOFs(settings *C.JPH_BodyCreationSettings) C.JPH_AllowedDOFs {
+	return C.JPH_BodyCreationSettings_GetAllowedDOFs(settings)
+}
+
+func JPH_BodyCreationSettings_SetAllowedDOFs(settings *C.JPH_BodyCreationSettings, value C.JPH_AllowedDOFs) {
+	C.JPH_BodyCreationSettings_SetAllowedDOFs(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetAllowDynamicOrKinematic(settings *C.JPH_BodyCreationSettings) bool {
+	return bool(C.JPH_BodyCreationSettings_GetAllowDynamicOrKinematic(settings))
+}
+
+func JPH_BodyCreationSettings_SetAllowDynamicOrKinematic(settings *C.JPH_BodyCreationSettings, value bool) {
+	C.JPH_BodyCreationSettings_SetAllowDynamicOrKinematic(settings, C.bool(value))
+}
+
+func JPH_BodyCreationSettings_GetIsSensor(settings *C.JPH_BodyCreationSettings) bool {
+	return bool(C.JPH_BodyCreationSettings_GetIsSensor(settings))
+}
+
+func JPH_BodyCreationSettings_SetIsSensor(settings *C.JPH_BodyCreationSettings, value bool) {
+	C.JPH_BodyCreationSettings_SetIsSensor(settings, C.bool(value))
+}
+
+func JPH_BodyCreationSettings_GetCollideKinematicVsNonDynamic(settings *C.JPH_BodyCreationSettings) bool {
+	return bool(C.JPH_BodyCreationSettings_GetCollideKinematicVsNonDynamic(settings))
+}
+
+func JPH_BodyCreationSettings_SetCollideKinematicVsNonDynamic(settings *C.JPH_BodyCreationSettings, value bool) {
+	C.JPH_BodyCreationSettings_SetCollideKinematicVsNonDynamic(settings, C.bool(value))
+}
+
+func JPH_BodyCreationSettings_GetUseManifoldReduction(settings *C.JPH_BodyCreationSettings) bool {
+	return bool(C.JPH_BodyCreationSettings_GetUseManifoldReduction(settings))
+}
+
+func JPH_BodyCreationSettings_SetUseManifoldReduction(settings *C.JPH_BodyCreationSettings, value bool) {
+	C.JPH_BodyCreationSettings_SetUseManifoldReduction(settings, C.bool(value))
+}
+
+func JPH_BodyCreationSettings_GetApplyGyroscopicForce(settings *C.JPH_BodyCreationSettings) bool {
+	return bool(C.JPH_BodyCreationSettings_GetApplyGyroscopicForce(settings))
+}
+
+func JPH_BodyCreationSettings_SetApplyGyroscopicForce(settings *C.JPH_BodyCreationSettings, value bool) {
+	C.JPH_BodyCreationSettings_SetApplyGyroscopicForce(settings, C.bool(value))
+}
+
+func JPH_BodyCreationSettings_GetMotionQuality(settings *C.JPH_BodyCreationSettings) C.JPH_MotionQuality {
+	return C.JPH_BodyCreationSettings_GetMotionQuality(settings)
+}
+
+func JPH_BodyCreationSettings_SetMotionQuality(settings *C.JPH_BodyCreationSettings, value C.JPH_MotionQuality) {
+	C.JPH_BodyCreationSettings_SetMotionQuality(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetEnhancedInternalEdgeRemoval(settings *C.JPH_BodyCreationSettings) bool {
+	return bool(C.JPH_BodyCreationSettings_GetEnhancedInternalEdgeRemoval(settings))
+}
+
+func JPH_BodyCreationSettings_SetEnhancedInternalEdgeRemoval(settings *C.JPH_BodyCreationSettings, value bool) {
+	C.JPH_BodyCreationSettings_SetEnhancedInternalEdgeRemoval(settings, C.bool(value))
+}
+
+func JPH_BodyCreationSettings_GetAllowSleeping(settings *C.JPH_BodyCreationSettings) bool {
+	return bool(C.JPH_BodyCreationSettings_GetAllowSleeping(settings))
+}
+
+func JPH_BodyCreationSettings_SetAllowSleeping(settings *C.JPH_BodyCreationSettings, value bool) {
+	C.JPH_BodyCreationSettings_SetAllowSleeping(settings, C.bool(value))
+}
+
+func JPH_BodyCreationSettings_GetFriction(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetFriction(settings))
+}
+
+func JPH_BodyCreationSettings_SetFriction(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetFriction(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetRestitution(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetRestitution(settings))
+}
+
+func JPH_BodyCreationSettings_SetRestitution(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetRestitution(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetLinearDamping(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetLinearDamping(settings))
+}
+
+func JPH_BodyCreationSettings_SetLinearDamping(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetLinearDamping(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetAngularDamping(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetAngularDamping(settings))
+}
+
+func JPH_BodyCreationSettings_SetAngularDamping(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetAngularDamping(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetMaxLinearVelocity(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetMaxLinearVelocity(settings))
+}
+
+func JPH_BodyCreationSettings_SetMaxLinearVelocity(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetMaxLinearVelocity(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetMaxAngularVelocity(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetMaxAngularVelocity(settings))
+}
+
+func JPH_BodyCreationSettings_SetMaxAngularVelocity(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetMaxAngularVelocity(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetGravityFactor(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetGravityFactor(settings))
+}
+
+func JPH_BodyCreationSettings_SetGravityFactor(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetGravityFactor(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetNumVelocityStepsOverride(settings *C.JPH_BodyCreationSettings) uint32 {
+	return uint32(C.JPH_BodyCreationSettings_GetNumVelocityStepsOverride(settings))
+}
+
+func JPH_BodyCreationSettings_SetNumVelocityStepsOverride(settings *C.JPH_BodyCreationSettings, value uint32) {
+	C.JPH_BodyCreationSettings_SetNumVelocityStepsOverride(settings, C.uint32_t(value))
+}
+
+func JPH_BodyCreationSettings_GetNumPositionStepsOverride(settings *C.JPH_BodyCreationSettings) uint32 {
+	return uint32(C.JPH_BodyCreationSettings_GetNumPositionStepsOverride(settings))
+}
+
+func JPH_BodyCreationSettings_SetNumPositionStepsOverride(settings *C.JPH_BodyCreationSettings, value uint32) {
+	C.JPH_BodyCreationSettings_SetNumPositionStepsOverride(settings, C.uint32_t(value))
+}
+
+func JPH_BodyCreationSettings_GetOverrideMassProperties(settings *C.JPH_BodyCreationSettings) C.JPH_OverrideMassProperties {
+	return C.JPH_BodyCreationSettings_GetOverrideMassProperties(settings)
+}
+
+func JPH_BodyCreationSettings_SetOverrideMassProperties(settings *C.JPH_BodyCreationSettings, value C.JPH_OverrideMassProperties) {
+	C.JPH_BodyCreationSettings_SetOverrideMassProperties(settings, value)
+}
+
+func JPH_BodyCreationSettings_GetInertiaMultiplier(settings *C.JPH_BodyCreationSettings) float32 {
+	return float32(C.JPH_BodyCreationSettings_GetInertiaMultiplier(settings))
+}
+
+func JPH_BodyCreationSettings_SetInertiaMultiplier(settings *C.JPH_BodyCreationSettings, value float32) {
+	C.JPH_BodyCreationSettings_SetInertiaMultiplier(settings, C.float(value))
+}
+
+func JPH_BodyCreationSettings_GetMassPropertiesOverride(settings *C.JPH_BodyCreationSettings, result *C.JPH_MassProperties) {
+	C.JPH_BodyCreationSettings_GetMassPropertiesOverride(settings, result)
+}
+
+func JPH_BodyCreationSettings_SetMassPropertiesOverride(settings *C.JPH_BodyCreationSettings, massProperties *C.JPH_MassProperties) {
+	C.JPH_BodyCreationSettings_SetMassPropertiesOverride(settings, massProperties)
+}
+
+func JPH_SoftBodySharedSettings_Create() *C.JPH_SoftBodySharedSettings {
+	return C.JPH_SoftBodySharedSettings_Create()
+}
+
+func JPH_SoftBodySharedSettings_Destroy(settings *C.JPH_SoftBodySharedSettings) {
+	C.JPH_SoftBodySharedSettings_Destroy(settings)
+}
+
+func JPH_SoftBodySharedSettings_AddVertex(settings *C.JPH_SoftBodySharedSettings, vertex *C.JPH_SoftVertex) {
+	C.JPH_SoftBodySharedSettings_AddVertex(settings, vertex)
+}
+
+func JPH_SoftBodySharedSettings_AddVertices(settings *C.JPH_SoftBodySharedSettings, vertices *C.JPH_SoftVertex, count uint32) {
+	C.JPH_SoftBodySharedSettings_AddVertices(settings, vertices, C.uint32_t(count))
+}
+
+func JPH_SoftBodySharedSettings_RemoveVertex(settings *C.JPH_SoftBodySharedSettings, index uint32) bool {
+	return bool(C.JPH_SoftBodySharedSettings_RemoveVertex(settings, C.uint32_t(index)))
+}
+
+func JPH_SoftBodySharedSettings_GetVertexCount(settings *C.JPH_SoftBodySharedSettings) uint32 {
+	return uint32(C.JPH_SoftBodySharedSettings_GetVertexCount(settings))
+}
+
+func JPH_SoftBodySharedSettings_GetVertex(settings *C.JPH_SoftBodySharedSettings, index uint32, outVertex *C.JPH_SoftVertex) bool {
+	return bool(C.JPH_SoftBodySharedSettings_GetVertex(settings, C.uint32_t(index), outVertex))
+}
+
+func JPH_SoftBodySharedSettings_AddFace(settings *C.JPH_SoftBodySharedSettings, face *C.JPH_SoftFace) {
+	C.JPH_SoftBodySharedSettings_AddFace(settings, face)
+}
+
+func JPH_SoftBodySharedSettings_AddFaces(settings *C.JPH_SoftBodySharedSettings, faces *C.JPH_SoftFace, count uint32) {
+	C.JPH_SoftBodySharedSettings_AddFaces(settings, faces, C.uint32_t(count))
+}
+
+func JPH_SoftBodySharedSettings_RemoveFace(settings *C.JPH_SoftBodySharedSettings, index uint32) bool {
+	return bool(C.JPH_SoftBodySharedSettings_RemoveFace(settings, C.uint32_t(index)))
+}
+
+func JPH_SoftBodySharedSettings_GetFaceCount(settings *C.JPH_SoftBodySharedSettings) uint32 {
+	return uint32(C.JPH_SoftBodySharedSettings_GetFaceCount(settings))
+}
+
+func JPH_SoftBodySharedSettings_GetFace(settings *C.JPH_SoftBodySharedSettings, index uint32, outFace *C.JPH_SoftFace) bool {
+	return bool(C.JPH_SoftBodySharedSettings_GetFace(settings, C.uint32_t(index), outFace))
+}
+
+func JPH_SoftBodySharedSettings_CreateConstraints(settings *C.JPH_SoftBodySharedSettings, compliance float32, bendType C.JPH_SoftBodyBendType) {
+	C.JPH_SoftBodySharedSettings_CreateConstraints(settings, C.float(compliance), bendType)
+}
+
+func JPH_SoftBodySharedSettings_Optimize(settings *C.JPH_SoftBodySharedSettings) {
+	C.JPH_SoftBodySharedSettings_Optimize(settings)
+}
+
+func JPH_SoftBodyCreationSettings_Create() *C.JPH_SoftBodyCreationSettings {
+	return C.JPH_SoftBodyCreationSettings_Create()
+}
+
+func JPH_SoftBodyCreationSettings_Create2(settings *C.JPH_SoftBodySharedSettings, position *C.JPH_RVec3, rotation *C.JPH_Quat, objectLayer C.JPH_ObjectLayer) *C.JPH_SoftBodyCreationSettings {
+	return C.JPH_SoftBodyCreationSettings_Create2(settings, position, rotation, objectLayer)
+}
+
+func JPH_SoftBodyCreationSettings_Destroy(settings *C.JPH_SoftBodyCreationSettings) {
+	C.JPH_SoftBodyCreationSettings_Destroy(settings)
+}
+
+func JPH_SoftBodyCreationSettings_GetSettings(settings *C.JPH_SoftBodyCreationSettings) *C.JPH_SoftBodySharedSettings {
+	return C.JPH_SoftBodyCreationSettings_GetSettings(settings)
+}
+
+func JPH_SoftBodyCreationSettings_SetSettings(settings *C.JPH_SoftBodyCreationSettings, sharedSettings *C.JPH_SoftBodySharedSettings) {
+	C.JPH_SoftBodyCreationSettings_SetSettings(settings, sharedSettings)
+}
+
+func JPH_SoftBodyCreationSettings_GetPosition(settings *C.JPH_SoftBodyCreationSettings, result *C.JPH_RVec3) {
+	C.JPH_SoftBodyCreationSettings_GetPosition(settings, result)
+}
+
+func JPH_SoftBodyCreationSettings_SetPosition(settings *C.JPH_SoftBodyCreationSettings, value *C.JPH_RVec3) {
+	C.JPH_SoftBodyCreationSettings_SetPosition(settings, value)
+}
+
+func JPH_SoftBodyCreationSettings_GetRotation(settings *C.JPH_SoftBodyCreationSettings, result *C.JPH_Quat) {
+	C.JPH_SoftBodyCreationSettings_GetRotation(settings, result)
+}
+
+func JPH_SoftBodyCreationSettings_SetRotation(settings *C.JPH_SoftBodyCreationSettings, value *C.JPH_Quat) {
+	C.JPH_SoftBodyCreationSettings_SetRotation(settings, value)
+}
+
+func JPH_SoftBodyCreationSettings_GetUserData(settings *C.JPH_SoftBodyCreationSettings) uint64 {
+	return uint64(C.JPH_SoftBodyCreationSettings_GetUserData(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetUserData(settings *C.JPH_SoftBodyCreationSettings, userData uint64) {
+	C.JPH_SoftBodyCreationSettings_SetUserData(settings, C.uint64_t(userData))
+}
+
+func JPH_SoftBodyCreationSettings_GetObjectLayer(settings *C.JPH_SoftBodyCreationSettings) C.JPH_ObjectLayer {
+	return C.JPH_SoftBodyCreationSettings_GetObjectLayer(settings)
+}
+
+func JPH_SoftBodyCreationSettings_SetObjectLayer(settings *C.JPH_SoftBodyCreationSettings, value C.JPH_ObjectLayer) {
+	C.JPH_SoftBodyCreationSettings_SetObjectLayer(settings, value)
+}
+
+func JPH_SoftBodyCreationSettings_GetCollisionGroup(settings *C.JPH_SoftBodyCreationSettings, result *C.JPH_CollisionGroup) {
+	C.JPH_SoftBodyCreationSettings_GetCollisionGroup(settings, result)
+}
+
+func JPH_SoftBodyCreationSettings_SetCollisionGroup(settings *C.JPH_SoftBodyCreationSettings, group *C.JPH_CollisionGroup) {
+	C.JPH_SoftBodyCreationSettings_SetCollisionGroup(settings, group)
+}
+
+func JPH_SoftBodyCreationSettings_GetNumIterations(settings *C.JPH_SoftBodyCreationSettings) uint32 {
+	return uint32(C.JPH_SoftBodyCreationSettings_GetNumIterations(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetNumIterations(settings *C.JPH_SoftBodyCreationSettings, iterations uint32) {
+	C.JPH_SoftBodyCreationSettings_SetNumIterations(settings, C.uint32_t(iterations))
+}
+
+func JPH_SoftBodyCreationSettings_GetLinearDamping(settings *C.JPH_SoftBodyCreationSettings) float32 {
+	return float32(C.JPH_SoftBodyCreationSettings_GetLinearDamping(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetLinearDamping(settings *C.JPH_SoftBodyCreationSettings, value float32) {
+	C.JPH_SoftBodyCreationSettings_SetLinearDamping(settings, C.float(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetMaxLinearVelocity(settings *C.JPH_SoftBodyCreationSettings) float32 {
+	return float32(C.JPH_SoftBodyCreationSettings_GetMaxLinearVelocity(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetMaxLinearVelocity(settings *C.JPH_SoftBodyCreationSettings, value float32) {
+	C.JPH_SoftBodyCreationSettings_SetMaxLinearVelocity(settings, C.float(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetRestitution(settings *C.JPH_SoftBodyCreationSettings) float32 {
+	return float32(C.JPH_SoftBodyCreationSettings_GetRestitution(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetRestitution(settings *C.JPH_SoftBodyCreationSettings, value float32) {
+	C.JPH_SoftBodyCreationSettings_SetRestitution(settings, C.float(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetFriction(settings *C.JPH_SoftBodyCreationSettings) float32 {
+	return float32(C.JPH_SoftBodyCreationSettings_GetFriction(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetFriction(settings *C.JPH_SoftBodyCreationSettings, value float32) {
+	C.JPH_SoftBodyCreationSettings_SetFriction(settings, C.float(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetPressure(settings *C.JPH_SoftBodyCreationSettings) float32 {
+	return float32(C.JPH_SoftBodyCreationSettings_GetPressure(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetPressure(settings *C.JPH_SoftBodyCreationSettings, value float32) {
+	C.JPH_SoftBodyCreationSettings_SetPressure(settings, C.float(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetGravityFactor(settings *C.JPH_SoftBodyCreationSettings) float32 {
+	return float32(C.JPH_SoftBodyCreationSettings_GetGravityFactor(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetGravityFactor(settings *C.JPH_SoftBodyCreationSettings, value float32) {
+	C.JPH_SoftBodyCreationSettings_SetGravityFactor(settings, C.float(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetVertexRadius(settings *C.JPH_SoftBodyCreationSettings) float32 {
+	return float32(C.JPH_SoftBodyCreationSettings_GetVertexRadius(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetVertexRadius(settings *C.JPH_SoftBodyCreationSettings, value float32) {
+	C.JPH_SoftBodyCreationSettings_SetVertexRadius(settings, C.float(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetUpdatePosition(settings *C.JPH_SoftBodyCreationSettings) bool {
+	return bool(C.JPH_SoftBodyCreationSettings_GetUpdatePosition(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetUpdatePosition(settings *C.JPH_SoftBodyCreationSettings, value bool) {
+	C.JPH_SoftBodyCreationSettings_SetUpdatePosition(settings, C.bool(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetMakeRotationIdentity(settings *C.JPH_SoftBodyCreationSettings) bool {
+	return bool(C.JPH_SoftBodyCreationSettings_GetMakeRotationIdentity(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetMakeRotationIdentity(settings *C.JPH_SoftBodyCreationSettings, value bool) {
+	C.JPH_SoftBodyCreationSettings_SetMakeRotationIdentity(settings, C.bool(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetAllowSleeping(settings *C.JPH_SoftBodyCreationSettings) bool {
+	return bool(C.JPH_SoftBodyCreationSettings_GetAllowSleeping(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetAllowSleeping(settings *C.JPH_SoftBodyCreationSettings, value bool) {
+	C.JPH_SoftBodyCreationSettings_SetAllowSleeping(settings, C.bool(value))
+}
+
+func JPH_SoftBodyCreationSettings_GetFacesDoubleSided(settings *C.JPH_SoftBodyCreationSettings) bool {
+	return bool(C.JPH_SoftBodyCreationSettings_GetFacesDoubleSided(settings))
+}
+
+func JPH_SoftBodyCreationSettings_SetFacesDoubleSided(settings *C.JPH_SoftBodyCreationSettings, value bool) {
+	C.JPH_SoftBodyCreationSettings_SetFacesDoubleSided(settings, C.bool(value))
+}
+
+func JPH_Constraint_Destroy(constraint *C.JPH_Constraint) { C.JPH_Constraint_Destroy(constraint) }
+
+func JPH_Constraint_GetType(constraint *C.JPH_Constraint) C.JPH_ConstraintType {
+	return C.JPH_Constraint_GetType(constraint)
+}
+
+func JPH_Constraint_GetSubType(constraint *C.JPH_Constraint) C.JPH_ConstraintSubType {
+	return C.JPH_Constraint_GetSubType(constraint)
+}
+
+func JPH_Constraint_GetConstraintPriority(constraint *C.JPH_Constraint) uint32 {
+	return uint32(C.JPH_Constraint_GetConstraintPriority(constraint))
+}
+
+func JPH_Constraint_SetConstraintPriority(constraint *C.JPH_Constraint, priority uint32) {
+	C.JPH_Constraint_SetConstraintPriority(constraint, C.uint32_t(priority))
+}
+
+func JPH_Constraint_GetNumVelocityStepsOverride(constraint *C.JPH_Constraint) uint32 {
+	return uint32(C.JPH_Constraint_GetNumVelocityStepsOverride(constraint))
+}
+
+func JPH_Constraint_SetNumVelocityStepsOverride(constraint *C.JPH_Constraint, value uint32) {
+	C.JPH_Constraint_SetNumVelocityStepsOverride(constraint, C.uint32_t(value))
+}
+
+func JPH_Constraint_GetNumPositionStepsOverride(constraint *C.JPH_Constraint) uint32 {
+	return uint32(C.JPH_Constraint_GetNumPositionStepsOverride(constraint))
+}
+
+func JPH_Constraint_SetNumPositionStepsOverride(constraint *C.JPH_Constraint, value uint32) {
+	C.JPH_Constraint_SetNumPositionStepsOverride(constraint, C.uint32_t(value))
+}
+
+func JPH_Constraint_GetEnabled(constraint *C.JPH_Constraint) bool {
+	return bool(C.JPH_Constraint_GetEnabled(constraint))
+}
+
+func JPH_Constraint_SetEnabled(constraint *C.JPH_Constraint, enabled bool) {
+	C.JPH_Constraint_SetEnabled(constraint, C.bool(enabled))
+}
+
+func JPH_Constraint_GetUserData(constraint *C.JPH_Constraint) uint64 {
+	return uint64(C.JPH_Constraint_GetUserData(constraint))
+}
+
+func JPH_Constraint_SetUserData(constraint *C.JPH_Constraint, userData uint64) {
+	C.JPH_Constraint_SetUserData(constraint, C.uint64_t(userData))
+}
+
+func JPH_Constraint_NotifyShapeChanged(constraint *C.JPH_Constraint, bodyID C.JPH_BodyID, deltaCOM *C.JPH_Vec3) {
+	C.JPH_Constraint_NotifyShapeChanged(constraint, bodyID, deltaCOM)
+}
+
+func JPH_Constraint_ResetWarmStart(constraint *C.JPH_Constraint) {
+	C.JPH_Constraint_ResetWarmStart(constraint)
+}
+
+func JPH_Constraint_IsActive(constraint *C.JPH_Constraint) bool {
+	return bool(C.JPH_Constraint_IsActive(constraint))
+}
+
+func JPH_Constraint_SetupVelocityConstraint(constraint *C.JPH_Constraint, deltaTime float32) {
+	C.JPH_Constraint_SetupVelocityConstraint(constraint, C.float(deltaTime))
+}
+
+func JPH_Constraint_WarmStartVelocityConstraint(constraint *C.JPH_Constraint, warmStartImpulseRatio float32) {
+	C.JPH_Constraint_WarmStartVelocityConstraint(constraint, C.float(warmStartImpulseRatio))
+}
+
+func JPH_Constraint_SolveVelocityConstraint(constraint *C.JPH_Constraint, deltaTime float32) bool {
+	return bool(C.JPH_Constraint_SolveVelocityConstraint(constraint, C.float(deltaTime)))
+}
+
+func JPH_Constraint_SolvePositionConstraint(constraint *C.JPH_Constraint, deltaTime float32, baumgarte float32) bool {
+	return bool(C.JPH_Constraint_SolvePositionConstraint(constraint, C.float(deltaTime), C.float(baumgarte)))
+}
+
+func JPH_TwoBodyConstraint_GetBody1(constraint *C.JPH_TwoBodyConstraint) *C.JPH_Body {
+	return C.JPH_TwoBodyConstraint_GetBody1(constraint)
+}
+
+func JPH_TwoBodyConstraint_GetBody2(constraint *C.JPH_TwoBodyConstraint) *C.JPH_Body {
+	return C.JPH_TwoBodyConstraint_GetBody2(constraint)
+}
+
+func JPH_TwoBodyConstraint_GetConstraintToBody1Matrix(constraint *C.JPH_TwoBodyConstraint, result *C.JPH_Mat4) {
+	C.JPH_TwoBodyConstraint_GetConstraintToBody1Matrix(constraint, result)
+}
+
+func JPH_TwoBodyConstraint_GetConstraintToBody2Matrix(constraint *C.JPH_TwoBodyConstraint, result *C.JPH_Mat4) {
+	C.JPH_TwoBodyConstraint_GetConstraintToBody2Matrix(constraint, result)
+}
+
+func JPH_FixedConstraintSettings_Init(settings *C.JPH_FixedConstraintSettings) {
+	C.JPH_FixedConstraintSettings_Init(settings)
+}
+
+func JPH_FixedConstraint_Create(settings *C.JPH_FixedConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_FixedConstraint {
+	return C.JPH_FixedConstraint_Create(settings, body1, body2)
+}
+
+func JPH_FixedConstraint_GetSettings(constraint *C.JPH_FixedConstraint, settings *C.JPH_FixedConstraintSettings) {
+	C.JPH_FixedConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_FixedConstraint_GetTotalLambdaPosition(constraint *C.JPH_FixedConstraint, result *C.JPH_Vec3) {
+	C.JPH_FixedConstraint_GetTotalLambdaPosition(constraint, result)
+}
+
+func JPH_FixedConstraint_GetTotalLambdaRotation(constraint *C.JPH_FixedConstraint, result *C.JPH_Vec3) {
+	C.JPH_FixedConstraint_GetTotalLambdaRotation(constraint, result)
+}
+
+func JPH_DistanceConstraintSettings_Init(settings *C.JPH_DistanceConstraintSettings) {
+	C.JPH_DistanceConstraintSettings_Init(settings)
+}
+
+func JPH_DistanceConstraint_Create(settings *C.JPH_DistanceConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_DistanceConstraint {
+	return C.JPH_DistanceConstraint_Create(settings, body1, body2)
+}
+
+func JPH_DistanceConstraint_GetSettings(constraint *C.JPH_DistanceConstraint, settings *C.JPH_DistanceConstraintSettings) {
+	C.JPH_DistanceConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_DistanceConstraint_SetDistance(constraint *C.JPH_DistanceConstraint, minDistance float32, maxDistance float32) {
+	C.JPH_DistanceConstraint_SetDistance(constraint, C.float(minDistance), C.float(maxDistance))
+}
+
+func JPH_DistanceConstraint_GetMinDistance(constraint *C.JPH_DistanceConstraint) float32 {
+	return float32(C.JPH_DistanceConstraint_GetMinDistance(constraint))
+}
+
+func JPH_DistanceConstraint_GetMaxDistance(constraint *C.JPH_DistanceConstraint) float32 {
+	return float32(C.JPH_DistanceConstraint_GetMaxDistance(constraint))
+}
+
+func JPH_DistanceConstraint_GetLimitsSpringSettings(constraint *C.JPH_DistanceConstraint, result *C.JPH_SpringSettings) {
+	C.JPH_DistanceConstraint_GetLimitsSpringSettings(constraint, result)
+}
+
+func JPH_DistanceConstraint_SetLimitsSpringSettings(constraint *C.JPH_DistanceConstraint, settings *C.JPH_SpringSettings) {
+	C.JPH_DistanceConstraint_SetLimitsSpringSettings(constraint, settings)
+}
+
+func JPH_DistanceConstraint_GetTotalLambdaPosition(constraint *C.JPH_DistanceConstraint) float32 {
+	return float32(C.JPH_DistanceConstraint_GetTotalLambdaPosition(constraint))
+}
+
+func JPH_PointConstraintSettings_Init(settings *C.JPH_PointConstraintSettings) {
+	C.JPH_PointConstraintSettings_Init(settings)
+}
+
+func JPH_PointConstraint_Create(settings *C.JPH_PointConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_PointConstraint {
+	return C.JPH_PointConstraint_Create(settings, body1, body2)
+}
+
+func JPH_PointConstraint_GetSettings(constraint *C.JPH_PointConstraint, settings *C.JPH_PointConstraintSettings) {
+	C.JPH_PointConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_PointConstraint_SetPoint1(constraint *C.JPH_PointConstraint, space C.JPH_ConstraintSpace, value *C.JPH_RVec3) {
+	C.JPH_PointConstraint_SetPoint1(constraint, space, value)
+}
+
+func JPH_PointConstraint_SetPoint2(constraint *C.JPH_PointConstraint, space C.JPH_ConstraintSpace, value *C.JPH_RVec3) {
+	C.JPH_PointConstraint_SetPoint2(constraint, space, value)
+}
+
+func JPH_PointConstraint_GetLocalSpacePoint1(constraint *C.JPH_PointConstraint, result *C.JPH_Vec3) {
+	C.JPH_PointConstraint_GetLocalSpacePoint1(constraint, result)
+}
+
+func JPH_PointConstraint_GetLocalSpacePoint2(constraint *C.JPH_PointConstraint, result *C.JPH_Vec3) {
+	C.JPH_PointConstraint_GetLocalSpacePoint2(constraint, result)
+}
+
+func JPH_PointConstraint_GetTotalLambdaPosition(constraint *C.JPH_PointConstraint, result *C.JPH_Vec3) {
+	C.JPH_PointConstraint_GetTotalLambdaPosition(constraint, result)
+}
+
+func JPH_HingeConstraintSettings_Init(settings *C.JPH_HingeConstraintSettings) {
+	C.JPH_HingeConstraintSettings_Init(settings)
+}
+
+func JPH_HingeConstraint_Create(settings *C.JPH_HingeConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_HingeConstraint {
+	return C.JPH_HingeConstraint_Create(settings, body1, body2)
+}
+
+func JPH_HingeConstraint_GetSettings(constraint *C.JPH_HingeConstraint, settings *C.JPH_HingeConstraintSettings) {
+	C.JPH_HingeConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_HingeConstraint_GetLocalSpacePoint1(constraint *C.JPH_HingeConstraint, result *C.JPH_Vec3) {
+	C.JPH_HingeConstraint_GetLocalSpacePoint1(constraint, result)
+}
+
+func JPH_HingeConstraint_GetLocalSpacePoint2(constraint *C.JPH_HingeConstraint, result *C.JPH_Vec3) {
+	C.JPH_HingeConstraint_GetLocalSpacePoint2(constraint, result)
+}
+
+func JPH_HingeConstraint_GetLocalSpaceHingeAxis1(constraint *C.JPH_HingeConstraint, result *C.JPH_Vec3) {
+	C.JPH_HingeConstraint_GetLocalSpaceHingeAxis1(constraint, result)
+}
+
+func JPH_HingeConstraint_GetLocalSpaceHingeAxis2(constraint *C.JPH_HingeConstraint, result *C.JPH_Vec3) {
+	C.JPH_HingeConstraint_GetLocalSpaceHingeAxis2(constraint, result)
+}
+
+func JPH_HingeConstraint_GetLocalSpaceNormalAxis1(constraint *C.JPH_HingeConstraint, result *C.JPH_Vec3) {
+	C.JPH_HingeConstraint_GetLocalSpaceNormalAxis1(constraint, result)
+}
+
+func JPH_HingeConstraint_GetLocalSpaceNormalAxis2(constraint *C.JPH_HingeConstraint, result *C.JPH_Vec3) {
+	C.JPH_HingeConstraint_GetLocalSpaceNormalAxis2(constraint, result)
+}
+
+func JPH_HingeConstraint_GetCurrentAngle(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetCurrentAngle(constraint))
+}
+
+func JPH_HingeConstraint_SetMaxFrictionTorque(constraint *C.JPH_HingeConstraint, frictionTorque float32) {
+	C.JPH_HingeConstraint_SetMaxFrictionTorque(constraint, C.float(frictionTorque))
+}
+
+func JPH_HingeConstraint_GetMaxFrictionTorque(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetMaxFrictionTorque(constraint))
+}
+
+func JPH_HingeConstraint_SetMotorSettings(constraint *C.JPH_HingeConstraint, settings *C.JPH_MotorSettings) {
+	C.JPH_HingeConstraint_SetMotorSettings(constraint, settings)
+}
+
+func JPH_HingeConstraint_GetMotorSettings(constraint *C.JPH_HingeConstraint, result *C.JPH_MotorSettings) {
+	C.JPH_HingeConstraint_GetMotorSettings(constraint, result)
+}
+
+func JPH_HingeConstraint_SetMotorState(constraint *C.JPH_HingeConstraint, state C.JPH_MotorState) {
+	C.JPH_HingeConstraint_SetMotorState(constraint, state)
+}
+
+func JPH_HingeConstraint_GetMotorState(constraint *C.JPH_HingeConstraint) C.JPH_MotorState {
+	return C.JPH_HingeConstraint_GetMotorState(constraint)
+}
+
+func JPH_HingeConstraint_SetTargetAngularVelocity(constraint *C.JPH_HingeConstraint, angularVelocity float32) {
+	C.JPH_HingeConstraint_SetTargetAngularVelocity(constraint, C.float(angularVelocity))
+}
+
+func JPH_HingeConstraint_GetTargetAngularVelocity(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetTargetAngularVelocity(constraint))
+}
+
+func JPH_HingeConstraint_SetTargetAngle(constraint *C.JPH_HingeConstraint, angle float32) {
+	C.JPH_HingeConstraint_SetTargetAngle(constraint, C.float(angle))
+}
+
+func JPH_HingeConstraint_GetTargetAngle(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetTargetAngle(constraint))
+}
+
+func JPH_HingeConstraint_SetLimits(constraint *C.JPH_HingeConstraint, inLimitsMin float32, inLimitsMax float32) {
+	C.JPH_HingeConstraint_SetLimits(constraint, C.float(inLimitsMin), C.float(inLimitsMax))
+}
+
+func JPH_HingeConstraint_GetLimitsMin(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetLimitsMin(constraint))
+}
+
+func JPH_HingeConstraint_GetLimitsMax(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetLimitsMax(constraint))
+}
+
+func JPH_HingeConstraint_HasLimits(constraint *C.JPH_HingeConstraint) bool {
+	return bool(C.JPH_HingeConstraint_HasLimits(constraint))
+}
+
+func JPH_HingeConstraint_GetLimitsSpringSettings(constraint *C.JPH_HingeConstraint, result *C.JPH_SpringSettings) {
+	C.JPH_HingeConstraint_GetLimitsSpringSettings(constraint, result)
+}
+
+func JPH_HingeConstraint_SetLimitsSpringSettings(constraint *C.JPH_HingeConstraint, settings *C.JPH_SpringSettings) {
+	C.JPH_HingeConstraint_SetLimitsSpringSettings(constraint, settings)
+}
+
+func JPH_HingeConstraint_GetTotalLambdaPosition(constraint *C.JPH_HingeConstraint, result *C.JPH_Vec3) {
+	C.JPH_HingeConstraint_GetTotalLambdaPosition(constraint, result)
+}
+
+func JPH_HingeConstraint_GetTotalLambdaRotation(constraint *C.JPH_HingeConstraint, rotation unsafe.Pointer) {
+	C.JPH_HingeConstraint_GetTotalLambdaRotation(constraint, (*C.float)(unsafe.Pointer(rotation)))
+}
+
+func JPH_HingeConstraint_GetTotalLambdaRotationLimits(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetTotalLambdaRotationLimits(constraint))
+}
+
+func JPH_HingeConstraint_GetTotalLambdaMotor(constraint *C.JPH_HingeConstraint) float32 {
+	return float32(C.JPH_HingeConstraint_GetTotalLambdaMotor(constraint))
+}
+
+func JPH_SliderConstraintSettings_Init(settings *C.JPH_SliderConstraintSettings) {
+	C.JPH_SliderConstraintSettings_Init(settings)
+}
+
+func JPH_SliderConstraintSettings_SetSliderAxis(settings *C.JPH_SliderConstraintSettings, axis *C.JPH_Vec3) {
+	C.JPH_SliderConstraintSettings_SetSliderAxis(settings, axis)
+}
+
+func JPH_SliderConstraint_Create(settings *C.JPH_SliderConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_SliderConstraint {
+	return C.JPH_SliderConstraint_Create(settings, body1, body2)
+}
+
+func JPH_SliderConstraint_GetSettings(constraint *C.JPH_SliderConstraint, settings *C.JPH_SliderConstraintSettings) {
+	C.JPH_SliderConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_SliderConstraint_GetCurrentPosition(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetCurrentPosition(constraint))
+}
+
+func JPH_SliderConstraint_SetMaxFrictionForce(constraint *C.JPH_SliderConstraint, frictionForce float32) {
+	C.JPH_SliderConstraint_SetMaxFrictionForce(constraint, C.float(frictionForce))
+}
+
+func JPH_SliderConstraint_GetMaxFrictionForce(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetMaxFrictionForce(constraint))
+}
+
+func JPH_SliderConstraint_SetMotorSettings(constraint *C.JPH_SliderConstraint, settings *C.JPH_MotorSettings) {
+	C.JPH_SliderConstraint_SetMotorSettings(constraint, settings)
+}
+
+func JPH_SliderConstraint_GetMotorSettings(constraint *C.JPH_SliderConstraint, result *C.JPH_MotorSettings) {
+	C.JPH_SliderConstraint_GetMotorSettings(constraint, result)
+}
+
+func JPH_SliderConstraint_SetMotorState(constraint *C.JPH_SliderConstraint, state C.JPH_MotorState) {
+	C.JPH_SliderConstraint_SetMotorState(constraint, state)
+}
+
+func JPH_SliderConstraint_GetMotorState(constraint *C.JPH_SliderConstraint) C.JPH_MotorState {
+	return C.JPH_SliderConstraint_GetMotorState(constraint)
+}
+
+func JPH_SliderConstraint_SetTargetVelocity(constraint *C.JPH_SliderConstraint, velocity float32) {
+	C.JPH_SliderConstraint_SetTargetVelocity(constraint, C.float(velocity))
+}
+
+func JPH_SliderConstraint_GetTargetVelocity(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetTargetVelocity(constraint))
+}
+
+func JPH_SliderConstraint_SetTargetPosition(constraint *C.JPH_SliderConstraint, position float32) {
+	C.JPH_SliderConstraint_SetTargetPosition(constraint, C.float(position))
+}
+
+func JPH_SliderConstraint_GetTargetPosition(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetTargetPosition(constraint))
+}
+
+func JPH_SliderConstraint_SetLimits(constraint *C.JPH_SliderConstraint, inLimitsMin float32, inLimitsMax float32) {
+	C.JPH_SliderConstraint_SetLimits(constraint, C.float(inLimitsMin), C.float(inLimitsMax))
+}
+
+func JPH_SliderConstraint_GetLimitsMin(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetLimitsMin(constraint))
+}
+
+func JPH_SliderConstraint_GetLimitsMax(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetLimitsMax(constraint))
+}
+
+func JPH_SliderConstraint_HasLimits(constraint *C.JPH_SliderConstraint) bool {
+	return bool(C.JPH_SliderConstraint_HasLimits(constraint))
+}
+
+func JPH_SliderConstraint_GetLimitsSpringSettings(constraint *C.JPH_SliderConstraint, result *C.JPH_SpringSettings) {
+	C.JPH_SliderConstraint_GetLimitsSpringSettings(constraint, result)
+}
+
+func JPH_SliderConstraint_SetLimitsSpringSettings(constraint *C.JPH_SliderConstraint, settings *C.JPH_SpringSettings) {
+	C.JPH_SliderConstraint_SetLimitsSpringSettings(constraint, settings)
+}
+
+func JPH_SliderConstraint_GetTotalLambdaPosition(constraint *C.JPH_SliderConstraint, position unsafe.Pointer) {
+	C.JPH_SliderConstraint_GetTotalLambdaPosition(constraint, (*C.float)(unsafe.Pointer(position)))
+}
+
+func JPH_SliderConstraint_GetTotalLambdaPositionLimits(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetTotalLambdaPositionLimits(constraint))
+}
+
+func JPH_SliderConstraint_GetTotalLambdaRotation(constraint *C.JPH_SliderConstraint, result *C.JPH_Vec3) {
+	C.JPH_SliderConstraint_GetTotalLambdaRotation(constraint, result)
+}
+
+func JPH_SliderConstraint_GetTotalLambdaMotor(constraint *C.JPH_SliderConstraint) float32 {
+	return float32(C.JPH_SliderConstraint_GetTotalLambdaMotor(constraint))
+}
+
+func JPH_ConeConstraintSettings_Init(settings *C.JPH_ConeConstraintSettings) {
+	C.JPH_ConeConstraintSettings_Init(settings)
+}
+
+func JPH_ConeConstraint_Create(settings *C.JPH_ConeConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_ConeConstraint {
+	return C.JPH_ConeConstraint_Create(settings, body1, body2)
+}
+
+func JPH_ConeConstraint_GetSettings(constraint *C.JPH_ConeConstraint, settings *C.JPH_ConeConstraintSettings) {
+	C.JPH_ConeConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_ConeConstraint_SetHalfConeAngle(constraint *C.JPH_ConeConstraint, halfConeAngle float32) {
+	C.JPH_ConeConstraint_SetHalfConeAngle(constraint, C.float(halfConeAngle))
+}
+
+func JPH_ConeConstraint_GetCosHalfConeAngle(constraint *C.JPH_ConeConstraint) float32 {
+	return float32(C.JPH_ConeConstraint_GetCosHalfConeAngle(constraint))
+}
+
+func JPH_ConeConstraint_GetTotalLambdaPosition(constraint *C.JPH_ConeConstraint, result *C.JPH_Vec3) {
+	C.JPH_ConeConstraint_GetTotalLambdaPosition(constraint, result)
+}
+
+func JPH_ConeConstraint_GetTotalLambdaRotation(constraint *C.JPH_ConeConstraint) float32 {
+	return float32(C.JPH_ConeConstraint_GetTotalLambdaRotation(constraint))
+}
+
+func JPH_SwingTwistConstraintSettings_Init(settings *C.JPH_SwingTwistConstraintSettings) {
+	C.JPH_SwingTwistConstraintSettings_Init(settings)
+}
+
+func JPH_SwingTwistConstraint_Create(settings *C.JPH_SwingTwistConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_SwingTwistConstraint {
+	return C.JPH_SwingTwistConstraint_Create(settings, body1, body2)
+}
+
+func JPH_SwingTwistConstraint_GetSettings(constraint *C.JPH_SwingTwistConstraint, settings *C.JPH_SwingTwistConstraintSettings) {
+	C.JPH_SwingTwistConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_SwingTwistConstraint_GetNormalHalfConeAngle(constraint *C.JPH_SwingTwistConstraint) float32 {
+	return float32(C.JPH_SwingTwistConstraint_GetNormalHalfConeAngle(constraint))
+}
+
+func JPH_SwingTwistConstraint_GetTotalLambdaPosition(constraint *C.JPH_SwingTwistConstraint, result *C.JPH_Vec3) {
+	C.JPH_SwingTwistConstraint_GetTotalLambdaPosition(constraint, result)
+}
+
+func JPH_SwingTwistConstraint_GetTotalLambdaTwist(constraint *C.JPH_SwingTwistConstraint) float32 {
+	return float32(C.JPH_SwingTwistConstraint_GetTotalLambdaTwist(constraint))
+}
+
+func JPH_SwingTwistConstraint_GetTotalLambdaSwingY(constraint *C.JPH_SwingTwistConstraint) float32 {
+	return float32(C.JPH_SwingTwistConstraint_GetTotalLambdaSwingY(constraint))
+}
+
+func JPH_SwingTwistConstraint_GetTotalLambdaSwingZ(constraint *C.JPH_SwingTwistConstraint) float32 {
+	return float32(C.JPH_SwingTwistConstraint_GetTotalLambdaSwingZ(constraint))
+}
+
+func JPH_SwingTwistConstraint_GetTotalLambdaMotor(constraint *C.JPH_SwingTwistConstraint, result *C.JPH_Vec3) {
+	C.JPH_SwingTwistConstraint_GetTotalLambdaMotor(constraint, result)
+}
+
+func JPH_SixDOFConstraintSettings_Init(settings *C.JPH_SixDOFConstraintSettings) {
+	C.JPH_SixDOFConstraintSettings_Init(settings)
+}
+
+func JPH_SixDOFConstraintSettings_MakeFreeAxis(settings *C.JPH_SixDOFConstraintSettings, axis C.JPH_SixDOFConstraintAxis) {
+	C.JPH_SixDOFConstraintSettings_MakeFreeAxis(settings, axis)
+}
+
+func JPH_SixDOFConstraintSettings_IsFreeAxis(settings *C.JPH_SixDOFConstraintSettings, axis C.JPH_SixDOFConstraintAxis) bool {
+	return bool(C.JPH_SixDOFConstraintSettings_IsFreeAxis(settings, axis))
+}
+
+func JPH_SixDOFConstraintSettings_MakeFixedAxis(settings *C.JPH_SixDOFConstraintSettings, axis C.JPH_SixDOFConstraintAxis) {
+	C.JPH_SixDOFConstraintSettings_MakeFixedAxis(settings, axis)
+}
+
+func JPH_SixDOFConstraintSettings_IsFixedAxis(settings *C.JPH_SixDOFConstraintSettings, axis C.JPH_SixDOFConstraintAxis) bool {
+	return bool(C.JPH_SixDOFConstraintSettings_IsFixedAxis(settings, axis))
+}
+
+func JPH_SixDOFConstraintSettings_SetLimitedAxis(settings *C.JPH_SixDOFConstraintSettings, axis C.JPH_SixDOFConstraintAxis, min float32, max float32) {
+	C.JPH_SixDOFConstraintSettings_SetLimitedAxis(settings, axis, C.float(min), C.float(max))
+}
+
+func JPH_SixDOFConstraint_Create(settings *C.JPH_SixDOFConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_SixDOFConstraint {
+	return C.JPH_SixDOFConstraint_Create(settings, body1, body2)
+}
+
+func JPH_SixDOFConstraint_GetSettings(constraint *C.JPH_SixDOFConstraint, settings *C.JPH_SixDOFConstraintSettings) {
+	C.JPH_SixDOFConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_SixDOFConstraint_GetLimitsMin(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis) float32 {
+	return float32(C.JPH_SixDOFConstraint_GetLimitsMin(constraint, axis))
+}
+
+func JPH_SixDOFConstraint_GetLimitsMax(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis) float32 {
+	return float32(C.JPH_SixDOFConstraint_GetLimitsMax(constraint, axis))
+}
+
+func JPH_SixDOFConstraint_GetTotalLambdaPosition(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTotalLambdaPosition(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetTotalLambdaRotation(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTotalLambdaRotation(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetTotalLambdaMotorTranslation(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTotalLambdaMotorTranslation(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetTotalLambdaMotorRotation(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTotalLambdaMotorRotation(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetTranslationLimitsMin(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTranslationLimitsMin(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetTranslationLimitsMax(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTranslationLimitsMax(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetRotationLimitsMin(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetRotationLimitsMin(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetRotationLimitsMax(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetRotationLimitsMax(constraint, result)
+}
+
+func JPH_SixDOFConstraint_IsFixedAxis(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis) bool {
+	return bool(C.JPH_SixDOFConstraint_IsFixedAxis(constraint, axis))
+}
+
+func JPH_SixDOFConstraint_IsFreeAxis(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis) bool {
+	return bool(C.JPH_SixDOFConstraint_IsFreeAxis(constraint, axis))
+}
+
+func JPH_SixDOFConstraint_GetLimitsSpringSettings(constraint *C.JPH_SixDOFConstraint, result *C.JPH_SpringSettings, axis C.JPH_SixDOFConstraintAxis) {
+	C.JPH_SixDOFConstraint_GetLimitsSpringSettings(constraint, result, axis)
+}
+
+func JPH_SixDOFConstraint_SetLimitsSpringSettings(constraint *C.JPH_SixDOFConstraint, settings *C.JPH_SpringSettings, axis C.JPH_SixDOFConstraintAxis) {
+	C.JPH_SixDOFConstraint_SetLimitsSpringSettings(constraint, settings, axis)
+}
+
+func JPH_SixDOFConstraint_SetMaxFriction(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis, inFriction float32) {
+	C.JPH_SixDOFConstraint_SetMaxFriction(constraint, axis, C.float(inFriction))
+}
+
+func JPH_SixDOFConstraint_GetMaxFriction(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis) float32 {
+	return float32(C.JPH_SixDOFConstraint_GetMaxFriction(constraint, axis))
+}
+
+func JPH_SixDOFConstraint_GetRotationInConstraintSpace(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Quat) {
+	C.JPH_SixDOFConstraint_GetRotationInConstraintSpace(constraint, result)
+}
+
+func JPH_SixDOFConstraint_GetMotorSettings(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis, settings *C.JPH_MotorSettings) {
+	C.JPH_SixDOFConstraint_GetMotorSettings(constraint, axis, settings)
+}
+
+func JPH_SixDOFConstraint_SetMotorState(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis, state C.JPH_MotorState) {
+	C.JPH_SixDOFConstraint_SetMotorState(constraint, axis, state)
+}
+
+func JPH_SixDOFConstraint_GetMotorState(constraint *C.JPH_SixDOFConstraint, axis C.JPH_SixDOFConstraintAxis) C.JPH_MotorState {
+	return C.JPH_SixDOFConstraint_GetMotorState(constraint, axis)
+}
+
+func JPH_SixDOFConstraint_SetTargetVelocityCS(constraint *C.JPH_SixDOFConstraint, inVelocity *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_SetTargetVelocityCS(constraint, inVelocity)
+}
+
+func JPH_SixDOFConstraint_GetTargetVelocityCS(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTargetVelocityCS(constraint, result)
+}
+
+func JPH_SixDOFConstraint_SetTargetAngularVelocityCS(constraint *C.JPH_SixDOFConstraint, inAngularVelocity *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_SetTargetAngularVelocityCS(constraint, inAngularVelocity)
+}
+
+func JPH_SixDOFConstraint_GetTargetAngularVelocityCS(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTargetAngularVelocityCS(constraint, result)
+}
+
+func JPH_SixDOFConstraint_SetTargetPositionCS(constraint *C.JPH_SixDOFConstraint, inPosition *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_SetTargetPositionCS(constraint, inPosition)
+}
+
+func JPH_SixDOFConstraint_GetTargetPositionCS(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Vec3) {
+	C.JPH_SixDOFConstraint_GetTargetPositionCS(constraint, result)
+}
+
+func JPH_SixDOFConstraint_SetTargetOrientationCS(constraint *C.JPH_SixDOFConstraint, inOrientation *C.JPH_Quat) {
+	C.JPH_SixDOFConstraint_SetTargetOrientationCS(constraint, inOrientation)
+}
+
+func JPH_SixDOFConstraint_GetTargetOrientationCS(constraint *C.JPH_SixDOFConstraint, result *C.JPH_Quat) {
+	C.JPH_SixDOFConstraint_GetTargetOrientationCS(constraint, result)
+}
+
+func JPH_SixDOFConstraint_SetTargetOrientationBS(constraint *C.JPH_SixDOFConstraint, inOrientation *C.JPH_Quat) {
+	C.JPH_SixDOFConstraint_SetTargetOrientationBS(constraint, inOrientation)
+}
+
+func JPH_GearConstraintSettings_Init(settings *C.JPH_GearConstraintSettings) {
+	C.JPH_GearConstraintSettings_Init(settings)
+}
+
+func JPH_GearConstraint_Create(settings *C.JPH_GearConstraintSettings, body1 *C.JPH_Body, body2 *C.JPH_Body) *C.JPH_GearConstraint {
+	return C.JPH_GearConstraint_Create(settings, body1, body2)
+}
+
+func JPH_GearConstraint_GetSettings(constraint *C.JPH_GearConstraint, settings *C.JPH_GearConstraintSettings) {
+	C.JPH_GearConstraint_GetSettings(constraint, settings)
+}
+
+func JPH_GearConstraint_SetConstraints(constraint *C.JPH_GearConstraint, gear1 *C.JPH_Constraint, gear2 *C.JPH_Constraint) {
+	C.JPH_GearConstraint_SetConstraints(constraint, gear1, gear2)
+}
+
+func JPH_GearConstraint_GetTotalLambda(constraint *C.JPH_GearConstraint) float32 {
+	return float32(C.JPH_GearConstraint_GetTotalLambda(constraint))
+}
+
+func JPH_BodyInterface_DestroyBody(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) {
+	C.JPH_BodyInterface_DestroyBody(bodyInterface, bodyID)
+}
+
+func JPH_BodyInterface_CreateAndAddBody(bodyInterface *C.JPH_BodyInterface, settings *C.JPH_BodyCreationSettings, activationMode C.JPH_Activation) C.JPH_BodyID {
+	return C.JPH_BodyInterface_CreateAndAddBody(bodyInterface, settings, activationMode)
+}
+
+func JPH_BodyInterface_CreateBody(bodyInterface *C.JPH_BodyInterface, settings *C.JPH_BodyCreationSettings) *C.JPH_Body {
+	return C.JPH_BodyInterface_CreateBody(bodyInterface, settings)
+}
+
+func JPH_BodyInterface_CreateBodyWithID(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, settings *C.JPH_BodyCreationSettings) *C.JPH_Body {
+	return C.JPH_BodyInterface_CreateBodyWithID(bodyInterface, bodyID, settings)
+}
+
+func JPH_BodyInterface_CreateBodyWithoutID(bodyInterface *C.JPH_BodyInterface, settings *C.JPH_BodyCreationSettings) *C.JPH_Body {
+	return C.JPH_BodyInterface_CreateBodyWithoutID(bodyInterface, settings)
+}
+
+func JPH_BodyInterface_DestroyBodyWithoutID(bodyInterface *C.JPH_BodyInterface, body *C.JPH_Body) {
+	C.JPH_BodyInterface_DestroyBodyWithoutID(bodyInterface, body)
+}
+
+func JPH_BodyInterface_AssignBodyID(bodyInterface *C.JPH_BodyInterface, body *C.JPH_Body) bool {
+	return bool(C.JPH_BodyInterface_AssignBodyID(bodyInterface, body))
+}
+
+func JPH_BodyInterface_AssignBodyID2(bodyInterface *C.JPH_BodyInterface, body *C.JPH_Body, bodyID C.JPH_BodyID) bool {
+	return bool(C.JPH_BodyInterface_AssignBodyID2(bodyInterface, body, bodyID))
+}
+
+func JPH_BodyInterface_UnassignBodyID(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) *C.JPH_Body {
+	return C.JPH_BodyInterface_UnassignBodyID(bodyInterface, bodyID)
+}
+
+func JPH_BodyInterface_CreateSoftBody(bodyInterface *C.JPH_BodyInterface, settings *C.JPH_SoftBodyCreationSettings) *C.JPH_Body {
+	return C.JPH_BodyInterface_CreateSoftBody(bodyInterface, settings)
+}
+
+func JPH_BodyInterface_CreateSoftBodyWithID(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, settings *C.JPH_SoftBodyCreationSettings) *C.JPH_Body {
+	return C.JPH_BodyInterface_CreateSoftBodyWithID(bodyInterface, bodyID, settings)
+}
+
+func JPH_BodyInterface_CreateSoftBodyWithoutID(bodyInterface *C.JPH_BodyInterface, settings *C.JPH_SoftBodyCreationSettings) *C.JPH_Body {
+	return C.JPH_BodyInterface_CreateSoftBodyWithoutID(bodyInterface, settings)
+}
+
+func JPH_BodyInterface_CreateAndAddSoftBody(bodyInterface *C.JPH_BodyInterface, settings *C.JPH_SoftBodyCreationSettings, activationMode C.JPH_Activation) C.JPH_BodyID {
+	return C.JPH_BodyInterface_CreateAndAddSoftBody(bodyInterface, settings, activationMode)
+}
+
+func JPH_BodyInterface_AddBody(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_AddBody(bodyInterface, bodyID, activationMode)
+}
+
+func JPH_BodyInterface_RemoveBody(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) {
+	C.JPH_BodyInterface_RemoveBody(bodyInterface, bodyID)
+}
+
+func JPH_BodyInterface_RemoveAndDestroyBody(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) {
+	C.JPH_BodyInterface_RemoveAndDestroyBody(bodyInterface, bodyID)
+}
+
+func JPH_BodyInterface_IsAdded(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) bool {
+	return bool(C.JPH_BodyInterface_IsAdded(bodyInterface, bodyID))
+}
+
+func JPH_BodyInterface_GetBodyType(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) C.JPH_BodyType {
+	return C.JPH_BodyInterface_GetBodyType(bodyInterface, bodyID)
+}
+
+func JPH_PhysicsSystem_GetBodyPtr(system *C.JPH_PhysicsSystem, bodyID C.JPH_BodyID) *C.JPH_Body {
+	return C.JPH_PhysicsSystem_GetBodyPtr(system, bodyID)
+}
+
+func JPH_BodyInterface_SetLinearVelocity(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, velocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_SetLinearVelocity(bodyInterface, bodyID, velocity)
+}
+
+func JPH_BodyInterface_GetLinearVelocity(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, velocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_GetLinearVelocity(bodyInterface, bodyID, velocity)
+}
+
+func JPH_BodyInterface_GetCenterOfMassPosition(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, position *C.JPH_RVec3) {
+	C.JPH_BodyInterface_GetCenterOfMassPosition(bodyInterface, bodyID, position)
+}
+
+func JPH_BodyInterface_GetMotionType(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) C.JPH_MotionType {
+	return C.JPH_BodyInterface_GetMotionType(bodyInterface, bodyID)
+}
+
+func JPH_BodyInterface_SetMotionType(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, motionType C.JPH_MotionType, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_SetMotionType(bodyInterface, bodyID, motionType, activationMode)
+}
+
+func JPH_BodyInterface_GetRestitution(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) float32 {
+	return float32(C.JPH_BodyInterface_GetRestitution(bodyInterface, bodyID))
+}
+
+func JPH_BodyInterface_SetRestitution(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, restitution float32) {
+	C.JPH_BodyInterface_SetRestitution(bodyInterface, bodyID, C.float(restitution))
+}
+
+func JPH_BodyInterface_GetFriction(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) float32 {
+	return float32(C.JPH_BodyInterface_GetFriction(bodyInterface, bodyID))
+}
+
+func JPH_BodyInterface_SetFriction(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID, friction float32) {
+	C.JPH_BodyInterface_SetFriction(bodyInterface, bodyID, C.float(friction))
+}
+
+func JPH_BodyInterface_SetPosition(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, position *C.JPH_RVec3, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_SetPosition(bodyInterface, bodyId, position, activationMode)
+}
+
+func JPH_BodyInterface_GetPosition(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, result *C.JPH_RVec3) {
+	C.JPH_BodyInterface_GetPosition(bodyInterface, bodyId, result)
+}
+
+func JPH_BodyInterface_SetRotation(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, rotation *C.JPH_Quat, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_SetRotation(bodyInterface, bodyId, rotation, activationMode)
+}
+
+func JPH_BodyInterface_GetRotation(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, result *C.JPH_Quat) {
+	C.JPH_BodyInterface_GetRotation(bodyInterface, bodyId, result)
+}
+
+func JPH_BodyInterface_SetPositionAndRotation(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, position *C.JPH_RVec3, rotation *C.JPH_Quat, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_SetPositionAndRotation(bodyInterface, bodyId, position, rotation, activationMode)
+}
+
+func JPH_BodyInterface_SetPositionAndRotationWhenChanged(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, position *C.JPH_RVec3, rotation *C.JPH_Quat, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_SetPositionAndRotationWhenChanged(bodyInterface, bodyId, position, rotation, activationMode)
+}
+
+func JPH_BodyInterface_GetPositionAndRotation(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, position *C.JPH_RVec3, rotation *C.JPH_Quat) {
+	C.JPH_BodyInterface_GetPositionAndRotation(bodyInterface, bodyId, position, rotation)
+}
+
+func JPH_BodyInterface_SetPositionRotationAndVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, position *C.JPH_RVec3, rotation *C.JPH_Quat, linearVelocity *C.JPH_Vec3, angularVelocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_SetPositionRotationAndVelocity(bodyInterface, bodyId, position, rotation, linearVelocity, angularVelocity)
+}
+
+func JPH_BodyInterface_GetCollisionGroup(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, result *C.JPH_CollisionGroup) {
+	C.JPH_BodyInterface_GetCollisionGroup(bodyInterface, bodyId, result)
+}
+
+func JPH_BodyInterface_SetCollisionGroup(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, group *C.JPH_CollisionGroup) {
+	C.JPH_BodyInterface_SetCollisionGroup(bodyInterface, bodyId, group)
+}
+
+func JPH_BodyInterface_GetShape(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) *C.JPH_Shape {
+	return C.JPH_BodyInterface_GetShape(bodyInterface, bodyId)
+}
+
+func JPH_BodyInterface_SetShape(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, shape *C.JPH_Shape, updateMassProperties bool, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_SetShape(bodyInterface, bodyId, shape, C.bool(updateMassProperties), activationMode)
+}
+
+func JPH_BodyInterface_NotifyShapeChanged(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, previousCenterOfMass *C.JPH_Vec3, updateMassProperties bool, activationMode C.JPH_Activation) {
+	C.JPH_BodyInterface_NotifyShapeChanged(bodyInterface, bodyId, previousCenterOfMass, C.bool(updateMassProperties), activationMode)
+}
+
+func JPH_BodyInterface_ActivateBody(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) {
+	C.JPH_BodyInterface_ActivateBody(bodyInterface, bodyId)
+}
+
+func JPH_BodyInterface_ActivateBodies(bodyInterface *C.JPH_BodyInterface, bodyIDs *C.JPH_BodyID, count uint32) {
+	C.JPH_BodyInterface_ActivateBodies(bodyInterface, bodyIDs, C.uint32_t(count))
+}
+
+func JPH_BodyInterface_ActivateBodiesInAABox(bodyInterface *C.JPH_BodyInterface, box *C.JPH_AABox, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter) {
+	C.JPH_BodyInterface_ActivateBodiesInAABox(bodyInterface, box, broadPhaseLayerFilter, objectLayerFilter)
+}
+
+func JPH_BodyInterface_DeactivateBody(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) {
+	C.JPH_BodyInterface_DeactivateBody(bodyInterface, bodyId)
+}
+
+func JPH_BodyInterface_DeactivateBodies(bodyInterface *C.JPH_BodyInterface, bodyIDs *C.JPH_BodyID, count uint32) {
+	C.JPH_BodyInterface_DeactivateBodies(bodyInterface, bodyIDs, C.uint32_t(count))
+}
+
+func JPH_BodyInterface_IsActive(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) bool {
+	return bool(C.JPH_BodyInterface_IsActive(bodyInterface, bodyID))
+}
+
+func JPH_BodyInterface_ResetSleepTimer(bodyInterface *C.JPH_BodyInterface, bodyID C.JPH_BodyID) {
+	C.JPH_BodyInterface_ResetSleepTimer(bodyInterface, bodyID)
+}
+
+func JPH_BodyInterface_GetObjectLayer(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) C.JPH_ObjectLayer {
+	return C.JPH_BodyInterface_GetObjectLayer(bodyInterface, bodyId)
+}
+
+func JPH_BodyInterface_SetObjectLayer(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, layer C.JPH_ObjectLayer) {
+	C.JPH_BodyInterface_SetObjectLayer(bodyInterface, bodyId, layer)
+}
+
+func JPH_BodyInterface_GetWorldTransform(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, result *C.JPH_RMat4) {
+	C.JPH_BodyInterface_GetWorldTransform(bodyInterface, bodyId, result)
+}
+
+func JPH_BodyInterface_GetCenterOfMassTransform(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, result *C.JPH_RMat4) {
+	C.JPH_BodyInterface_GetCenterOfMassTransform(bodyInterface, bodyId, result)
+}
+
+func JPH_BodyInterface_MoveKinematic(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, targetPosition *C.JPH_RVec3, targetRotation *C.JPH_Quat, deltaTime float32) {
+	C.JPH_BodyInterface_MoveKinematic(bodyInterface, bodyId, targetPosition, targetRotation, C.float(deltaTime))
+}
+
+func JPH_BodyInterface_ApplyBuoyancyImpulse(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, surfacePosition *C.JPH_RVec3, surfaceNormal *C.JPH_Vec3, buoyancy float32, linearDrag float32, angularDrag float32, fluidVelocity *C.JPH_Vec3, gravity *C.JPH_Vec3, deltaTime float32) bool {
+	return bool(C.JPH_BodyInterface_ApplyBuoyancyImpulse(bodyInterface, bodyId, surfacePosition, surfaceNormal, C.float(buoyancy), C.float(linearDrag), C.float(angularDrag), fluidVelocity, gravity, C.float(deltaTime)))
+}
+
+func JPH_BodyInterface_SetLinearAndAngularVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, linearVelocity *C.JPH_Vec3, angularVelocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_SetLinearAndAngularVelocity(bodyInterface, bodyId, linearVelocity, angularVelocity)
+}
+
+func JPH_BodyInterface_GetLinearAndAngularVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, linearVelocity *C.JPH_Vec3, angularVelocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_GetLinearAndAngularVelocity(bodyInterface, bodyId, linearVelocity, angularVelocity)
+}
+
+func JPH_BodyInterface_AddLinearVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, linearVelocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_AddLinearVelocity(bodyInterface, bodyId, linearVelocity)
+}
+
+func JPH_BodyInterface_AddLinearAndAngularVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, linearVelocity *C.JPH_Vec3, angularVelocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_AddLinearAndAngularVelocity(bodyInterface, bodyId, linearVelocity, angularVelocity)
+}
+
+func JPH_BodyInterface_SetAngularVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, angularVelocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_SetAngularVelocity(bodyInterface, bodyId, angularVelocity)
+}
+
+func JPH_BodyInterface_GetAngularVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, angularVelocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_GetAngularVelocity(bodyInterface, bodyId, angularVelocity)
+}
+
+func JPH_BodyInterface_GetPointVelocity(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, point *C.JPH_RVec3, velocity *C.JPH_Vec3) {
+	C.JPH_BodyInterface_GetPointVelocity(bodyInterface, bodyId, point, velocity)
+}
+
+func JPH_BodyInterface_AddForce(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, force *C.JPH_Vec3) {
+	C.JPH_BodyInterface_AddForce(bodyInterface, bodyId, force)
+}
+
+func JPH_BodyInterface_AddForce2(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, force *C.JPH_Vec3, point *C.JPH_RVec3) {
+	C.JPH_BodyInterface_AddForce2(bodyInterface, bodyId, force, point)
+}
+
+func JPH_BodyInterface_AddTorque(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, torque *C.JPH_Vec3) {
+	C.JPH_BodyInterface_AddTorque(bodyInterface, bodyId, torque)
+}
+
+func JPH_BodyInterface_AddForceAndTorque(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, force *C.JPH_Vec3, torque *C.JPH_Vec3) {
+	C.JPH_BodyInterface_AddForceAndTorque(bodyInterface, bodyId, force, torque)
+}
+
+func JPH_BodyInterface_AddImpulse(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, impulse *C.JPH_Vec3) {
+	C.JPH_BodyInterface_AddImpulse(bodyInterface, bodyId, impulse)
+}
+
+func JPH_BodyInterface_AddImpulse2(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, impulse *C.JPH_Vec3, point *C.JPH_RVec3) {
+	C.JPH_BodyInterface_AddImpulse2(bodyInterface, bodyId, impulse, point)
+}
+
+func JPH_BodyInterface_AddAngularImpulse(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, angularImpulse *C.JPH_Vec3) {
+	C.JPH_BodyInterface_AddAngularImpulse(bodyInterface, bodyId, angularImpulse)
+}
+
+func JPH_BodyInterface_SetMotionQuality(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, quality C.JPH_MotionQuality) {
+	C.JPH_BodyInterface_SetMotionQuality(bodyInterface, bodyId, quality)
+}
+
+func JPH_BodyInterface_GetMotionQuality(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) C.JPH_MotionQuality {
+	return C.JPH_BodyInterface_GetMotionQuality(bodyInterface, bodyId)
+}
+
+func JPH_BodyInterface_GetInverseInertia(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, result *C.JPH_Mat4) {
+	C.JPH_BodyInterface_GetInverseInertia(bodyInterface, bodyId, result)
+}
+
+func JPH_BodyInterface_SetGravityFactor(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, value float32) {
+	C.JPH_BodyInterface_SetGravityFactor(bodyInterface, bodyId, C.float(value))
+}
+
+func JPH_BodyInterface_GetGravityFactor(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) float32 {
+	return float32(C.JPH_BodyInterface_GetGravityFactor(bodyInterface, bodyId))
+}
+
+func JPH_BodyInterface_SetUseManifoldReduction(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, value bool) {
+	C.JPH_BodyInterface_SetUseManifoldReduction(bodyInterface, bodyId, C.bool(value))
+}
+
+func JPH_BodyInterface_GetUseManifoldReduction(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) bool {
+	return bool(C.JPH_BodyInterface_GetUseManifoldReduction(bodyInterface, bodyId))
+}
+
+func JPH_BodyInterface_SetUserData(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, inUserData uint64) {
+	C.JPH_BodyInterface_SetUserData(bodyInterface, bodyId, C.uint64_t(inUserData))
+}
+
+func JPH_BodyInterface_GetUserData(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) uint64 {
+	return uint64(C.JPH_BodyInterface_GetUserData(bodyInterface, bodyId))
+}
+
+func JPH_BodyInterface_SetIsSensor(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, value bool) {
+	C.JPH_BodyInterface_SetIsSensor(bodyInterface, bodyId, C.bool(value))
+}
+
+func JPH_BodyInterface_IsSensor(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) bool {
+	return bool(C.JPH_BodyInterface_IsSensor(bodyInterface, bodyId))
+}
+
+func JPH_BodyInterface_GetMaterial(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID, subShapeID C.JPH_SubShapeID) *C.JPH_PhysicsMaterial {
+	return C.JPH_BodyInterface_GetMaterial(bodyInterface, bodyId, subShapeID)
+}
+
+func JPH_BodyInterface_InvalidateContactCache(bodyInterface *C.JPH_BodyInterface, bodyId C.JPH_BodyID) {
+	C.JPH_BodyInterface_InvalidateContactCache(bodyInterface, bodyId)
+}
+
+func JPH_BodyLockInterface_LockRead(lockInterface *C.JPH_BodyLockInterface, bodyID C.JPH_BodyID, outLock *C.JPH_BodyLockRead) {
+	C.JPH_BodyLockInterface_LockRead(lockInterface, bodyID, outLock)
+}
+
+func JPH_BodyLockInterface_UnlockRead(lockInterface *C.JPH_BodyLockInterface, ioLock *C.JPH_BodyLockRead) {
+	C.JPH_BodyLockInterface_UnlockRead(lockInterface, ioLock)
+}
+
+func JPH_BodyLockInterface_LockWrite(lockInterface *C.JPH_BodyLockInterface, bodyID C.JPH_BodyID, outLock *C.JPH_BodyLockWrite) {
+	C.JPH_BodyLockInterface_LockWrite(lockInterface, bodyID, outLock)
+}
+
+func JPH_BodyLockInterface_UnlockWrite(lockInterface *C.JPH_BodyLockInterface, ioLock *C.JPH_BodyLockWrite) {
+	C.JPH_BodyLockInterface_UnlockWrite(lockInterface, ioLock)
+}
+
+func JPH_BodyLockInterface_LockMultiRead(lockInterface *C.JPH_BodyLockInterface, bodyIDs *C.JPH_BodyID, count uint32) *C.JPH_BodyLockMultiRead {
+	return C.JPH_BodyLockInterface_LockMultiRead(lockInterface, bodyIDs, C.uint32_t(count))
+}
+
+func JPH_BodyLockMultiRead_Destroy(ioLock *C.JPH_BodyLockMultiRead) {
+	C.JPH_BodyLockMultiRead_Destroy(ioLock)
+}
+
+func JPH_BodyLockMultiRead_GetBody(ioLock *C.JPH_BodyLockMultiRead, bodyIndex uint32) *C.JPH_Body {
+	return C.JPH_BodyLockMultiRead_GetBody(ioLock, C.uint32_t(bodyIndex))
+}
+
+func JPH_BodyLockInterface_LockMultiWrite(lockInterface *C.JPH_BodyLockInterface, bodyIDs *C.JPH_BodyID, count uint32) *C.JPH_BodyLockMultiWrite {
+	return C.JPH_BodyLockInterface_LockMultiWrite(lockInterface, bodyIDs, C.uint32_t(count))
+}
+
+func JPH_BodyLockMultiWrite_Destroy(ioLock *C.JPH_BodyLockMultiWrite) {
+	C.JPH_BodyLockMultiWrite_Destroy(ioLock)
+}
+
+func JPH_BodyLockMultiWrite_GetBody(ioLock *C.JPH_BodyLockMultiWrite, bodyIndex uint32) *C.JPH_Body {
+	return C.JPH_BodyLockMultiWrite_GetBody(ioLock, C.uint32_t(bodyIndex))
+}
+
+func JPH_MotionProperties_GetAllowedDOFs(properties *C.JPH_MotionProperties) C.JPH_AllowedDOFs {
+	return C.JPH_MotionProperties_GetAllowedDOFs(properties)
+}
+
+func JPH_MotionProperties_SetLinearDamping(properties *C.JPH_MotionProperties, damping float32) {
+	C.JPH_MotionProperties_SetLinearDamping(properties, C.float(damping))
+}
+
+func JPH_MotionProperties_GetLinearDamping(properties *C.JPH_MotionProperties) float32 {
+	return float32(C.JPH_MotionProperties_GetLinearDamping(properties))
+}
+
+func JPH_MotionProperties_SetAngularDamping(properties *C.JPH_MotionProperties, damping float32) {
+	C.JPH_MotionProperties_SetAngularDamping(properties, C.float(damping))
+}
+
+func JPH_MotionProperties_GetAngularDamping(properties *C.JPH_MotionProperties) float32 {
+	return float32(C.JPH_MotionProperties_GetAngularDamping(properties))
+}
+
+func JPH_MotionProperties_SetMassProperties(properties *C.JPH_MotionProperties, allowedDOFs C.JPH_AllowedDOFs, massProperties *C.JPH_MassProperties) {
+	C.JPH_MotionProperties_SetMassProperties(properties, allowedDOFs, massProperties)
+}
+
+func JPH_MotionProperties_GetInverseMassUnchecked(properties *C.JPH_MotionProperties) float32 {
+	return float32(C.JPH_MotionProperties_GetInverseMassUnchecked(properties))
+}
+
+func JPH_MotionProperties_SetInverseMass(properties *C.JPH_MotionProperties, inverseMass float32) {
+	C.JPH_MotionProperties_SetInverseMass(properties, C.float(inverseMass))
+}
+
+func JPH_MotionProperties_GetInverseInertiaDiagonal(properties *C.JPH_MotionProperties, result *C.JPH_Vec3) {
+	C.JPH_MotionProperties_GetInverseInertiaDiagonal(properties, result)
+}
+
+func JPH_MotionProperties_GetInertiaRotation(properties *C.JPH_MotionProperties, result *C.JPH_Quat) {
+	C.JPH_MotionProperties_GetInertiaRotation(properties, result)
+}
+
+func JPH_MotionProperties_SetInverseInertia(properties *C.JPH_MotionProperties, diagonal *C.JPH_Vec3, rot *C.JPH_Quat) {
+	C.JPH_MotionProperties_SetInverseInertia(properties, diagonal, rot)
+}
+
+func JPH_MotionProperties_ScaleToMass(properties *C.JPH_MotionProperties, mass float32) {
+	C.JPH_MotionProperties_ScaleToMass(properties, C.float(mass))
+}
+
+func JPH_RayCast_GetPointOnRay(origin *C.JPH_Vec3, direction *C.JPH_Vec3, fraction float32, result *C.JPH_Vec3) {
+	C.JPH_RayCast_GetPointOnRay(origin, direction, C.float(fraction), result)
+}
+
+func JPH_RRayCast_GetPointOnRay(origin *C.JPH_RVec3, direction *C.JPH_Vec3, fraction float32, result *C.JPH_RVec3) {
+	C.JPH_RRayCast_GetPointOnRay(origin, direction, C.float(fraction), result)
+}
+
+func JPH_MassProperties_DecomposePrincipalMomentsOfInertia(properties *C.JPH_MassProperties, rotation *C.JPH_Mat4, diagonal *C.JPH_Vec3) {
+	C.JPH_MassProperties_DecomposePrincipalMomentsOfInertia(properties, rotation, diagonal)
+}
+
+func JPH_MassProperties_ScaleToMass(properties *C.JPH_MassProperties, mass float32) {
+	C.JPH_MassProperties_ScaleToMass(properties, C.float(mass))
+}
+
+func JPH_MassProperties_GetEquivalentSolidBoxSize(mass float32, inertiaDiagonal *C.JPH_Vec3, result *C.JPH_Vec3) {
+	C.JPH_MassProperties_GetEquivalentSolidBoxSize(C.float(mass), inertiaDiagonal, result)
+}
+
+func JPH_CollideShapeSettings_Init(settings *C.JPH_CollideShapeSettings) {
+	C.JPH_CollideShapeSettings_Init(settings)
+}
+
+func JPH_ShapeCastSettings_Init(settings *C.JPH_ShapeCastSettings) {
+	C.JPH_ShapeCastSettings_Init(settings)
+}
+
+func JPH_BroadPhaseQuery_CastRay(query *C.JPH_BroadPhaseQuery, origin *C.JPH_Vec3, direction *C.JPH_Vec3, callback *C.JPH_RayCastBodyCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter) bool {
+	return bool(C.JPH_BroadPhaseQuery_CastRay(query, origin, direction, callback, userData, broadPhaseLayerFilter, objectLayerFilter))
+}
+
+func JPH_BroadPhaseQuery_CastRay2(query *C.JPH_BroadPhaseQuery, origin *C.JPH_Vec3, direction *C.JPH_Vec3, collectorType C.JPH_CollisionCollectorType, callback *C.JPH_RayCastBodyResultCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter) bool {
+	return bool(C.JPH_BroadPhaseQuery_CastRay2(query, origin, direction, collectorType, callback, userData, broadPhaseLayerFilter, objectLayerFilter))
+}
+
+func JPH_BroadPhaseQuery_CollideAABox(query *C.JPH_BroadPhaseQuery, box *C.JPH_AABox, callback *C.JPH_CollideShapeBodyCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter) bool {
+	return bool(C.JPH_BroadPhaseQuery_CollideAABox(query, box, callback, userData, broadPhaseLayerFilter, objectLayerFilter))
+}
+
+func JPH_BroadPhaseQuery_CollideSphere(query *C.JPH_BroadPhaseQuery, center *C.JPH_Vec3, radius float32, callback *C.JPH_CollideShapeBodyCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter) bool {
+	return bool(C.JPH_BroadPhaseQuery_CollideSphere(query, center, C.float(radius), callback, userData, broadPhaseLayerFilter, objectLayerFilter))
+}
+
+func JPH_BroadPhaseQuery_CollidePoint(query *C.JPH_BroadPhaseQuery, point *C.JPH_Vec3, callback *C.JPH_CollideShapeBodyCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter) bool {
+	return bool(C.JPH_BroadPhaseQuery_CollidePoint(query, point, callback, userData, broadPhaseLayerFilter, objectLayerFilter))
+}
+
+func JPH_NarrowPhaseQuery_CastRay(query *C.JPH_NarrowPhaseQuery, origin *C.JPH_RVec3, direction *C.JPH_Vec3, hit *C.JPH_RayCastResult, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CastRay(query, origin, direction, hit, broadPhaseLayerFilter, objectLayerFilter, bodyFilter))
+}
+
+func JPH_NarrowPhaseQuery_CastRay2(query *C.JPH_NarrowPhaseQuery, origin *C.JPH_RVec3, direction *C.JPH_Vec3, rayCastSettings *C.JPH_RayCastSettings, callback *C.JPH_CastRayCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CastRay2(query, origin, direction, rayCastSettings, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_NarrowPhaseQuery_CastRay3(query *C.JPH_NarrowPhaseQuery, origin *C.JPH_RVec3, direction *C.JPH_Vec3, rayCastSettings *C.JPH_RayCastSettings, collectorType C.JPH_CollisionCollectorType, callback *C.JPH_CastRayResultCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CastRay3(query, origin, direction, rayCastSettings, collectorType, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_NarrowPhaseQuery_CollidePoint(query *C.JPH_NarrowPhaseQuery, point *C.JPH_RVec3, callback *C.JPH_CollidePointCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CollidePoint(query, point, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_NarrowPhaseQuery_CollidePoint2(query *C.JPH_NarrowPhaseQuery, point *C.JPH_RVec3, collectorType C.JPH_CollisionCollectorType, callback *C.JPH_CollidePointResultCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CollidePoint2(query, point, collectorType, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_NarrowPhaseQuery_CollideShape(query *C.JPH_NarrowPhaseQuery, shape *C.JPH_Shape, scale *C.JPH_Vec3, centerOfMassTransform *C.JPH_RMat4, settings *C.JPH_CollideShapeSettings, baseOffset *C.JPH_RVec3, callback *C.JPH_CollideShapeCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CollideShape(query, shape, scale, centerOfMassTransform, settings, baseOffset, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_NarrowPhaseQuery_CollideShape2(query *C.JPH_NarrowPhaseQuery, shape *C.JPH_Shape, scale *C.JPH_Vec3, centerOfMassTransform *C.JPH_RMat4, settings *C.JPH_CollideShapeSettings, baseOffset *C.JPH_RVec3, collectorType C.JPH_CollisionCollectorType, callback *C.JPH_CollideShapeResultCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CollideShape2(query, shape, scale, centerOfMassTransform, settings, baseOffset, collectorType, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_NarrowPhaseQuery_CastShape(query *C.JPH_NarrowPhaseQuery, shape *C.JPH_Shape, worldTransform *C.JPH_RMat4, direction *C.JPH_Vec3, settings *C.JPH_ShapeCastSettings, baseOffset *C.JPH_RVec3, callback *C.JPH_CastShapeCollectorCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CastShape(query, shape, worldTransform, direction, settings, baseOffset, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_NarrowPhaseQuery_CastShape2(query *C.JPH_NarrowPhaseQuery, shape *C.JPH_Shape, worldTransform *C.JPH_RMat4, direction *C.JPH_Vec3, settings *C.JPH_ShapeCastSettings, baseOffset *C.JPH_RVec3, collectorType C.JPH_CollisionCollectorType, callback *C.JPH_CastShapeResultCallback, userData unsafe.Pointer, broadPhaseLayerFilter *C.JPH_BroadPhaseLayerFilter, objectLayerFilter *C.JPH_ObjectLayerFilter, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_NarrowPhaseQuery_CastShape2(query, shape, worldTransform, direction, settings, baseOffset, collectorType, callback, userData, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter))
+}
+
+func JPH_Body_GetID(body *C.JPH_Body) C.JPH_BodyID {
+	return C.JPH_Body_GetID(body)
+}
+
+func JPH_Body_GetBodyType(body *C.JPH_Body) C.JPH_BodyType {
+	return C.JPH_Body_GetBodyType(body)
+}
+
+func JPH_Body_IsRigidBody(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsRigidBody(body))
+}
+
+func JPH_Body_IsSoftBody(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsSoftBody(body))
+}
+
+func JPH_Body_IsActive(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsActive(body))
+}
+
+func JPH_Body_IsStatic(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsStatic(body))
+}
+
+func JPH_Body_IsKinematic(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsKinematic(body))
+}
+
+func JPH_Body_IsDynamic(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsDynamic(body))
+}
+
+func JPH_Body_CanBeKinematicOrDynamic(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_CanBeKinematicOrDynamic(body))
+}
+
+func JPH_Body_SetIsSensor(body *C.JPH_Body, value bool) { C.JPH_Body_SetIsSensor(body, C.bool(value)) }
+
+func JPH_Body_IsSensor(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsSensor(body))
+}
+
+func JPH_Body_SetCollideKinematicVsNonDynamic(body *C.JPH_Body, value bool) {
+	C.JPH_Body_SetCollideKinematicVsNonDynamic(body, C.bool(value))
+}
+
+func JPH_Body_GetCollideKinematicVsNonDynamic(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_GetCollideKinematicVsNonDynamic(body))
+}
+
+func JPH_Body_SetUseManifoldReduction(body *C.JPH_Body, value bool) {
+	C.JPH_Body_SetUseManifoldReduction(body, C.bool(value))
+}
+
+func JPH_Body_GetUseManifoldReduction(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_GetUseManifoldReduction(body))
+}
+
+func JPH_Body_GetUseManifoldReductionWithBody(body *C.JPH_Body, other *C.JPH_Body) bool {
+	return bool(C.JPH_Body_GetUseManifoldReductionWithBody(body, other))
+}
+
+func JPH_Body_SetApplyGyroscopicForce(body *C.JPH_Body, value bool) {
+	C.JPH_Body_SetApplyGyroscopicForce(body, C.bool(value))
+}
+
+func JPH_Body_GetApplyGyroscopicForce(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_GetApplyGyroscopicForce(body))
+}
+
+func JPH_Body_SetEnhancedInternalEdgeRemoval(body *C.JPH_Body, value bool) {
+	C.JPH_Body_SetEnhancedInternalEdgeRemoval(body, C.bool(value))
+}
+
+func JPH_Body_GetEnhancedInternalEdgeRemoval(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_GetEnhancedInternalEdgeRemoval(body))
+}
+
+func JPH_Body_GetEnhancedInternalEdgeRemovalWithBody(body *C.JPH_Body, other *C.JPH_Body) bool {
+	return bool(C.JPH_Body_GetEnhancedInternalEdgeRemovalWithBody(body, other))
+}
+
+func JPH_Body_GetMotionType(body *C.JPH_Body) C.JPH_MotionType {
+	return C.JPH_Body_GetMotionType(body)
+}
+
+func JPH_Body_SetMotionType(body *C.JPH_Body, motionType C.JPH_MotionType) {
+	C.JPH_Body_SetMotionType(body, motionType)
+}
+
+func JPH_Body_GetBroadPhaseLayer(body *C.JPH_Body) C.JPH_BroadPhaseLayer {
+	return C.JPH_Body_GetBroadPhaseLayer(body)
+}
+
+func JPH_Body_GetObjectLayer(body *C.JPH_Body) C.JPH_ObjectLayer {
+	return C.JPH_Body_GetObjectLayer(body)
+}
+
+func JPH_Body_GetCollisionGroup(body *C.JPH_Body, result *C.JPH_CollisionGroup) {
+	C.JPH_Body_GetCollisionGroup(body, result)
+}
+
+func JPH_Body_SetCollisionGroup(body *C.JPH_Body, value *C.JPH_CollisionGroup) {
+	C.JPH_Body_SetCollisionGroup(body, value)
+}
+
+func JPH_Body_GetAllowSleeping(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_GetAllowSleeping(body))
+}
+
+func JPH_Body_SetAllowSleeping(body *C.JPH_Body, allowSleeping bool) {
+	C.JPH_Body_SetAllowSleeping(body, C.bool(allowSleeping))
+}
+
+func JPH_Body_ResetSleepTimer(body *C.JPH_Body) { C.JPH_Body_ResetSleepTimer(body) }
+
+func JPH_Body_GetFriction(body *C.JPH_Body) float32 {
+	return float32(C.JPH_Body_GetFriction(body))
+}
+
+func JPH_Body_SetFriction(body *C.JPH_Body, friction float32) {
+	C.JPH_Body_SetFriction(body, C.float(friction))
+}
+
+func JPH_Body_GetRestitution(body *C.JPH_Body) float32 {
+	return float32(C.JPH_Body_GetRestitution(body))
+}
+
+func JPH_Body_SetRestitution(body *C.JPH_Body, restitution float32) {
+	C.JPH_Body_SetRestitution(body, C.float(restitution))
+}
+
+func JPH_Body_GetLinearVelocity(body *C.JPH_Body, velocity *C.JPH_Vec3) {
+	C.JPH_Body_GetLinearVelocity(body, velocity)
+}
+
+func JPH_Body_SetLinearVelocity(body *C.JPH_Body, velocity *C.JPH_Vec3) {
+	C.JPH_Body_SetLinearVelocity(body, velocity)
+}
+
+func JPH_Body_SetLinearVelocityClamped(body *C.JPH_Body, velocity *C.JPH_Vec3) {
+	C.JPH_Body_SetLinearVelocityClamped(body, velocity)
+}
+
+func JPH_Body_GetAngularVelocity(body *C.JPH_Body, velocity *C.JPH_Vec3) {
+	C.JPH_Body_GetAngularVelocity(body, velocity)
+}
+
+func JPH_Body_SetAngularVelocity(body *C.JPH_Body, velocity *C.JPH_Vec3) {
+	C.JPH_Body_SetAngularVelocity(body, velocity)
+}
+
+func JPH_Body_SetAngularVelocityClamped(body *C.JPH_Body, velocity *C.JPH_Vec3) {
+	C.JPH_Body_SetAngularVelocityClamped(body, velocity)
+}
+
+func JPH_Body_GetPointVelocityCOM(body *C.JPH_Body, pointRelativeToCOM *C.JPH_Vec3, velocity *C.JPH_Vec3) {
+	C.JPH_Body_GetPointVelocityCOM(body, pointRelativeToCOM, velocity)
+}
+
+func JPH_Body_GetPointVelocity(body *C.JPH_Body, point *C.JPH_RVec3, velocity *C.JPH_Vec3) {
+	C.JPH_Body_GetPointVelocity(body, point, velocity)
+}
+
+func JPH_Body_AddForce(body *C.JPH_Body, force *C.JPH_Vec3) { C.JPH_Body_AddForce(body, force) }
+
+func JPH_Body_AddForceAtPosition(body *C.JPH_Body, force *C.JPH_Vec3, position *C.JPH_RVec3) {
+	C.JPH_Body_AddForceAtPosition(body, force, position)
+}
+
+func JPH_Body_AddTorque(body *C.JPH_Body, force *C.JPH_Vec3) { C.JPH_Body_AddTorque(body, force) }
+
+func JPH_Body_GetAccumulatedForce(body *C.JPH_Body, force *C.JPH_Vec3) {
+	C.JPH_Body_GetAccumulatedForce(body, force)
+}
+
+func JPH_Body_GetAccumulatedTorque(body *C.JPH_Body, force *C.JPH_Vec3) {
+	C.JPH_Body_GetAccumulatedTorque(body, force)
+}
+
+func JPH_Body_ResetForce(body *C.JPH_Body) { C.JPH_Body_ResetForce(body) }
+
+func JPH_Body_ResetTorque(body *C.JPH_Body) { C.JPH_Body_ResetTorque(body) }
+
+func JPH_Body_ResetMotion(body *C.JPH_Body) { C.JPH_Body_ResetMotion(body) }
+
+func JPH_Body_GetInverseInertia(body *C.JPH_Body, result *C.JPH_Mat4) {
+	C.JPH_Body_GetInverseInertia(body, result)
+}
+
+func JPH_Body_AddImpulse(body *C.JPH_Body, impulse *C.JPH_Vec3) { C.JPH_Body_AddImpulse(body, impulse) }
+
+func JPH_Body_AddImpulseAtPosition(body *C.JPH_Body, impulse *C.JPH_Vec3, position *C.JPH_RVec3) {
+	C.JPH_Body_AddImpulseAtPosition(body, impulse, position)
+}
+
+func JPH_Body_AddAngularImpulse(body *C.JPH_Body, angularImpulse *C.JPH_Vec3) {
+	C.JPH_Body_AddAngularImpulse(body, angularImpulse)
+}
+
+func JPH_Body_MoveKinematic(body *C.JPH_Body, targetPosition *C.JPH_RVec3, targetRotation *C.JPH_Quat, deltaTime float32) {
+	C.JPH_Body_MoveKinematic(body, targetPosition, targetRotation, C.float(deltaTime))
+}
+
+func JPH_Body_ApplyBuoyancyImpulse(body *C.JPH_Body, surfacePosition *C.JPH_RVec3, surfaceNormal *C.JPH_Vec3, buoyancy float32, linearDrag float32, angularDrag float32, fluidVelocity *C.JPH_Vec3, gravity *C.JPH_Vec3, deltaTime float32) bool {
+	return bool(C.JPH_Body_ApplyBuoyancyImpulse(body, surfacePosition, surfaceNormal, C.float(buoyancy), C.float(linearDrag), C.float(angularDrag), fluidVelocity, gravity, C.float(deltaTime)))
+}
+
+func JPH_Body_IsInBroadPhase(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsInBroadPhase(body))
+}
+
+func JPH_Body_IsCollisionCacheInvalid(body *C.JPH_Body) bool {
+	return bool(C.JPH_Body_IsCollisionCacheInvalid(body))
+}
+
+func JPH_Body_GetShape(body *C.JPH_Body) *C.JPH_Shape {
+	return C.JPH_Body_GetShape(body)
+}
+
+func JPH_Body_GetPosition(body *C.JPH_Body, result *C.JPH_RVec3) {
+	C.JPH_Body_GetPosition(body, result)
+}
+
+func JPH_Body_GetRotation(body *C.JPH_Body, result *C.JPH_Quat) { C.JPH_Body_GetRotation(body, result) }
+
+func JPH_Body_GetWorldTransform(body *C.JPH_Body, result *C.JPH_RMat4) {
+	C.JPH_Body_GetWorldTransform(body, result)
+}
+
+func JPH_Body_GetCenterOfMassPosition(body *C.JPH_Body, result *C.JPH_RVec3) {
+	C.JPH_Body_GetCenterOfMassPosition(body, result)
+}
+
+func JPH_Body_GetCenterOfMassTransform(body *C.JPH_Body, result *C.JPH_RMat4) {
+	C.JPH_Body_GetCenterOfMassTransform(body, result)
+}
+
+func JPH_Body_GetInverseCenterOfMassTransform(body *C.JPH_Body, result *C.JPH_RMat4) {
+	C.JPH_Body_GetInverseCenterOfMassTransform(body, result)
+}
+
+func JPH_Body_GetWorldSpaceBounds(body *C.JPH_Body, result *C.JPH_AABox) {
+	C.JPH_Body_GetWorldSpaceBounds(body, result)
+}
+
+func JPH_Body_GetWorldSpaceSurfaceNormal(body *C.JPH_Body, subShapeID C.JPH_SubShapeID, position *C.JPH_RVec3, normal *C.JPH_Vec3) {
+	C.JPH_Body_GetWorldSpaceSurfaceNormal(body, subShapeID, position, normal)
+}
+
+func JPH_Body_GetMotionProperties(body *C.JPH_Body) *C.JPH_MotionProperties {
+	return C.JPH_Body_GetMotionProperties(body)
+}
+
+func JPH_Body_GetMotionPropertiesUnchecked(body *C.JPH_Body) *C.JPH_MotionProperties {
+	return C.JPH_Body_GetMotionPropertiesUnchecked(body)
+}
+
+func JPH_Body_SetUserData(body *C.JPH_Body, userData uint64) {
+	C.JPH_Body_SetUserData(body, C.uint64_t(userData))
+}
+
+func JPH_Body_GetUserData(body *C.JPH_Body) uint64 {
+	return uint64(C.JPH_Body_GetUserData(body))
+}
+
+func JPH_Body_GetFixedToWorldBody() *C.JPH_Body {
+	return C.JPH_Body_GetFixedToWorldBody()
+}
+
+func JPH_Body_GetSoftBodyVertexCount(body *C.JPH_Body) uint32 {
+	return uint32(C.JPH_Body_GetSoftBodyVertexCount(body))
+}
+
+func JPH_Body_GetSoftBodyVertexPosition(body *C.JPH_Body, index uint32, outPos *C.JPH_Vec3) {
+	C.JPH_Body_GetSoftBodyVertexPosition(body, C.uint32_t(index), outPos)
+}
+
+func JPH_Body_GetSoftBodyVertexPositions(body *C.JPH_Body, outPositions *C.JPH_Vec3, capacity uint32, outCount unsafe.Pointer) {
+	C.JPH_Body_GetSoftBodyVertexPositions(body, outPositions, C.uint32_t(capacity), (*C.uint32_t)(unsafe.Pointer(outCount)))
+}
+
+func JPH_BroadPhaseLayerFilter_SetProcs(procs *C.JPH_BroadPhaseLayerFilter_Procs) {
+	C.JPH_BroadPhaseLayerFilter_SetProcs(procs)
+}
+
+func JPH_BroadPhaseLayerFilter_Create(userData unsafe.Pointer) *C.JPH_BroadPhaseLayerFilter {
+	return C.JPH_BroadPhaseLayerFilter_Create(userData)
+}
+
+func JPH_BroadPhaseLayerFilter_Destroy(filter *C.JPH_BroadPhaseLayerFilter) {
+	C.JPH_BroadPhaseLayerFilter_Destroy(filter)
+}
+
+func JPH_ObjectLayerFilter_SetProcs(procs *C.JPH_ObjectLayerFilter_Procs) {
+	C.JPH_ObjectLayerFilter_SetProcs(procs)
+}
+
+func JPH_ObjectLayerFilter_Create(userData unsafe.Pointer) *C.JPH_ObjectLayerFilter {
+	return C.JPH_ObjectLayerFilter_Create(userData)
+}
+
+func JPH_ObjectLayerFilter_Destroy(filter *C.JPH_ObjectLayerFilter) {
+	C.JPH_ObjectLayerFilter_Destroy(filter)
+}
+
+func JPH_BodyFilter_SetProcs(procs *C.JPH_BodyFilter_Procs) { C.JPH_BodyFilter_SetProcs(procs) }
+
+func JPH_BodyFilter_Create(userData unsafe.Pointer) *C.JPH_BodyFilter {
+	return C.JPH_BodyFilter_Create(userData)
+}
+
+func JPH_BodyFilter_Destroy(filter *C.JPH_BodyFilter) { C.JPH_BodyFilter_Destroy(filter) }
+
+func JPH_ShapeFilter_SetProcs(procs *C.JPH_ShapeFilter_Procs) { C.JPH_ShapeFilter_SetProcs(procs) }
+
+func JPH_ShapeFilter_Create(userData unsafe.Pointer) *C.JPH_ShapeFilter {
+	return C.JPH_ShapeFilter_Create(userData)
+}
+
+func JPH_ShapeFilter_Destroy(filter *C.JPH_ShapeFilter) { C.JPH_ShapeFilter_Destroy(filter) }
+
+func JPH_ShapeFilter_GetBodyID2(filter *C.JPH_ShapeFilter) C.JPH_BodyID {
+	return C.JPH_ShapeFilter_GetBodyID2(filter)
+}
+
+func JPH_ShapeFilter_SetBodyID2(filter *C.JPH_ShapeFilter, id C.JPH_BodyID) {
+	C.JPH_ShapeFilter_SetBodyID2(filter, id)
+}
+
+func JPH_SimShapeFilter_SetProcs(procs *C.JPH_SimShapeFilter_Procs) {
+	C.JPH_SimShapeFilter_SetProcs(procs)
+}
+
+func JPH_SimShapeFilter_Create(userData unsafe.Pointer) *C.JPH_SimShapeFilter {
+	return C.JPH_SimShapeFilter_Create(userData)
+}
+
+func JPH_SimShapeFilter_Destroy(filter *C.JPH_SimShapeFilter) { C.JPH_SimShapeFilter_Destroy(filter) }
+
+func JPH_ContactListener_SetProcs(procs *C.JPH_ContactListener_Procs) {
+	C.JPH_ContactListener_SetProcs(procs)
+}
+
+func JPH_ContactListener_Create(userData unsafe.Pointer) *C.JPH_ContactListener {
+	return C.JPH_ContactListener_Create(userData)
+}
+
+func JPH_ContactListener_Destroy(listener *C.JPH_ContactListener) {
+	C.JPH_ContactListener_Destroy(listener)
+}
+
+func JPH_BodyActivationListener_SetProcs(procs *C.JPH_BodyActivationListener_Procs) {
+	C.JPH_BodyActivationListener_SetProcs(procs)
+}
+
+func JPH_BodyActivationListener_Create(userData unsafe.Pointer) *C.JPH_BodyActivationListener {
+	return C.JPH_BodyActivationListener_Create(userData)
+}
+
+func JPH_BodyActivationListener_Destroy(listener *C.JPH_BodyActivationListener) {
+	C.JPH_BodyActivationListener_Destroy(listener)
+}
+
+func JPH_BodyDrawFilter_SetProcs(procs *C.JPH_BodyDrawFilter_Procs) {
+	C.JPH_BodyDrawFilter_SetProcs(procs)
+}
+
+func JPH_BodyDrawFilter_Create(userData unsafe.Pointer) *C.JPH_BodyDrawFilter {
+	return C.JPH_BodyDrawFilter_Create(userData)
+}
+
+func JPH_BodyDrawFilter_Destroy(filter *C.JPH_BodyDrawFilter) { C.JPH_BodyDrawFilter_Destroy(filter) }
+
+func JPH_ContactManifold_GetWorldSpaceNormal(manifold *C.JPH_ContactManifold, result *C.JPH_Vec3) {
+	C.JPH_ContactManifold_GetWorldSpaceNormal(manifold, result)
+}
+
+func JPH_ContactManifold_GetPenetrationDepth(manifold *C.JPH_ContactManifold) float32 {
+	return float32(C.JPH_ContactManifold_GetPenetrationDepth(manifold))
+}
+
+func JPH_ContactManifold_GetSubShapeID1(manifold *C.JPH_ContactManifold) C.JPH_SubShapeID {
+	return C.JPH_ContactManifold_GetSubShapeID1(manifold)
+}
+
+func JPH_ContactManifold_GetSubShapeID2(manifold *C.JPH_ContactManifold) C.JPH_SubShapeID {
+	return C.JPH_ContactManifold_GetSubShapeID2(manifold)
+}
+
+func JPH_ContactManifold_GetPointCount(manifold *C.JPH_ContactManifold) uint32 {
+	return uint32(C.JPH_ContactManifold_GetPointCount(manifold))
+}
+
+func JPH_ContactManifold_GetWorldSpaceContactPointOn1(manifold *C.JPH_ContactManifold, index uint32, result *C.JPH_RVec3) {
+	C.JPH_ContactManifold_GetWorldSpaceContactPointOn1(manifold, C.uint32_t(index), result)
+}
+
+func JPH_ContactManifold_GetWorldSpaceContactPointOn2(manifold *C.JPH_ContactManifold, index uint32, result *C.JPH_RVec3) {
+	C.JPH_ContactManifold_GetWorldSpaceContactPointOn2(manifold, C.uint32_t(index), result)
+}
+
+func JPH_CharacterBase_Destroy(character *C.JPH_CharacterBase) {
+	C.JPH_CharacterBase_Destroy(character)
+}
+
+func JPH_CharacterBase_GetCosMaxSlopeAngle(character *C.JPH_CharacterBase) float32 {
+	return float32(C.JPH_CharacterBase_GetCosMaxSlopeAngle(character))
+}
+
+func JPH_CharacterBase_SetMaxSlopeAngle(character *C.JPH_CharacterBase, maxSlopeAngle float32) {
+	C.JPH_CharacterBase_SetMaxSlopeAngle(character, C.float(maxSlopeAngle))
+}
+
+func JPH_CharacterBase_GetUp(character *C.JPH_CharacterBase, result *C.JPH_Vec3) {
+	C.JPH_CharacterBase_GetUp(character, result)
+}
+
+func JPH_CharacterBase_SetUp(character *C.JPH_CharacterBase, value *C.JPH_Vec3) {
+	C.JPH_CharacterBase_SetUp(character, value)
+}
+
+func JPH_CharacterBase_IsSlopeTooSteep(character *C.JPH_CharacterBase, value *C.JPH_Vec3) bool {
+	return bool(C.JPH_CharacterBase_IsSlopeTooSteep(character, value))
+}
+
+func JPH_CharacterBase_GetShape(character *C.JPH_CharacterBase) *C.JPH_Shape {
+	return C.JPH_CharacterBase_GetShape(character)
+}
+
+func JPH_CharacterBase_GetGroundState(character *C.JPH_CharacterBase) C.JPH_GroundState {
+	return C.JPH_CharacterBase_GetGroundState(character)
+}
+
+func JPH_CharacterBase_IsSupported(character *C.JPH_CharacterBase) bool {
+	return bool(C.JPH_CharacterBase_IsSupported(character))
+}
+
+func JPH_CharacterBase_GetGroundPosition(character *C.JPH_CharacterBase, position *C.JPH_RVec3) {
+	C.JPH_CharacterBase_GetGroundPosition(character, position)
+}
+
+func JPH_CharacterBase_GetGroundNormal(character *C.JPH_CharacterBase, normal *C.JPH_Vec3) {
+	C.JPH_CharacterBase_GetGroundNormal(character, normal)
+}
+
+func JPH_CharacterBase_GetGroundVelocity(character *C.JPH_CharacterBase, velocity *C.JPH_Vec3) {
+	C.JPH_CharacterBase_GetGroundVelocity(character, velocity)
+}
+
+func JPH_CharacterBase_GetGroundMaterial(character *C.JPH_CharacterBase) *C.JPH_PhysicsMaterial {
+	return C.JPH_CharacterBase_GetGroundMaterial(character)
+}
+
+func JPH_CharacterBase_GetGroundBodyId(character *C.JPH_CharacterBase) C.JPH_BodyID {
+	return C.JPH_CharacterBase_GetGroundBodyId(character)
+}
+
+func JPH_CharacterBase_GetGroundSubShapeId(character *C.JPH_CharacterBase) C.JPH_SubShapeID {
+	return C.JPH_CharacterBase_GetGroundSubShapeId(character)
+}
+
+func JPH_CharacterBase_GetGroundUserData(character *C.JPH_CharacterBase) uint64 {
+	return uint64(C.JPH_CharacterBase_GetGroundUserData(character))
+}
+
+func JPH_CharacterSettings_Init(settings *C.JPH_CharacterSettings) {
+	C.JPH_CharacterSettings_Init(settings)
+}
+
+func JPH_Character_Create(settings *C.JPH_CharacterSettings, position *C.JPH_RVec3, rotation *C.JPH_Quat, userData uint64, system *C.JPH_PhysicsSystem) *C.JPH_Character {
+	return C.JPH_Character_Create(settings, position, rotation, C.uint64_t(userData), system)
+}
+
+func JPH_Character_AddToPhysicsSystem(character *C.JPH_Character, activationMode C.JPH_Activation, lockBodies bool) {
+	C.JPH_Character_AddToPhysicsSystem(character, activationMode, C.bool(lockBodies))
+}
+
+func JPH_Character_RemoveFromPhysicsSystem(character *C.JPH_Character, lockBodies bool) {
+	C.JPH_Character_RemoveFromPhysicsSystem(character, C.bool(lockBodies))
+}
+
+func JPH_Character_Activate(character *C.JPH_Character, lockBodies bool) {
+	C.JPH_Character_Activate(character, C.bool(lockBodies))
+}
+
+func JPH_Character_PostSimulation(character *C.JPH_Character, maxSeparationDistance float32, lockBodies bool) {
+	C.JPH_Character_PostSimulation(character, C.float(maxSeparationDistance), C.bool(lockBodies))
+}
+
+func JPH_Character_SetLinearAndAngularVelocity(character *C.JPH_Character, linearVelocity *C.JPH_Vec3, angularVelocity *C.JPH_Vec3, lockBodies bool) {
+	C.JPH_Character_SetLinearAndAngularVelocity(character, linearVelocity, angularVelocity, C.bool(lockBodies))
+}
+
+func JPH_Character_GetLinearVelocity(character *C.JPH_Character, result *C.JPH_Vec3) {
+	C.JPH_Character_GetLinearVelocity(character, result)
+}
+
+func JPH_Character_SetLinearVelocity(character *C.JPH_Character, value *C.JPH_Vec3, lockBodies bool) {
+	C.JPH_Character_SetLinearVelocity(character, value, C.bool(lockBodies))
+}
+
+func JPH_Character_AddLinearVelocity(character *C.JPH_Character, value *C.JPH_Vec3, lockBodies bool) {
+	C.JPH_Character_AddLinearVelocity(character, value, C.bool(lockBodies))
+}
+
+func JPH_Character_AddImpulse(character *C.JPH_Character, value *C.JPH_Vec3, lockBodies bool) {
+	C.JPH_Character_AddImpulse(character, value, C.bool(lockBodies))
+}
+
+func JPH_Character_GetBodyID(character *C.JPH_Character) C.JPH_BodyID {
+	return C.JPH_Character_GetBodyID(character)
+}
+
+func JPH_Character_GetPositionAndRotation(character *C.JPH_Character, position *C.JPH_RVec3, rotation *C.JPH_Quat, lockBodies bool) {
+	C.JPH_Character_GetPositionAndRotation(character, position, rotation, C.bool(lockBodies))
+}
+
+func JPH_Character_SetPositionAndRotation(character *C.JPH_Character, position *C.JPH_RVec3, rotation *C.JPH_Quat, activationMode C.JPH_Activation, lockBodies bool) {
+	C.JPH_Character_SetPositionAndRotation(character, position, rotation, activationMode, C.bool(lockBodies))
+}
+
+func JPH_Character_GetPosition(character *C.JPH_Character, position *C.JPH_RVec3, lockBodies bool) {
+	C.JPH_Character_GetPosition(character, position, C.bool(lockBodies))
+}
+
+func JPH_Character_SetPosition(character *C.JPH_Character, position *C.JPH_RVec3, activationMode C.JPH_Activation, lockBodies bool) {
+	C.JPH_Character_SetPosition(character, position, activationMode, C.bool(lockBodies))
+}
+
+func JPH_Character_GetRotation(character *C.JPH_Character, rotation *C.JPH_Quat, lockBodies bool) {
+	C.JPH_Character_GetRotation(character, rotation, C.bool(lockBodies))
+}
+
+func JPH_Character_SetRotation(character *C.JPH_Character, rotation *C.JPH_Quat, activationMode C.JPH_Activation, lockBodies bool) {
+	C.JPH_Character_SetRotation(character, rotation, activationMode, C.bool(lockBodies))
+}
+
+func JPH_Character_GetCenterOfMassPosition(character *C.JPH_Character, result *C.JPH_RVec3, lockBodies bool) {
+	C.JPH_Character_GetCenterOfMassPosition(character, result, C.bool(lockBodies))
+}
+
+func JPH_Character_GetWorldTransform(character *C.JPH_Character, result *C.JPH_RMat4, lockBodies bool) {
+	C.JPH_Character_GetWorldTransform(character, result, C.bool(lockBodies))
+}
+
+func JPH_Character_GetLayer(character *C.JPH_Character) C.JPH_ObjectLayer {
+	return C.JPH_Character_GetLayer(character)
+}
+
+func JPH_Character_SetLayer(character *C.JPH_Character, value C.JPH_ObjectLayer, lockBodies bool) {
+	C.JPH_Character_SetLayer(character, value, C.bool(lockBodies))
+}
+
+func JPH_Character_SetShape(character *C.JPH_Character, shape *C.JPH_Shape, maxPenetrationDepth float32, lockBodies bool) {
+	C.JPH_Character_SetShape(character, shape, C.float(maxPenetrationDepth), C.bool(lockBodies))
+}
+
+func JPH_CharacterVirtualSettings_Init(settings *C.JPH_CharacterVirtualSettings) {
+	C.JPH_CharacterVirtualSettings_Init(settings)
+}
+
+func JPH_CharacterVirtual_Create(settings *C.JPH_CharacterVirtualSettings, position *C.JPH_RVec3, rotation *C.JPH_Quat, userData uint64, system *C.JPH_PhysicsSystem) *C.JPH_CharacterVirtual {
+	return C.JPH_CharacterVirtual_Create(settings, position, rotation, C.uint64_t(userData), system)
+}
+
+func JPH_CharacterVirtual_GetID(character *C.JPH_CharacterVirtual) C.JPH_CharacterID {
+	return C.JPH_CharacterVirtual_GetID(character)
+}
+
+func JPH_CharacterVirtual_SetListener(character *C.JPH_CharacterVirtual, listener *C.JPH_CharacterContactListener) {
+	C.JPH_CharacterVirtual_SetListener(character, listener)
+}
+
+func JPH_CharacterVirtual_SetCharacterVsCharacterCollision(character *C.JPH_CharacterVirtual, characterVsCharacterCollision *C.JPH_CharacterVsCharacterCollision) {
+	C.JPH_CharacterVirtual_SetCharacterVsCharacterCollision(character, characterVsCharacterCollision)
+}
+
+func JPH_CharacterVirtual_GetLinearVelocity(character *C.JPH_CharacterVirtual, velocity *C.JPH_Vec3) {
+	C.JPH_CharacterVirtual_GetLinearVelocity(character, velocity)
+}
+
+func JPH_CharacterVirtual_SetLinearVelocity(character *C.JPH_CharacterVirtual, velocity *C.JPH_Vec3) {
+	C.JPH_CharacterVirtual_SetLinearVelocity(character, velocity)
+}
+
+func JPH_CharacterVirtual_GetPosition(character *C.JPH_CharacterVirtual, position *C.JPH_RVec3) {
+	C.JPH_CharacterVirtual_GetPosition(character, position)
+}
+
+func JPH_CharacterVirtual_SetPosition(character *C.JPH_CharacterVirtual, position *C.JPH_RVec3) {
+	C.JPH_CharacterVirtual_SetPosition(character, position)
+}
+
+func JPH_CharacterVirtual_GetRotation(character *C.JPH_CharacterVirtual, rotation *C.JPH_Quat) {
+	C.JPH_CharacterVirtual_GetRotation(character, rotation)
+}
+
+func JPH_CharacterVirtual_SetRotation(character *C.JPH_CharacterVirtual, rotation *C.JPH_Quat) {
+	C.JPH_CharacterVirtual_SetRotation(character, rotation)
+}
+
+func JPH_CharacterVirtual_GetWorldTransform(character *C.JPH_CharacterVirtual, result *C.JPH_RMat4) {
+	C.JPH_CharacterVirtual_GetWorldTransform(character, result)
+}
+
+func JPH_CharacterVirtual_GetCenterOfMassTransform(character *C.JPH_CharacterVirtual, result *C.JPH_RMat4) {
+	C.JPH_CharacterVirtual_GetCenterOfMassTransform(character, result)
+}
+
+func JPH_CharacterVirtual_GetMass(character *C.JPH_CharacterVirtual) float32 {
+	return float32(C.JPH_CharacterVirtual_GetMass(character))
+}
+
+func JPH_CharacterVirtual_SetMass(character *C.JPH_CharacterVirtual, value float32) {
+	C.JPH_CharacterVirtual_SetMass(character, C.float(value))
+}
+
+func JPH_CharacterVirtual_GetMaxStrength(character *C.JPH_CharacterVirtual) float32 {
+	return float32(C.JPH_CharacterVirtual_GetMaxStrength(character))
+}
+
+func JPH_CharacterVirtual_SetMaxStrength(character *C.JPH_CharacterVirtual, value float32) {
+	C.JPH_CharacterVirtual_SetMaxStrength(character, C.float(value))
+}
+
+func JPH_CharacterVirtual_GetPenetrationRecoverySpeed(character *C.JPH_CharacterVirtual) float32 {
+	return float32(C.JPH_CharacterVirtual_GetPenetrationRecoverySpeed(character))
+}
+
+func JPH_CharacterVirtual_SetPenetrationRecoverySpeed(character *C.JPH_CharacterVirtual, value float32) {
+	C.JPH_CharacterVirtual_SetPenetrationRecoverySpeed(character, C.float(value))
+}
+
+func JPH_CharacterVirtual_GetEnhancedInternalEdgeRemoval(character *C.JPH_CharacterVirtual) bool {
+	return bool(C.JPH_CharacterVirtual_GetEnhancedInternalEdgeRemoval(character))
+}
+
+func JPH_CharacterVirtual_SetEnhancedInternalEdgeRemoval(character *C.JPH_CharacterVirtual, value bool) {
+	C.JPH_CharacterVirtual_SetEnhancedInternalEdgeRemoval(character, C.bool(value))
+}
+
+func JPH_CharacterVirtual_GetCharacterPadding(character *C.JPH_CharacterVirtual) float32 {
+	return float32(C.JPH_CharacterVirtual_GetCharacterPadding(character))
+}
+
+func JPH_CharacterVirtual_GetMaxNumHits(character *C.JPH_CharacterVirtual) uint32 {
+	return uint32(C.JPH_CharacterVirtual_GetMaxNumHits(character))
+}
+
+func JPH_CharacterVirtual_SetMaxNumHits(character *C.JPH_CharacterVirtual, value uint32) {
+	C.JPH_CharacterVirtual_SetMaxNumHits(character, C.uint32_t(value))
+}
+
+func JPH_CharacterVirtual_GetHitReductionCosMaxAngle(character *C.JPH_CharacterVirtual) float32 {
+	return float32(C.JPH_CharacterVirtual_GetHitReductionCosMaxAngle(character))
+}
+
+func JPH_CharacterVirtual_SetHitReductionCosMaxAngle(character *C.JPH_CharacterVirtual, value float32) {
+	C.JPH_CharacterVirtual_SetHitReductionCosMaxAngle(character, C.float(value))
+}
+
+func JPH_CharacterVirtual_GetMaxHitsExceeded(character *C.JPH_CharacterVirtual) bool {
+	return bool(C.JPH_CharacterVirtual_GetMaxHitsExceeded(character))
+}
+
+func JPH_CharacterVirtual_GetShapeOffset(character *C.JPH_CharacterVirtual, result *C.JPH_Vec3) {
+	C.JPH_CharacterVirtual_GetShapeOffset(character, result)
+}
+
+func JPH_CharacterVirtual_SetShapeOffset(character *C.JPH_CharacterVirtual, value *C.JPH_Vec3) {
+	C.JPH_CharacterVirtual_SetShapeOffset(character, value)
+}
+
+func JPH_CharacterVirtual_GetUserData(character *C.JPH_CharacterVirtual) uint64 {
+	return uint64(C.JPH_CharacterVirtual_GetUserData(character))
+}
+
+func JPH_CharacterVirtual_SetUserData(character *C.JPH_CharacterVirtual, value uint64) {
+	C.JPH_CharacterVirtual_SetUserData(character, C.uint64_t(value))
+}
+
+func JPH_CharacterVirtual_GetInnerBodyID(character *C.JPH_CharacterVirtual) C.JPH_BodyID {
+	return C.JPH_CharacterVirtual_GetInnerBodyID(character)
+}
+
+func JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(character *C.JPH_CharacterVirtual, desiredVelocity *C.JPH_Vec3, velocity *C.JPH_Vec3) {
+	C.JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(character, desiredVelocity, velocity)
+}
+
+func JPH_CharacterVirtual_StartTrackingContactChanges(character *C.JPH_CharacterVirtual) {
+	C.JPH_CharacterVirtual_StartTrackingContactChanges(character)
+}
+
+func JPH_CharacterVirtual_FinishTrackingContactChanges(character *C.JPH_CharacterVirtual) {
+	C.JPH_CharacterVirtual_FinishTrackingContactChanges(character)
+}
+
+func JPH_CharacterVirtual_Update(character *C.JPH_CharacterVirtual, deltaTime float32, layer C.JPH_ObjectLayer, system *C.JPH_PhysicsSystem, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) {
+	C.JPH_CharacterVirtual_Update(character, C.float(deltaTime), layer, system, bodyFilter, shapeFilter)
+}
+
+func JPH_CharacterVirtual_ExtendedUpdate(character *C.JPH_CharacterVirtual, deltaTime float32, settings *C.JPH_ExtendedUpdateSettings, layer C.JPH_ObjectLayer, system *C.JPH_PhysicsSystem, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) {
+	C.JPH_CharacterVirtual_ExtendedUpdate(character, C.float(deltaTime), settings, layer, system, bodyFilter, shapeFilter)
+}
+
+func JPH_CharacterVirtual_RefreshContacts(character *C.JPH_CharacterVirtual, layer C.JPH_ObjectLayer, system *C.JPH_PhysicsSystem, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) {
+	C.JPH_CharacterVirtual_RefreshContacts(character, layer, system, bodyFilter, shapeFilter)
+}
+
+func JPH_CharacterVirtual_CanWalkStairs(character *C.JPH_CharacterVirtual, linearVelocity *C.JPH_Vec3) bool {
+	return bool(C.JPH_CharacterVirtual_CanWalkStairs(character, linearVelocity))
+}
+
+func JPH_CharacterVirtual_WalkStairs(character *C.JPH_CharacterVirtual, deltaTime float32, stepUp *C.JPH_Vec3, stepForward *C.JPH_Vec3, stepForwardTest *C.JPH_Vec3, stepDownExtra *C.JPH_Vec3, layer C.JPH_ObjectLayer, system *C.JPH_PhysicsSystem, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_CharacterVirtual_WalkStairs(character, C.float(deltaTime), stepUp, stepForward, stepForwardTest, stepDownExtra, layer, system, bodyFilter, shapeFilter))
+}
+
+func JPH_CharacterVirtual_StickToFloor(character *C.JPH_CharacterVirtual, stepDown *C.JPH_Vec3, layer C.JPH_ObjectLayer, system *C.JPH_PhysicsSystem, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_CharacterVirtual_StickToFloor(character, stepDown, layer, system, bodyFilter, shapeFilter))
+}
+
+func JPH_CharacterVirtual_UpdateGroundVelocity(character *C.JPH_CharacterVirtual) {
+	C.JPH_CharacterVirtual_UpdateGroundVelocity(character)
+}
+
+func JPH_CharacterVirtual_SetShape(character *C.JPH_CharacterVirtual, shape *C.JPH_Shape, maxPenetrationDepth float32, layer C.JPH_ObjectLayer, system *C.JPH_PhysicsSystem, bodyFilter *C.JPH_BodyFilter, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_CharacterVirtual_SetShape(character, shape, C.float(maxPenetrationDepth), layer, system, bodyFilter, shapeFilter))
+}
+
+func JPH_CharacterVirtual_SetInnerBodyShape(character *C.JPH_CharacterVirtual, shape *C.JPH_Shape) {
+	C.JPH_CharacterVirtual_SetInnerBodyShape(character, shape)
+}
+
+func JPH_CharacterVirtual_GetNumActiveContacts(character *C.JPH_CharacterVirtual) uint32 {
+	return uint32(C.JPH_CharacterVirtual_GetNumActiveContacts(character))
+}
+
+func JPH_CharacterVirtual_GetActiveContact(character *C.JPH_CharacterVirtual, index uint32, result *C.JPH_CharacterVirtualContact) {
+	C.JPH_CharacterVirtual_GetActiveContact(character, C.uint32_t(index), result)
+}
+
+func JPH_CharacterVirtual_HasCollidedWithBody(character *C.JPH_CharacterVirtual, body C.JPH_BodyID) bool {
+	return bool(C.JPH_CharacterVirtual_HasCollidedWithBody(character, body))
+}
+
+func JPH_CharacterVirtual_HasCollidedWith(character *C.JPH_CharacterVirtual, other C.JPH_CharacterID) bool {
+	return bool(C.JPH_CharacterVirtual_HasCollidedWith(character, other))
+}
+
+func JPH_CharacterVirtual_HasCollidedWithCharacter(character *C.JPH_CharacterVirtual, other *C.JPH_CharacterVirtual) bool {
+	return bool(C.JPH_CharacterVirtual_HasCollidedWithCharacter(character, other))
+}
+
+func JPH_CharacterContactListener_SetProcs(procs *C.JPH_CharacterContactListener_Procs) {
+	C.JPH_CharacterContactListener_SetProcs(procs)
+}
+
+func JPH_CharacterContactListener_Create(userData unsafe.Pointer) *C.JPH_CharacterContactListener {
+	return C.JPH_CharacterContactListener_Create(userData)
+}
+
+func JPH_CharacterContactListener_Destroy(listener *C.JPH_CharacterContactListener) {
+	C.JPH_CharacterContactListener_Destroy(listener)
+}
+
+func JPH_CharacterVsCharacterCollision_SetProcs(procs *C.JPH_CharacterVsCharacterCollision_Procs) {
+	C.JPH_CharacterVsCharacterCollision_SetProcs(procs)
+}
+
+func JPH_CharacterVsCharacterCollision_Create(userData unsafe.Pointer) *C.JPH_CharacterVsCharacterCollision {
+	return C.JPH_CharacterVsCharacterCollision_Create(userData)
+}
+
+func JPH_CharacterVsCharacterCollision_CreateSimple() *C.JPH_CharacterVsCharacterCollision {
+	return C.JPH_CharacterVsCharacterCollision_CreateSimple()
+}
+
+func JPH_CharacterVsCharacterCollisionSimple_AddCharacter(characterVsCharacter *C.JPH_CharacterVsCharacterCollision, character *C.JPH_CharacterVirtual) {
+	C.JPH_CharacterVsCharacterCollisionSimple_AddCharacter(characterVsCharacter, character)
+}
+
+func JPH_CharacterVsCharacterCollisionSimple_RemoveCharacter(characterVsCharacter *C.JPH_CharacterVsCharacterCollision, character *C.JPH_CharacterVirtual) {
+	C.JPH_CharacterVsCharacterCollisionSimple_RemoveCharacter(characterVsCharacter, character)
+}
+
+func JPH_CharacterVsCharacterCollision_Destroy(listener *C.JPH_CharacterVsCharacterCollision) {
+	C.JPH_CharacterVsCharacterCollision_Destroy(listener)
+}
+
+func JPH_CollisionDispatch_CollideShapeVsShape(shape1 *C.JPH_Shape, shape2 *C.JPH_Shape, scale1 *C.JPH_Vec3, scale2 *C.JPH_Vec3, centerOfMassTransform1 *C.JPH_Mat4, centerOfMassTransform2 *C.JPH_Mat4, collideShapeSettings *C.JPH_CollideShapeSettings, callback *C.JPH_CollideShapeCollectorCallback, userData unsafe.Pointer, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_CollisionDispatch_CollideShapeVsShape(shape1, shape2, scale1, scale2, centerOfMassTransform1, centerOfMassTransform2, collideShapeSettings, callback, userData, shapeFilter))
+}
+
+func JPH_CollisionDispatch_CastShapeVsShapeLocalSpace(direction *C.JPH_Vec3, shape1 *C.JPH_Shape, shape2 *C.JPH_Shape, scale1InShape2LocalSpace *C.JPH_Vec3, scale2 *C.JPH_Vec3, centerOfMassTransform1InShape2LocalSpace *C.JPH_Mat4, centerOfMassWorldTransform2 *C.JPH_Mat4, shapeCastSettings *C.JPH_ShapeCastSettings, callback *C.JPH_CastShapeCollectorCallback, userData unsafe.Pointer, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_CollisionDispatch_CastShapeVsShapeLocalSpace(direction, shape1, shape2, scale1InShape2LocalSpace, scale2, centerOfMassTransform1InShape2LocalSpace, centerOfMassWorldTransform2, shapeCastSettings, callback, userData, shapeFilter))
+}
+
+func JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(direction *C.JPH_Vec3, shape1 *C.JPH_Shape, shape2 *C.JPH_Shape, scale1 *C.JPH_Vec3, inScale2 *C.JPH_Vec3, centerOfMassWorldTransform1 *C.JPH_Mat4, centerOfMassWorldTransform2 *C.JPH_Mat4, shapeCastSettings *C.JPH_ShapeCastSettings, callback *C.JPH_CastShapeCollectorCallback, userData unsafe.Pointer, shapeFilter *C.JPH_ShapeFilter) bool {
+	return bool(C.JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(direction, shape1, shape2, scale1, inScale2, centerOfMassWorldTransform1, centerOfMassWorldTransform2, shapeCastSettings, callback, userData, shapeFilter))
+}
+
+func JPH_DebugRenderer_SetProcs(procs *C.JPH_DebugRenderer_Procs) {
+	C.JPH_DebugRenderer_SetProcs(procs)
+}
+
+func JPH_DebugRenderer_Create(userData unsafe.Pointer) *C.JPH_DebugRenderer {
+	return C.JPH_DebugRenderer_Create(userData)
+}
+
+func JPH_DebugRenderer_Destroy(renderer *C.JPH_DebugRenderer) { C.JPH_DebugRenderer_Destroy(renderer) }
+
+func JPH_DebugRenderer_NextFrame(renderer *C.JPH_DebugRenderer) {
+	C.JPH_DebugRenderer_NextFrame(renderer)
+}
+
+func JPH_DebugRenderer_SetCameraPos(renderer *C.JPH_DebugRenderer, position *C.JPH_RVec3) {
+	C.JPH_DebugRenderer_SetCameraPos(renderer, position)
+}
+
+func JPH_DebugRenderer_DrawLine(renderer *C.JPH_DebugRenderer, from *C.JPH_RVec3, to *C.JPH_RVec3, color C.JPH_Color) {
+	C.JPH_DebugRenderer_DrawLine(renderer, from, to, color)
+}
+
+func JPH_DebugRenderer_DrawWireBox(renderer *C.JPH_DebugRenderer, box *C.JPH_AABox, color C.JPH_Color) {
+	C.JPH_DebugRenderer_DrawWireBox(renderer, box, color)
+}
+
+func JPH_DebugRenderer_DrawWireBox2(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, box *C.JPH_AABox, color C.JPH_Color) {
+	C.JPH_DebugRenderer_DrawWireBox2(renderer, matrix, box, color)
+}
+
+func JPH_DebugRenderer_DrawMarker(renderer *C.JPH_DebugRenderer, position *C.JPH_RVec3, color C.JPH_Color, size float32) {
+	C.JPH_DebugRenderer_DrawMarker(renderer, position, color, C.float(size))
+}
+
+func JPH_DebugRenderer_DrawArrow(renderer *C.JPH_DebugRenderer, from *C.JPH_RVec3, to *C.JPH_RVec3, color C.JPH_Color, size float32) {
+	C.JPH_DebugRenderer_DrawArrow(renderer, from, to, color, C.float(size))
+}
+
+func JPH_DebugRenderer_DrawCoordinateSystem(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, size float32) {
+	C.JPH_DebugRenderer_DrawCoordinateSystem(renderer, matrix, C.float(size))
+}
+
+func JPH_DebugRenderer_DrawPlane(renderer *C.JPH_DebugRenderer, point *C.JPH_RVec3, normal *C.JPH_Vec3, color C.JPH_Color, size float32) {
+	C.JPH_DebugRenderer_DrawPlane(renderer, point, normal, color, C.float(size))
+}
+
+func JPH_DebugRenderer_DrawWireTriangle(renderer *C.JPH_DebugRenderer, v1 *C.JPH_RVec3, v2 *C.JPH_RVec3, v3 *C.JPH_RVec3, color C.JPH_Color) {
+	C.JPH_DebugRenderer_DrawWireTriangle(renderer, v1, v2, v3, color)
+}
+
+func JPH_DebugRenderer_DrawWireSphere(renderer *C.JPH_DebugRenderer, center *C.JPH_RVec3, radius float32, color C.JPH_Color, level int32) {
+	C.JPH_DebugRenderer_DrawWireSphere(renderer, center, C.float(radius), color, C.int(level))
+}
+
+func JPH_DebugRenderer_DrawWireUnitSphere(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, color C.JPH_Color, level int32) {
+	C.JPH_DebugRenderer_DrawWireUnitSphere(renderer, matrix, color, C.int(level))
+}
+
+func JPH_DebugRenderer_DrawTriangle(renderer *C.JPH_DebugRenderer, v1 *C.JPH_RVec3, v2 *C.JPH_RVec3, v3 *C.JPH_RVec3, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow) {
+	C.JPH_DebugRenderer_DrawTriangle(renderer, v1, v2, v3, color, castShadow)
+}
+
+func JPH_DebugRenderer_DrawBox(renderer *C.JPH_DebugRenderer, box *C.JPH_AABox, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawBox(renderer, box, color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawBox2(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, box *C.JPH_AABox, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawBox2(renderer, matrix, box, color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawSphere(renderer *C.JPH_DebugRenderer, center *C.JPH_RVec3, radius float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawSphere(renderer, center, C.float(radius), color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawUnitSphere(renderer *C.JPH_DebugRenderer, matrix C.JPH_RMat4, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawUnitSphere(renderer, matrix, color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawCapsule(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, halfHeightOfCylinder float32, radius float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawCapsule(renderer, matrix, C.float(halfHeightOfCylinder), C.float(radius), color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawCylinder(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, halfHeight float32, radius float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawCylinder(renderer, matrix, C.float(halfHeight), C.float(radius), color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawOpenCone(renderer *C.JPH_DebugRenderer, top *C.JPH_RVec3, axis *C.JPH_Vec3, perpendicular *C.JPH_Vec3, halfAngle float32, length float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawOpenCone(renderer, top, axis, perpendicular, C.float(halfAngle), C.float(length), color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawSwingConeLimits(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, swingYHalfAngle float32, swingZHalfAngle float32, edgeLength float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawSwingConeLimits(renderer, matrix, C.float(swingYHalfAngle), C.float(swingZHalfAngle), C.float(edgeLength), color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawSwingPyramidLimits(renderer *C.JPH_DebugRenderer, matrix *C.JPH_RMat4, minSwingYAngle float32, maxSwingYAngle float32, minSwingZAngle float32, maxSwingZAngle float32, edgeLength float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawSwingPyramidLimits(renderer, matrix, C.float(minSwingYAngle), C.float(maxSwingYAngle), C.float(minSwingZAngle), C.float(maxSwingZAngle), C.float(edgeLength), color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawPie(renderer *C.JPH_DebugRenderer, center *C.JPH_RVec3, radius float32, normal *C.JPH_Vec3, axis *C.JPH_Vec3, minAngle float32, maxAngle float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawPie(renderer, center, C.float(radius), normal, axis, C.float(minAngle), C.float(maxAngle), color, castShadow, drawMode)
+}
+
+func JPH_DebugRenderer_DrawTaperedCylinder(renderer *C.JPH_DebugRenderer, inMatrix *C.JPH_RMat4, top float32, bottom float32, topRadius float32, bottomRadius float32, color C.JPH_Color, castShadow C.JPH_DebugRenderer_CastShadow, drawMode C.JPH_DebugRenderer_DrawMode) {
+	C.JPH_DebugRenderer_DrawTaperedCylinder(renderer, inMatrix, C.float(top), C.float(bottom), C.float(topRadius), C.float(bottomRadius), color, castShadow, drawMode)
+}
+
+func JPH_Skeleton_Create() *C.JPH_Skeleton {
+	return C.JPH_Skeleton_Create()
+}
+
+func JPH_Skeleton_Destroy(skeleton *C.JPH_Skeleton) { C.JPH_Skeleton_Destroy(skeleton) }
+
+func JPH_Skeleton_AddJoint(skeleton *C.JPH_Skeleton, name unsafe.Pointer) uint32 {
+	return uint32(C.JPH_Skeleton_AddJoint(skeleton, (*C.char)(unsafe.Pointer(name))))
+}
+
+func JPH_Skeleton_AddJoint2(skeleton *C.JPH_Skeleton, name unsafe.Pointer, parentIndex int32) uint32 {
+	return uint32(C.JPH_Skeleton_AddJoint2(skeleton, (*C.char)(unsafe.Pointer(name)), C.int(parentIndex)))
+}
+
+func JPH_Skeleton_AddJoint3(skeleton *C.JPH_Skeleton, name unsafe.Pointer, parentName unsafe.Pointer) uint32 {
+	return uint32(C.JPH_Skeleton_AddJoint3(skeleton, (*C.char)(unsafe.Pointer(name)), (*C.char)(unsafe.Pointer(parentName))))
+}
+
+func JPH_Skeleton_GetJointCount(skeleton *C.JPH_Skeleton) int32 {
+	return int32(C.JPH_Skeleton_GetJointCount(skeleton))
+}
+
+func JPH_Skeleton_GetJoint(skeleton *C.JPH_Skeleton, index int32, joint *C.JPH_SkeletonJoint) {
+	C.JPH_Skeleton_GetJoint(skeleton, C.int(index), joint)
+}
+
+func JPH_Skeleton_GetJointIndex(skeleton *C.JPH_Skeleton, name unsafe.Pointer) int32 {
+	return int32(C.JPH_Skeleton_GetJointIndex(skeleton, (*C.char)(unsafe.Pointer(name))))
+}
+
+func JPH_Skeleton_CalculateParentJointIndices(skeleton *C.JPH_Skeleton) {
+	C.JPH_Skeleton_CalculateParentJointIndices(skeleton)
+}
+
+func JPH_Skeleton_AreJointsCorrectlyOrdered(skeleton *C.JPH_Skeleton) bool {
+	return bool(C.JPH_Skeleton_AreJointsCorrectlyOrdered(skeleton))
+}
+
+func JPH_SkeletonPose_Create() *C.JPH_SkeletonPose {
+	return C.JPH_SkeletonPose_Create()
+}
+
+func JPH_SkeletonPose_Destroy(pose *C.JPH_SkeletonPose) { C.JPH_SkeletonPose_Destroy(pose) }
+
+func JPH_SkeletonPose_SetSkeleton(pose *C.JPH_SkeletonPose, skeleton *C.JPH_Skeleton) {
+	C.JPH_SkeletonPose_SetSkeleton(pose, skeleton)
+}
+
+func JPH_SkeletonPose_GetSkeleton(pose *C.JPH_SkeletonPose) *C.JPH_Skeleton {
+	return C.JPH_SkeletonPose_GetSkeleton(pose)
+}
+
+func JPH_SkeletonPose_SetRootOffset(pose *C.JPH_SkeletonPose, offset *C.JPH_RVec3) {
+	C.JPH_SkeletonPose_SetRootOffset(pose, offset)
+}
+
+func JPH_SkeletonPose_GetRootOffset(pose *C.JPH_SkeletonPose, result *C.JPH_RVec3) {
+	C.JPH_SkeletonPose_GetRootOffset(pose, result)
+}
+
+func JPH_SkeletonPose_GetJointCount(pose *C.JPH_SkeletonPose) int32 {
+	return int32(C.JPH_SkeletonPose_GetJointCount(pose))
+}
+
+func JPH_SkeletonPose_GetJointState(pose *C.JPH_SkeletonPose, index int32, outTranslation *C.JPH_Vec3, outRotation *C.JPH_Quat) {
+	C.JPH_SkeletonPose_GetJointState(pose, C.int(index), outTranslation, outRotation)
+}
+
+func JPH_SkeletonPose_SetJointState(pose *C.JPH_SkeletonPose, index int32, translation *C.JPH_Vec3, rotation *C.JPH_Quat) {
+	C.JPH_SkeletonPose_SetJointState(pose, C.int(index), translation, rotation)
+}
+
+func JPH_SkeletonPose_GetJointMatrix(pose *C.JPH_SkeletonPose, index int32, result *C.JPH_Mat4) {
+	C.JPH_SkeletonPose_GetJointMatrix(pose, C.int(index), result)
+}
+
+func JPH_SkeletonPose_SetJointMatrix(pose *C.JPH_SkeletonPose, index int32, matrix *C.JPH_Mat4) {
+	C.JPH_SkeletonPose_SetJointMatrix(pose, C.int(index), matrix)
+}
+
+func JPH_SkeletonPose_GetJointMatrices(pose *C.JPH_SkeletonPose, outMatrices *C.JPH_Mat4, count int32) {
+	C.JPH_SkeletonPose_GetJointMatrices(pose, outMatrices, C.int(count))
+}
+
+func JPH_SkeletonPose_SetJointMatrices(pose *C.JPH_SkeletonPose, matrices *C.JPH_Mat4, count int32) {
+	C.JPH_SkeletonPose_SetJointMatrices(pose, matrices, C.int(count))
+}
+
+func JPH_SkeletonPose_CalculateJointMatrices(pose *C.JPH_SkeletonPose) {
+	C.JPH_SkeletonPose_CalculateJointMatrices(pose)
+}
+
+func JPH_SkeletonPose_CalculateJointStates(pose *C.JPH_SkeletonPose) {
+	C.JPH_SkeletonPose_CalculateJointStates(pose)
+}
+
+func JPH_SkeletonPose_CalculateLocalSpaceJointMatrices(pose *C.JPH_SkeletonPose, outMatrices *C.JPH_Mat4) {
+	C.JPH_SkeletonPose_CalculateLocalSpaceJointMatrices(pose, outMatrices)
+}
+
+func JPH_SkeletalAnimation_Create() *C.JPH_SkeletalAnimation {
+	return C.JPH_SkeletalAnimation_Create()
+}
+
+func JPH_SkeletalAnimation_Destroy(animation *C.JPH_SkeletalAnimation) {
+	C.JPH_SkeletalAnimation_Destroy(animation)
+}
+
+func JPH_SkeletalAnimation_GetDuration(animation *C.JPH_SkeletalAnimation) float32 {
+	return float32(C.JPH_SkeletalAnimation_GetDuration(animation))
+}
+
+func JPH_SkeletalAnimation_IsLooping(animation *C.JPH_SkeletalAnimation) bool {
+	return bool(C.JPH_SkeletalAnimation_IsLooping(animation))
+}
+
+func JPH_SkeletalAnimation_SetIsLooping(animation *C.JPH_SkeletalAnimation, looping bool) {
+	C.JPH_SkeletalAnimation_SetIsLooping(animation, C.bool(looping))
+}
+
+func JPH_SkeletalAnimation_ScaleJoints(animation *C.JPH_SkeletalAnimation, scale float32) {
+	C.JPH_SkeletalAnimation_ScaleJoints(animation, C.float(scale))
+}
+
+func JPH_SkeletalAnimation_Sample(animation *C.JPH_SkeletalAnimation, time float32, pose *C.JPH_SkeletonPose) {
+	C.JPH_SkeletalAnimation_Sample(animation, C.float(time), pose)
+}
+
+func JPH_SkeletalAnimation_GetAnimatedJointCount(animation *C.JPH_SkeletalAnimation) int32 {
+	return int32(C.JPH_SkeletalAnimation_GetAnimatedJointCount(animation))
+}
+
+func JPH_SkeletalAnimation_AddAnimatedJoint(animation *C.JPH_SkeletalAnimation, jointName unsafe.Pointer) {
+	C.JPH_SkeletalAnimation_AddAnimatedJoint(animation, (*C.char)(unsafe.Pointer(jointName)))
+}
+
+func JPH_SkeletalAnimation_AddKeyframe(animation *C.JPH_SkeletalAnimation, jointIndex int32, time float32, translation *C.JPH_Vec3, rotation *C.JPH_Quat) {
+	C.JPH_SkeletalAnimation_AddKeyframe(animation, C.int(jointIndex), C.float(time), translation, rotation)
+}
+
+func JPH_SkeletonMapper_Create() *C.JPH_SkeletonMapper {
+	return C.JPH_SkeletonMapper_Create()
+}
+
+func JPH_SkeletonMapper_Destroy(mapper *C.JPH_SkeletonMapper) { C.JPH_SkeletonMapper_Destroy(mapper) }
+
+func JPH_SkeletonMapper_Initialize(mapper *C.JPH_SkeletonMapper, skeleton1 *C.JPH_Skeleton, neutralPose1 *C.JPH_Mat4, skeleton2 *C.JPH_Skeleton, neutralPose2 *C.JPH_Mat4) {
+	C.JPH_SkeletonMapper_Initialize(mapper, skeleton1, neutralPose1, skeleton2, neutralPose2)
+}
+
+func JPH_SkeletonMapper_LockAllTranslations(mapper *C.JPH_SkeletonMapper, skeleton2 *C.JPH_Skeleton, neutralPose2 *C.JPH_Mat4) {
+	C.JPH_SkeletonMapper_LockAllTranslations(mapper, skeleton2, neutralPose2)
+}
+
+func JPH_SkeletonMapper_LockTranslations(mapper *C.JPH_SkeletonMapper, skeleton2 *C.JPH_Skeleton, lockedTranslations unsafe.Pointer, neutralPose2 *C.JPH_Mat4) {
+	C.JPH_SkeletonMapper_LockTranslations(mapper, skeleton2, (*C._Bool)(unsafe.Pointer(lockedTranslations)), neutralPose2)
+}
+
+func JPH_SkeletonMapper_Map(mapper *C.JPH_SkeletonMapper, pose1ModelSpace *C.JPH_Mat4, pose2LocalSpace *C.JPH_Mat4, outPose2ModelSpace *C.JPH_Mat4) {
+	C.JPH_SkeletonMapper_Map(mapper, pose1ModelSpace, pose2LocalSpace, outPose2ModelSpace)
+}
+
+func JPH_SkeletonMapper_MapReverse(mapper *C.JPH_SkeletonMapper, pose2ModelSpace *C.JPH_Mat4, outPose1ModelSpace *C.JPH_Mat4) {
+	C.JPH_SkeletonMapper_MapReverse(mapper, pose2ModelSpace, outPose1ModelSpace)
+}
+
+func JPH_SkeletonMapper_GetMappedJointIndex(mapper *C.JPH_SkeletonMapper, joint1Index int32) int32 {
+	return int32(C.JPH_SkeletonMapper_GetMappedJointIndex(mapper, C.int(joint1Index)))
+}
+
+func JPH_SkeletonMapper_IsJointTranslationLocked(mapper *C.JPH_SkeletonMapper, joint2Index int32) bool {
+	return bool(C.JPH_SkeletonMapper_IsJointTranslationLocked(mapper, C.int(joint2Index)))
+}
+
+func JPH_RagdollSettings_Create() *C.JPH_RagdollSettings {
+	return C.JPH_RagdollSettings_Create()
+}
+
+func JPH_RagdollSettings_Destroy(settings *C.JPH_RagdollSettings) {
+	C.JPH_RagdollSettings_Destroy(settings)
+}
+
+func JPH_RagdollSettings_GetSkeleton(character *C.JPH_RagdollSettings) *C.JPH_Skeleton {
+	return C.JPH_RagdollSettings_GetSkeleton(character)
+}
+
+func JPH_RagdollSettings_SetSkeleton(character *C.JPH_RagdollSettings, skeleton *C.JPH_Skeleton) {
+	C.JPH_RagdollSettings_SetSkeleton(character, skeleton)
+}
+
+func JPH_RagdollSettings_Stabilize(settings *C.JPH_RagdollSettings) bool {
+	return bool(C.JPH_RagdollSettings_Stabilize(settings))
+}
+
+func JPH_RagdollSettings_DisableParentChildCollisions(settings *C.JPH_RagdollSettings, jointMatrices *C.JPH_Mat4, minSeparationDistance float32) {
+	C.JPH_RagdollSettings_DisableParentChildCollisions(settings, jointMatrices, C.float(minSeparationDistance))
+}
+
+func JPH_RagdollSettings_CalculateBodyIndexToConstraintIndex(settings *C.JPH_RagdollSettings) {
+	C.JPH_RagdollSettings_CalculateBodyIndexToConstraintIndex(settings)
+}
+
+func JPH_RagdollSettings_GetConstraintIndexForBodyIndex(settings *C.JPH_RagdollSettings, bodyIndex int32) int32 {
+	return int32(C.JPH_RagdollSettings_GetConstraintIndexForBodyIndex(settings, C.int(bodyIndex)))
+}
+
+func JPH_RagdollSettings_CalculateConstraintIndexToBodyIdxPair(settings *C.JPH_RagdollSettings) {
+	C.JPH_RagdollSettings_CalculateConstraintIndexToBodyIdxPair(settings)
+}
+
+func JPH_RagdollSettings_ResizeParts(settings *C.JPH_RagdollSettings, count int32) {
+	C.JPH_RagdollSettings_ResizeParts(settings, C.int(count))
+}
+
+func JPH_RagdollSettings_GetPartCount(settings *C.JPH_RagdollSettings) int32 {
+	return int32(C.JPH_RagdollSettings_GetPartCount(settings))
+}
+
+func JPH_RagdollSettings_SetPartShape(settings *C.JPH_RagdollSettings, partIndex int32, shape *C.JPH_Shape) {
+	C.JPH_RagdollSettings_SetPartShape(settings, C.int(partIndex), shape)
+}
+
+func JPH_RagdollSettings_SetPartPosition(settings *C.JPH_RagdollSettings, partIndex int32, position *C.JPH_RVec3) {
+	C.JPH_RagdollSettings_SetPartPosition(settings, C.int(partIndex), position)
+}
+
+func JPH_RagdollSettings_SetPartRotation(settings *C.JPH_RagdollSettings, partIndex int32, rotation *C.JPH_Quat) {
+	C.JPH_RagdollSettings_SetPartRotation(settings, C.int(partIndex), rotation)
+}
+
+func JPH_RagdollSettings_SetPartMotionType(settings *C.JPH_RagdollSettings, partIndex int32, motionType C.JPH_MotionType) {
+	C.JPH_RagdollSettings_SetPartMotionType(settings, C.int(partIndex), motionType)
+}
+
+func JPH_RagdollSettings_SetPartObjectLayer(settings *C.JPH_RagdollSettings, partIndex int32, layer C.JPH_ObjectLayer) {
+	C.JPH_RagdollSettings_SetPartObjectLayer(settings, C.int(partIndex), layer)
+}
+
+func JPH_RagdollSettings_SetPartMassProperties(settings *C.JPH_RagdollSettings, partIndex int32, mass float32) {
+	C.JPH_RagdollSettings_SetPartMassProperties(settings, C.int(partIndex), C.float(mass))
+}
+
+func JPH_RagdollSettings_SetPartToParent(settings *C.JPH_RagdollSettings, partIndex int32, constraintSettings *C.JPH_SwingTwistConstraintSettings) {
+	C.JPH_RagdollSettings_SetPartToParent(settings, C.int(partIndex), constraintSettings)
+}
+
+func JPH_RagdollSettings_CreateRagdoll(settings *C.JPH_RagdollSettings, system *C.JPH_PhysicsSystem, collisionGroup C.JPH_CollisionGroupID, userData uint64) *C.JPH_Ragdoll {
+	return C.JPH_RagdollSettings_CreateRagdoll(settings, system, collisionGroup, C.uint64_t(userData))
+}
+
+func JPH_Ragdoll_Destroy(ragdoll *C.JPH_Ragdoll) { C.JPH_Ragdoll_Destroy(ragdoll) }
+
+func JPH_Ragdoll_AddToPhysicsSystem(ragdoll *C.JPH_Ragdoll, activationMode C.JPH_Activation, lockBodies bool) {
+	C.JPH_Ragdoll_AddToPhysicsSystem(ragdoll, activationMode, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_RemoveFromPhysicsSystem(ragdoll *C.JPH_Ragdoll, lockBodies bool) {
+	C.JPH_Ragdoll_RemoveFromPhysicsSystem(ragdoll, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_Activate(ragdoll *C.JPH_Ragdoll, lockBodies bool) {
+	C.JPH_Ragdoll_Activate(ragdoll, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_IsActive(ragdoll *C.JPH_Ragdoll, lockBodies bool) bool {
+	return bool(C.JPH_Ragdoll_IsActive(ragdoll, C.bool(lockBodies)))
+}
+
+func JPH_Ragdoll_ResetWarmStart(ragdoll *C.JPH_Ragdoll) { C.JPH_Ragdoll_ResetWarmStart(ragdoll) }
+
+func JPH_Ragdoll_SetPose(ragdoll *C.JPH_Ragdoll, pose *C.JPH_SkeletonPose, lockBodies bool) {
+	C.JPH_Ragdoll_SetPose(ragdoll, pose, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_SetPose2(ragdoll *C.JPH_Ragdoll, rootOffset *C.JPH_RVec3, jointMatrices *C.JPH_Mat4, lockBodies bool) {
+	C.JPH_Ragdoll_SetPose2(ragdoll, rootOffset, jointMatrices, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_GetPose(ragdoll *C.JPH_Ragdoll, outPose *C.JPH_SkeletonPose, lockBodies bool) {
+	C.JPH_Ragdoll_GetPose(ragdoll, outPose, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_GetPose2(ragdoll *C.JPH_Ragdoll, outRootOffset *C.JPH_RVec3, outJointMatrices *C.JPH_Mat4, lockBodies bool) {
+	C.JPH_Ragdoll_GetPose2(ragdoll, outRootOffset, outJointMatrices, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_DriveToPoseUsingMotors(ragdoll *C.JPH_Ragdoll, pose *C.JPH_SkeletonPose) {
+	C.JPH_Ragdoll_DriveToPoseUsingMotors(ragdoll, pose)
+}
+
+func JPH_Ragdoll_DriveToPoseUsingKinematics(ragdoll *C.JPH_Ragdoll, pose *C.JPH_SkeletonPose, deltaTime float32, lockBodies bool) {
+	C.JPH_Ragdoll_DriveToPoseUsingKinematics(ragdoll, pose, C.float(deltaTime), C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_GetBodyCount(ragdoll *C.JPH_Ragdoll) int32 {
+	return int32(C.JPH_Ragdoll_GetBodyCount(ragdoll))
+}
+
+func JPH_Ragdoll_GetBodyID(ragdoll *C.JPH_Ragdoll, bodyIndex int32) C.JPH_BodyID {
+	return C.JPH_Ragdoll_GetBodyID(ragdoll, C.int(bodyIndex))
+}
+
+func JPH_Ragdoll_GetConstraintCount(ragdoll *C.JPH_Ragdoll) int32 {
+	return int32(C.JPH_Ragdoll_GetConstraintCount(ragdoll))
+}
+
+func JPH_Ragdoll_GetConstraint(ragdoll *C.JPH_Ragdoll, constraintIndex int32) *C.JPH_TwoBodyConstraint {
+	return C.JPH_Ragdoll_GetConstraint(ragdoll, C.int(constraintIndex))
+}
+
+func JPH_Ragdoll_GetRootTransform(ragdoll *C.JPH_Ragdoll, outPosition *C.JPH_RVec3, outRotation *C.JPH_Quat, lockBodies bool) {
+	C.JPH_Ragdoll_GetRootTransform(ragdoll, outPosition, outRotation, C.bool(lockBodies))
+}
+
+func JPH_Ragdoll_GetRagdollSettings(ragdoll *C.JPH_Ragdoll) *C.JPH_RagdollSettings {
+	return C.JPH_Ragdoll_GetRagdollSettings(ragdoll)
+}
+
+func JPH_EstimateCollisionResponse(body1 *C.JPH_Body, body2 *C.JPH_Body, manifold *C.JPH_ContactManifold, combinedFriction float32, combinedRestitution float32, minVelocityForRestitution float32, numIterations uint32, result *C.JPH_CollisionEstimationResult) {
+	C.JPH_EstimateCollisionResponse(body1, body2, manifold, C.float(combinedFriction), C.float(combinedRestitution), C.float(minVelocityForRestitution), C.uint32_t(numIterations), result)
+}
+
+func JPH_VehicleConstraintSettings_Init(settings *C.JPH_VehicleConstraintSettings) {
+	C.JPH_VehicleConstraintSettings_Init(settings)
+}
+
+func JPH_VehicleConstraint_Create(body *C.JPH_Body, settings *C.JPH_VehicleConstraintSettings) *C.JPH_VehicleConstraint {
+	return C.JPH_VehicleConstraint_Create(body, settings)
+}
+
+func JPH_VehicleConstraint_AsPhysicsStepListener(constraint *C.JPH_VehicleConstraint) *C.JPH_PhysicsStepListener {
+	return C.JPH_VehicleConstraint_AsPhysicsStepListener(constraint)
+}
+
+func JPH_VehicleConstraint_SetMaxPitchRollAngle(constraint *C.JPH_VehicleConstraint, maxPitchRollAngle float32) {
+	C.JPH_VehicleConstraint_SetMaxPitchRollAngle(constraint, C.float(maxPitchRollAngle))
+}
+
+func JPH_VehicleConstraint_SetVehicleCollisionTester(constraint *C.JPH_VehicleConstraint, tester *C.JPH_VehicleCollisionTester) {
+	C.JPH_VehicleConstraint_SetVehicleCollisionTester(constraint, tester)
+}
+
+func JPH_VehicleConstraint_OverrideGravity(constraint *C.JPH_VehicleConstraint, value *C.JPH_Vec3) {
+	C.JPH_VehicleConstraint_OverrideGravity(constraint, value)
+}
+
+func JPH_VehicleConstraint_IsGravityOverridden(constraint *C.JPH_VehicleConstraint) bool {
+	return bool(C.JPH_VehicleConstraint_IsGravityOverridden(constraint))
+}
+
+func JPH_VehicleConstraint_GetGravityOverride(constraint *C.JPH_VehicleConstraint, result *C.JPH_Vec3) {
+	C.JPH_VehicleConstraint_GetGravityOverride(constraint, result)
+}
+
+func JPH_VehicleConstraint_ResetGravityOverride(constraint *C.JPH_VehicleConstraint) {
+	C.JPH_VehicleConstraint_ResetGravityOverride(constraint)
+}
+
+func JPH_VehicleConstraint_GetLocalForward(constraint *C.JPH_VehicleConstraint, result *C.JPH_Vec3) {
+	C.JPH_VehicleConstraint_GetLocalForward(constraint, result)
+}
+
+func JPH_VehicleConstraint_GetLocalUp(constraint *C.JPH_VehicleConstraint, result *C.JPH_Vec3) {
+	C.JPH_VehicleConstraint_GetLocalUp(constraint, result)
+}
+
+func JPH_VehicleConstraint_GetWorldUp(constraint *C.JPH_VehicleConstraint, result *C.JPH_Vec3) {
+	C.JPH_VehicleConstraint_GetWorldUp(constraint, result)
+}
+
+func JPH_VehicleConstraint_GetVehicleBody(constraint *C.JPH_VehicleConstraint) *C.JPH_Body {
+	return C.JPH_VehicleConstraint_GetVehicleBody(constraint)
+}
+
+func JPH_VehicleConstraint_GetController(constraint *C.JPH_VehicleConstraint) *C.JPH_VehicleController {
+	return C.JPH_VehicleConstraint_GetController(constraint)
+}
+
+func JPH_VehicleConstraint_GetWheelsCount(constraint *C.JPH_VehicleConstraint) uint32 {
+	return uint32(C.JPH_VehicleConstraint_GetWheelsCount(constraint))
+}
+
+func JPH_VehicleConstraint_GetWheel(constraint *C.JPH_VehicleConstraint, index uint32) *C.JPH_Wheel {
+	return C.JPH_VehicleConstraint_GetWheel(constraint, C.uint32_t(index))
+}
+
+func JPH_VehicleConstraint_GetWheelLocalBasis(constraint *C.JPH_VehicleConstraint, wheel *C.JPH_Wheel, outForward *C.JPH_Vec3, outUp *C.JPH_Vec3, outRight *C.JPH_Vec3) {
+	C.JPH_VehicleConstraint_GetWheelLocalBasis(constraint, wheel, outForward, outUp, outRight)
+}
+
+func JPH_VehicleConstraint_GetWheelLocalTransform(constraint *C.JPH_VehicleConstraint, wheelIndex uint32, wheelRight *C.JPH_Vec3, wheelUp *C.JPH_Vec3, result *C.JPH_Mat4) {
+	C.JPH_VehicleConstraint_GetWheelLocalTransform(constraint, C.uint32_t(wheelIndex), wheelRight, wheelUp, result)
+}
+
+func JPH_VehicleConstraint_GetWheelWorldTransform(constraint *C.JPH_VehicleConstraint, wheelIndex uint32, wheelRight *C.JPH_Vec3, wheelUp *C.JPH_Vec3, result *C.JPH_RMat4) {
+	C.JPH_VehicleConstraint_GetWheelWorldTransform(constraint, C.uint32_t(wheelIndex), wheelRight, wheelUp, result)
+}
+
+func JPH_WheelSettings_Create() *C.JPH_WheelSettings {
+	return C.JPH_WheelSettings_Create()
+}
+
+func JPH_WheelSettings_Destroy(settings *C.JPH_WheelSettings) { C.JPH_WheelSettings_Destroy(settings) }
+
+func JPH_WheelSettings_GetPosition(settings *C.JPH_WheelSettings, result *C.JPH_Vec3) {
+	C.JPH_WheelSettings_GetPosition(settings, result)
+}
+
+func JPH_WheelSettings_SetPosition(settings *C.JPH_WheelSettings, value *C.JPH_Vec3) {
+	C.JPH_WheelSettings_SetPosition(settings, value)
+}
+
+func JPH_WheelSettings_GetSuspensionForcePoint(settings *C.JPH_WheelSettings, result *C.JPH_Vec3) {
+	C.JPH_WheelSettings_GetSuspensionForcePoint(settings, result)
+}
+
+func JPH_WheelSettings_SetSuspensionForcePoint(settings *C.JPH_WheelSettings, value *C.JPH_Vec3) {
+	C.JPH_WheelSettings_SetSuspensionForcePoint(settings, value)
+}
+
+func JPH_WheelSettings_GetSuspensionDirection(settings *C.JPH_WheelSettings, result *C.JPH_Vec3) {
+	C.JPH_WheelSettings_GetSuspensionDirection(settings, result)
+}
+
+func JPH_WheelSettings_SetSuspensionDirection(settings *C.JPH_WheelSettings, value *C.JPH_Vec3) {
+	C.JPH_WheelSettings_SetSuspensionDirection(settings, value)
+}
+
+func JPH_WheelSettings_GetSteeringAxis(settings *C.JPH_WheelSettings, result *C.JPH_Vec3) {
+	C.JPH_WheelSettings_GetSteeringAxis(settings, result)
+}
+
+func JPH_WheelSettings_SetSteeringAxis(settings *C.JPH_WheelSettings, value *C.JPH_Vec3) {
+	C.JPH_WheelSettings_SetSteeringAxis(settings, value)
+}
+
+func JPH_WheelSettings_GetWheelUp(settings *C.JPH_WheelSettings, result *C.JPH_Vec3) {
+	C.JPH_WheelSettings_GetWheelUp(settings, result)
+}
+
+func JPH_WheelSettings_SetWheelUp(settings *C.JPH_WheelSettings, value *C.JPH_Vec3) {
+	C.JPH_WheelSettings_SetWheelUp(settings, value)
+}
+
+func JPH_WheelSettings_GetWheelForward(settings *C.JPH_WheelSettings, result *C.JPH_Vec3) {
+	C.JPH_WheelSettings_GetWheelForward(settings, result)
+}
+
+func JPH_WheelSettings_SetWheelForward(settings *C.JPH_WheelSettings, value *C.JPH_Vec3) {
+	C.JPH_WheelSettings_SetWheelForward(settings, value)
+}
+
+func JPH_WheelSettings_GetSuspensionMinLength(settings *C.JPH_WheelSettings) float32 {
+	return float32(C.JPH_WheelSettings_GetSuspensionMinLength(settings))
+}
+
+func JPH_WheelSettings_SetSuspensionMinLength(settings *C.JPH_WheelSettings, value float32) {
+	C.JPH_WheelSettings_SetSuspensionMinLength(settings, C.float(value))
+}
+
+func JPH_WheelSettings_GetSuspensionMaxLength(settings *C.JPH_WheelSettings) float32 {
+	return float32(C.JPH_WheelSettings_GetSuspensionMaxLength(settings))
+}
+
+func JPH_WheelSettings_SetSuspensionMaxLength(settings *C.JPH_WheelSettings, value float32) {
+	C.JPH_WheelSettings_SetSuspensionMaxLength(settings, C.float(value))
+}
+
+func JPH_WheelSettings_GetSuspensionPreloadLength(settings *C.JPH_WheelSettings) float32 {
+	return float32(C.JPH_WheelSettings_GetSuspensionPreloadLength(settings))
+}
+
+func JPH_WheelSettings_SetSuspensionPreloadLength(settings *C.JPH_WheelSettings, value float32) {
+	C.JPH_WheelSettings_SetSuspensionPreloadLength(settings, C.float(value))
+}
+
+func JPH_WheelSettings_GetSuspensionSpring(settings *C.JPH_WheelSettings, result *C.JPH_SpringSettings) {
+	C.JPH_WheelSettings_GetSuspensionSpring(settings, result)
+}
+
+func JPH_WheelSettings_SetSuspensionSpring(settings *C.JPH_WheelSettings, springSettings *C.JPH_SpringSettings) {
+	C.JPH_WheelSettings_SetSuspensionSpring(settings, springSettings)
+}
+
+func JPH_WheelSettings_GetRadius(settings *C.JPH_WheelSettings) float32 {
+	return float32(C.JPH_WheelSettings_GetRadius(settings))
+}
+
+func JPH_WheelSettings_SetRadius(settings *C.JPH_WheelSettings, value float32) {
+	C.JPH_WheelSettings_SetRadius(settings, C.float(value))
+}
+
+func JPH_WheelSettings_GetWidth(settings *C.JPH_WheelSettings) float32 {
+	return float32(C.JPH_WheelSettings_GetWidth(settings))
+}
+
+func JPH_WheelSettings_SetWidth(settings *C.JPH_WheelSettings, value float32) {
+	C.JPH_WheelSettings_SetWidth(settings, C.float(value))
+}
+
+func JPH_WheelSettings_GetEnableSuspensionForcePoint(settings *C.JPH_WheelSettings) bool {
+	return bool(C.JPH_WheelSettings_GetEnableSuspensionForcePoint(settings))
+}
+
+func JPH_WheelSettings_SetEnableSuspensionForcePoint(settings *C.JPH_WheelSettings, value bool) {
+	C.JPH_WheelSettings_SetEnableSuspensionForcePoint(settings, C.bool(value))
+}
+
+func JPH_Wheel_Create(settings *C.JPH_WheelSettings) *C.JPH_Wheel {
+	return C.JPH_Wheel_Create(settings)
+}
+
+func JPH_Wheel_Destroy(wheel *C.JPH_Wheel) { C.JPH_Wheel_Destroy(wheel) }
+
+func JPH_Wheel_GetSettings(wheel *C.JPH_Wheel) *C.JPH_WheelSettings {
+	return C.JPH_Wheel_GetSettings(wheel)
+}
+
+func JPH_Wheel_GetAngularVelocity(wheel *C.JPH_Wheel) float32 {
+	return float32(C.JPH_Wheel_GetAngularVelocity(wheel))
+}
+
+func JPH_Wheel_SetAngularVelocity(wheel *C.JPH_Wheel, value float32) {
+	C.JPH_Wheel_SetAngularVelocity(wheel, C.float(value))
+}
+
+func JPH_Wheel_GetRotationAngle(wheel *C.JPH_Wheel) float32 {
+	return float32(C.JPH_Wheel_GetRotationAngle(wheel))
+}
+
+func JPH_Wheel_SetRotationAngle(wheel *C.JPH_Wheel, value float32) {
+	C.JPH_Wheel_SetRotationAngle(wheel, C.float(value))
+}
+
+func JPH_Wheel_GetSteerAngle(wheel *C.JPH_Wheel) float32 {
+	return float32(C.JPH_Wheel_GetSteerAngle(wheel))
+}
+
+func JPH_Wheel_SetSteerAngle(wheel *C.JPH_Wheel, value float32) {
+	C.JPH_Wheel_SetSteerAngle(wheel, C.float(value))
+}
+
+func JPH_Wheel_HasContact(wheel *C.JPH_Wheel) bool {
+	return bool(C.JPH_Wheel_HasContact(wheel))
+}
+
+func JPH_Wheel_GetContactBodyID(wheel *C.JPH_Wheel) C.JPH_BodyID {
+	return C.JPH_Wheel_GetContactBodyID(wheel)
+}
+
+func JPH_Wheel_GetContactSubShapeID(wheel *C.JPH_Wheel) C.JPH_SubShapeID {
+	return C.JPH_Wheel_GetContactSubShapeID(wheel)
+}
+
+func JPH_Wheel_GetContactPosition(wheel *C.JPH_Wheel, result *C.JPH_RVec3) {
+	C.JPH_Wheel_GetContactPosition(wheel, result)
+}
+
+func JPH_Wheel_GetContactPointVelocity(wheel *C.JPH_Wheel, result *C.JPH_Vec3) {
+	C.JPH_Wheel_GetContactPointVelocity(wheel, result)
+}
+
+func JPH_Wheel_GetContactNormal(wheel *C.JPH_Wheel, result *C.JPH_Vec3) {
+	C.JPH_Wheel_GetContactNormal(wheel, result)
+}
+
+func JPH_Wheel_GetContactLongitudinal(wheel *C.JPH_Wheel, result *C.JPH_Vec3) {
+	C.JPH_Wheel_GetContactLongitudinal(wheel, result)
+}
+
+func JPH_Wheel_GetContactLateral(wheel *C.JPH_Wheel, result *C.JPH_Vec3) {
+	C.JPH_Wheel_GetContactLateral(wheel, result)
+}
+
+func JPH_Wheel_GetSuspensionLength(wheel *C.JPH_Wheel) float32 {
+	return float32(C.JPH_Wheel_GetSuspensionLength(wheel))
+}
+
+func JPH_Wheel_GetSuspensionLambda(wheel *C.JPH_Wheel) float32 {
+	return float32(C.JPH_Wheel_GetSuspensionLambda(wheel))
+}
+
+func JPH_Wheel_GetLongitudinalLambda(wheel *C.JPH_Wheel) float32 {
+	return float32(C.JPH_Wheel_GetLongitudinalLambda(wheel))
+}
+
+func JPH_Wheel_GetLateralLambda(wheel *C.JPH_Wheel) float32 {
+	return float32(C.JPH_Wheel_GetLateralLambda(wheel))
+}
+
+func JPH_Wheel_HasHitHardPoint(wheel *C.JPH_Wheel) bool {
+	return bool(C.JPH_Wheel_HasHitHardPoint(wheel))
+}
+
+func JPH_VehicleAntiRollBar_Init(antiRollBar *C.JPH_VehicleAntiRollBar) {
+	C.JPH_VehicleAntiRollBar_Init(antiRollBar)
+}
+
+func JPH_VehicleEngineSettings_Init(settings *C.JPH_VehicleEngineSettings) {
+	C.JPH_VehicleEngineSettings_Init(settings)
+}
+
+func JPH_VehicleEngine_ClampRPM(engine *C.JPH_VehicleEngine) { C.JPH_VehicleEngine_ClampRPM(engine) }
+
+func JPH_VehicleEngine_GetCurrentRPM(engine *C.JPH_VehicleEngine) float32 {
+	return float32(C.JPH_VehicleEngine_GetCurrentRPM(engine))
+}
+
+func JPH_VehicleEngine_SetCurrentRPM(engine *C.JPH_VehicleEngine, rpm float32) {
+	C.JPH_VehicleEngine_SetCurrentRPM(engine, C.float(rpm))
+}
+
+func JPH_VehicleEngine_GetAngularVelocity(engine *C.JPH_VehicleEngine) float32 {
+	return float32(C.JPH_VehicleEngine_GetAngularVelocity(engine))
+}
+
+func JPH_VehicleEngine_GetTorque(engine *C.JPH_VehicleEngine, acceleration float32) float32 {
+	return float32(C.JPH_VehicleEngine_GetTorque(engine, C.float(acceleration)))
+}
+
+func JPH_VehicleEngine_ApplyTorque(engine *C.JPH_VehicleEngine, torque float32, deltaTime float32) {
+	C.JPH_VehicleEngine_ApplyTorque(engine, C.float(torque), C.float(deltaTime))
+}
+
+func JPH_VehicleEngine_ApplyDamping(engine *C.JPH_VehicleEngine, deltaTime float32) {
+	C.JPH_VehicleEngine_ApplyDamping(engine, C.float(deltaTime))
+}
+
+func JPH_VehicleEngine_AllowSleep(engine *C.JPH_VehicleEngine) bool {
+	return bool(C.JPH_VehicleEngine_AllowSleep(engine))
+}
+
+func JPH_VehicleDifferentialSettings_Init(settings *C.JPH_VehicleDifferentialSettings) {
+	C.JPH_VehicleDifferentialSettings_Init(settings)
+}
+
+func JPH_VehicleTransmissionSettings_Create() *C.JPH_VehicleTransmissionSettings {
+	return C.JPH_VehicleTransmissionSettings_Create()
+}
+
+func JPH_VehicleTransmissionSettings_Destroy(settings *C.JPH_VehicleTransmissionSettings) {
+	C.JPH_VehicleTransmissionSettings_Destroy(settings)
+}
+
+func JPH_VehicleTransmissionSettings_GetMode(settings *C.JPH_VehicleTransmissionSettings) C.JPH_TransmissionMode {
+	return C.JPH_VehicleTransmissionSettings_GetMode(settings)
+}
+
+func JPH_VehicleTransmissionSettings_SetMode(settings *C.JPH_VehicleTransmissionSettings, value C.JPH_TransmissionMode) {
+	C.JPH_VehicleTransmissionSettings_SetMode(settings, value)
+}
+
+func JPH_VehicleTransmissionSettings_GetGearRatioCount(settings *C.JPH_VehicleTransmissionSettings) uint32 {
+	return uint32(C.JPH_VehicleTransmissionSettings_GetGearRatioCount(settings))
+}
+
+func JPH_VehicleTransmissionSettings_GetGearRatio(settings *C.JPH_VehicleTransmissionSettings, index uint32) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetGearRatio(settings, C.uint32_t(index)))
+}
+
+func JPH_VehicleTransmissionSettings_SetGearRatio(settings *C.JPH_VehicleTransmissionSettings, index uint32, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetGearRatio(settings, C.uint32_t(index), C.float(value))
+}
+
+func JPH_VehicleTransmissionSettings_GetGearRatios(settings *C.JPH_VehicleTransmissionSettings) *C.float {
+	return C.JPH_VehicleTransmissionSettings_GetGearRatios(settings)
+}
+
+func JPH_VehicleTransmissionSettings_SetGearRatios(settings *C.JPH_VehicleTransmissionSettings, values unsafe.Pointer, count uint32) {
+	C.JPH_VehicleTransmissionSettings_SetGearRatios(settings, (*C.float)(unsafe.Pointer(values)), C.uint32_t(count))
+}
+
+func JPH_VehicleTransmissionSettings_GetReverseGearRatioCount(settings *C.JPH_VehicleTransmissionSettings) uint32 {
+	return uint32(C.JPH_VehicleTransmissionSettings_GetReverseGearRatioCount(settings))
+}
+
+func JPH_VehicleTransmissionSettings_GetReverseGearRatio(settings *C.JPH_VehicleTransmissionSettings, index uint32) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetReverseGearRatio(settings, C.uint32_t(index)))
+}
+
+func JPH_VehicleTransmissionSettings_SetReverseGearRatio(settings *C.JPH_VehicleTransmissionSettings, index uint32, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetReverseGearRatio(settings, C.uint32_t(index), C.float(value))
+}
+
+func JPH_VehicleTransmissionSettings_GetReverseGearRatios(settings *C.JPH_VehicleTransmissionSettings) *C.float {
+	return C.JPH_VehicleTransmissionSettings_GetReverseGearRatios(settings)
+}
+
+func JPH_VehicleTransmissionSettings_SetReverseGearRatios(settings *C.JPH_VehicleTransmissionSettings, values unsafe.Pointer, count uint32) {
+	C.JPH_VehicleTransmissionSettings_SetReverseGearRatios(settings, (*C.float)(unsafe.Pointer(values)), C.uint32_t(count))
+}
+
+func JPH_VehicleTransmissionSettings_GetSwitchTime(settings *C.JPH_VehicleTransmissionSettings) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetSwitchTime(settings))
+}
+
+func JPH_VehicleTransmissionSettings_SetSwitchTime(settings *C.JPH_VehicleTransmissionSettings, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetSwitchTime(settings, C.float(value))
+}
+
+func JPH_VehicleTransmissionSettings_GetClutchReleaseTime(settings *C.JPH_VehicleTransmissionSettings) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetClutchReleaseTime(settings))
+}
+
+func JPH_VehicleTransmissionSettings_SetClutchReleaseTime(settings *C.JPH_VehicleTransmissionSettings, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetClutchReleaseTime(settings, C.float(value))
+}
+
+func JPH_VehicleTransmissionSettings_GetSwitchLatency(settings *C.JPH_VehicleTransmissionSettings) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetSwitchLatency(settings))
+}
+
+func JPH_VehicleTransmissionSettings_SetSwitchLatency(settings *C.JPH_VehicleTransmissionSettings, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetSwitchLatency(settings, C.float(value))
+}
+
+func JPH_VehicleTransmissionSettings_GetShiftUpRPM(settings *C.JPH_VehicleTransmissionSettings) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetShiftUpRPM(settings))
+}
+
+func JPH_VehicleTransmissionSettings_SetShiftUpRPM(settings *C.JPH_VehicleTransmissionSettings, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetShiftUpRPM(settings, C.float(value))
+}
+
+func JPH_VehicleTransmissionSettings_GetShiftDownRPM(settings *C.JPH_VehicleTransmissionSettings) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetShiftDownRPM(settings))
+}
+
+func JPH_VehicleTransmissionSettings_SetShiftDownRPM(settings *C.JPH_VehicleTransmissionSettings, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetShiftDownRPM(settings, C.float(value))
+}
+
+func JPH_VehicleTransmissionSettings_GetClutchStrength(settings *C.JPH_VehicleTransmissionSettings) float32 {
+	return float32(C.JPH_VehicleTransmissionSettings_GetClutchStrength(settings))
+}
+
+func JPH_VehicleTransmissionSettings_SetClutchStrength(settings *C.JPH_VehicleTransmissionSettings, value float32) {
+	C.JPH_VehicleTransmissionSettings_SetClutchStrength(settings, C.float(value))
+}
+
+func JPH_VehicleTransmission_SetMode(transmission *C.JPH_VehicleTransmission, mode C.JPH_TransmissionMode) {
+	C.JPH_VehicleTransmission_SetMode(transmission, mode)
+}
+
+func JPH_VehicleTransmission_Set(transmission *C.JPH_VehicleTransmission, currentGear int32, clutchFriction float32) {
+	C.JPH_VehicleTransmission_Set(transmission, C.int(currentGear), C.float(clutchFriction))
+}
+
+func JPH_VehicleTransmission_Update(transmission *C.JPH_VehicleTransmission, deltaTime float32, currentRPM float32, forwardInput float32, canShiftUp bool) {
+	C.JPH_VehicleTransmission_Update(transmission, C.float(deltaTime), C.float(currentRPM), C.float(forwardInput), C.bool(canShiftUp))
+}
+
+func JPH_VehicleTransmission_GetCurrentGear(transmission *C.JPH_VehicleTransmission) int32 {
+	return int32(C.JPH_VehicleTransmission_GetCurrentGear(transmission))
+}
+
+func JPH_VehicleTransmission_GetClutchFriction(transmission *C.JPH_VehicleTransmission) float32 {
+	return float32(C.JPH_VehicleTransmission_GetClutchFriction(transmission))
+}
+
+func JPH_VehicleTransmission_IsSwitchingGear(transmission *C.JPH_VehicleTransmission) bool {
+	return bool(C.JPH_VehicleTransmission_IsSwitchingGear(transmission))
+}
+
+func JPH_VehicleTransmission_GetCurrentRatio(transmission *C.JPH_VehicleTransmission) float32 {
+	return float32(C.JPH_VehicleTransmission_GetCurrentRatio(transmission))
+}
+
+func JPH_VehicleTransmission_AllowSleep(transmission *C.JPH_VehicleTransmission) bool {
+	return bool(C.JPH_VehicleTransmission_AllowSleep(transmission))
+}
+
+func JPH_VehicleCollisionTester_Destroy(tester *C.JPH_VehicleCollisionTester) {
+	C.JPH_VehicleCollisionTester_Destroy(tester)
+}
+
+func JPH_VehicleCollisionTester_GetObjectLayer(tester *C.JPH_VehicleCollisionTester) C.JPH_ObjectLayer {
+	return C.JPH_VehicleCollisionTester_GetObjectLayer(tester)
+}
+
+func JPH_VehicleCollisionTester_SetObjectLayer(tester *C.JPH_VehicleCollisionTester, value C.JPH_ObjectLayer) {
+	C.JPH_VehicleCollisionTester_SetObjectLayer(tester, value)
+}
+
+func JPH_VehicleCollisionTesterRay_Create(layer C.JPH_ObjectLayer, up *C.JPH_Vec3, maxSlopeAngle float32) *C.JPH_VehicleCollisionTesterRay {
+	return C.JPH_VehicleCollisionTesterRay_Create(layer, up, C.float(maxSlopeAngle))
+}
+
+func JPH_VehicleCollisionTesterCastSphere_Create(layer C.JPH_ObjectLayer, radius float32, up *C.JPH_Vec3, maxSlopeAngle float32) *C.JPH_VehicleCollisionTesterCastSphere {
+	return C.JPH_VehicleCollisionTesterCastSphere_Create(layer, C.float(radius), up, C.float(maxSlopeAngle))
+}
+
+func JPH_VehicleCollisionTesterCastCylinder_Create(layer C.JPH_ObjectLayer, convexRadiusFraction float32) *C.JPH_VehicleCollisionTesterCastCylinder {
+	return C.JPH_VehicleCollisionTesterCastCylinder_Create(layer, C.float(convexRadiusFraction))
+}
+
+func JPH_VehicleControllerSettings_Destroy(settings *C.JPH_VehicleControllerSettings) {
+	C.JPH_VehicleControllerSettings_Destroy(settings)
+}
+
+func JPH_VehicleController_GetConstraint(controller *C.JPH_VehicleController) *C.JPH_VehicleConstraint {
+	return C.JPH_VehicleController_GetConstraint(controller)
+}
+
+func JPH_WheelSettingsWV_Create() *C.JPH_WheelSettingsWV {
+	return C.JPH_WheelSettingsWV_Create()
+}
+
+func JPH_WheelSettingsWV_GetInertia(settings *C.JPH_WheelSettingsWV) float32 {
+	return float32(C.JPH_WheelSettingsWV_GetInertia(settings))
+}
+
+func JPH_WheelSettingsWV_SetInertia(settings *C.JPH_WheelSettingsWV, value float32) {
+	C.JPH_WheelSettingsWV_SetInertia(settings, C.float(value))
+}
+
+func JPH_WheelSettingsWV_GetAngularDamping(settings *C.JPH_WheelSettingsWV) float32 {
+	return float32(C.JPH_WheelSettingsWV_GetAngularDamping(settings))
+}
+
+func JPH_WheelSettingsWV_SetAngularDamping(settings *C.JPH_WheelSettingsWV, value float32) {
+	C.JPH_WheelSettingsWV_SetAngularDamping(settings, C.float(value))
+}
+
+func JPH_WheelSettingsWV_GetMaxSteerAngle(settings *C.JPH_WheelSettingsWV) float32 {
+	return float32(C.JPH_WheelSettingsWV_GetMaxSteerAngle(settings))
+}
+
+func JPH_WheelSettingsWV_SetMaxSteerAngle(settings *C.JPH_WheelSettingsWV, value float32) {
+	C.JPH_WheelSettingsWV_SetMaxSteerAngle(settings, C.float(value))
+}
+
+func JPH_WheelSettingsWV_GetLongitudinalFriction(settings *C.JPH_WheelSettingsWV) *C.JPH_LinearCurve {
+	return C.JPH_WheelSettingsWV_GetLongitudinalFriction(settings)
+}
+
+func JPH_WheelSettingsWV_SetLongitudinalFriction(settings *C.JPH_WheelSettingsWV, value *C.JPH_LinearCurve) {
+	C.JPH_WheelSettingsWV_SetLongitudinalFriction(settings, value)
+}
+
+func JPH_WheelSettingsWV_GetLateralFriction(settings *C.JPH_WheelSettingsWV) *C.JPH_LinearCurve {
+	return C.JPH_WheelSettingsWV_GetLateralFriction(settings)
+}
+
+func JPH_WheelSettingsWV_SetLateralFriction(settings *C.JPH_WheelSettingsWV, value *C.JPH_LinearCurve) {
+	C.JPH_WheelSettingsWV_SetLateralFriction(settings, value)
+}
+
+func JPH_WheelSettingsWV_GetMaxBrakeTorque(settings *C.JPH_WheelSettingsWV) float32 {
+	return float32(C.JPH_WheelSettingsWV_GetMaxBrakeTorque(settings))
+}
+
+func JPH_WheelSettingsWV_SetMaxBrakeTorque(settings *C.JPH_WheelSettingsWV, value float32) {
+	C.JPH_WheelSettingsWV_SetMaxBrakeTorque(settings, C.float(value))
+}
+
+func JPH_WheelSettingsWV_GetMaxHandBrakeTorque(settings *C.JPH_WheelSettingsWV) float32 {
+	return float32(C.JPH_WheelSettingsWV_GetMaxHandBrakeTorque(settings))
+}
+
+func JPH_WheelSettingsWV_SetMaxHandBrakeTorque(settings *C.JPH_WheelSettingsWV, value float32) {
+	C.JPH_WheelSettingsWV_SetMaxHandBrakeTorque(settings, C.float(value))
+}
+
+func JPH_WheelWV_Create(settings *C.JPH_WheelSettingsWV) *C.JPH_WheelWV {
+	return C.JPH_WheelWV_Create(settings)
+}
+
+func JPH_WheelWV_GetSettings(wheel *C.JPH_WheelWV) *C.JPH_WheelSettingsWV {
+	return C.JPH_WheelWV_GetSettings(wheel)
+}
+
+func JPH_WheelWV_ApplyTorque(wheel *C.JPH_WheelWV, torque float32, deltaTime float32) {
+	C.JPH_WheelWV_ApplyTorque(wheel, C.float(torque), C.float(deltaTime))
+}
+
+func JPH_WheeledVehicleControllerSettings_Create() *C.JPH_WheeledVehicleControllerSettings {
+	return C.JPH_WheeledVehicleControllerSettings_Create()
+}
+
+func JPH_WheeledVehicleControllerSettings_GetEngine(settings *C.JPH_WheeledVehicleControllerSettings, result *C.JPH_VehicleEngineSettings) {
+	C.JPH_WheeledVehicleControllerSettings_GetEngine(settings, result)
+}
+
+func JPH_WheeledVehicleControllerSettings_SetEngine(settings *C.JPH_WheeledVehicleControllerSettings, value *C.JPH_VehicleEngineSettings) {
+	C.JPH_WheeledVehicleControllerSettings_SetEngine(settings, value)
+}
+
+func JPH_WheeledVehicleControllerSettings_GetTransmission(settings *C.JPH_WheeledVehicleControllerSettings) *C.JPH_VehicleTransmissionSettings {
+	return C.JPH_WheeledVehicleControllerSettings_GetTransmission(settings)
+}
+
+func JPH_WheeledVehicleControllerSettings_SetTransmission(settings *C.JPH_WheeledVehicleControllerSettings, value *C.JPH_VehicleTransmissionSettings) {
+	C.JPH_WheeledVehicleControllerSettings_SetTransmission(settings, value)
+}
+
+func JPH_WheeledVehicleControllerSettings_GetDifferentialsCount(settings *C.JPH_WheeledVehicleControllerSettings) uint32 {
+	return uint32(C.JPH_WheeledVehicleControllerSettings_GetDifferentialsCount(settings))
+}
+
+func JPH_WheeledVehicleControllerSettings_SetDifferentialsCount(settings *C.JPH_WheeledVehicleControllerSettings, count uint32) {
+	C.JPH_WheeledVehicleControllerSettings_SetDifferentialsCount(settings, C.uint32_t(count))
+}
+
+func JPH_WheeledVehicleControllerSettings_GetDifferential(settings *C.JPH_WheeledVehicleControllerSettings, index uint32, result *C.JPH_VehicleDifferentialSettings) {
+	C.JPH_WheeledVehicleControllerSettings_GetDifferential(settings, C.uint32_t(index), result)
+}
+
+func JPH_WheeledVehicleControllerSettings_SetDifferential(settings *C.JPH_WheeledVehicleControllerSettings, index uint32, value *C.JPH_VehicleDifferentialSettings) {
+	C.JPH_WheeledVehicleControllerSettings_SetDifferential(settings, C.uint32_t(index), value)
+}
+
+func JPH_WheeledVehicleControllerSettings_SetDifferentials(settings *C.JPH_WheeledVehicleControllerSettings, values *C.JPH_VehicleDifferentialSettings, count uint32) {
+	C.JPH_WheeledVehicleControllerSettings_SetDifferentials(settings, values, C.uint32_t(count))
+}
+
+func JPH_WheeledVehicleControllerSettings_AddDifferential(settings *C.JPH_WheeledVehicleControllerSettings, leftWheel int32, rightWheel int32) {
+	C.JPH_WheeledVehicleControllerSettings_AddDifferential(settings, C.int(leftWheel), C.int(rightWheel))
+}
+
+func JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(settings *C.JPH_WheeledVehicleControllerSettings) float32 {
+	return float32(C.JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(settings))
+}
+
+func JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(settings *C.JPH_WheeledVehicleControllerSettings, value float32) {
+	C.JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(settings, C.float(value))
+}
+
+func JPH_WheeledVehicleController_SetDriverInput(controller *C.JPH_WheeledVehicleController, forward float32, right float32, brake float32, handBrake float32) {
+	C.JPH_WheeledVehicleController_SetDriverInput(controller, C.float(forward), C.float(right), C.float(brake), C.float(handBrake))
+}
+
+func JPH_WheeledVehicleController_SetForwardInput(controller *C.JPH_WheeledVehicleController, forward float32) {
+	C.JPH_WheeledVehicleController_SetForwardInput(controller, C.float(forward))
+}
+
+func JPH_WheeledVehicleController_GetForwardInput(controller *C.JPH_WheeledVehicleController) float32 {
+	return float32(C.JPH_WheeledVehicleController_GetForwardInput(controller))
+}
+
+func JPH_WheeledVehicleController_SetRightInput(controller *C.JPH_WheeledVehicleController, rightRatio float32) {
+	C.JPH_WheeledVehicleController_SetRightInput(controller, C.float(rightRatio))
+}
+
+func JPH_WheeledVehicleController_GetRightInput(controller *C.JPH_WheeledVehicleController) float32 {
+	return float32(C.JPH_WheeledVehicleController_GetRightInput(controller))
+}
+
+func JPH_WheeledVehicleController_SetBrakeInput(controller *C.JPH_WheeledVehicleController, brakeInput float32) {
+	C.JPH_WheeledVehicleController_SetBrakeInput(controller, C.float(brakeInput))
+}
+
+func JPH_WheeledVehicleController_GetBrakeInput(controller *C.JPH_WheeledVehicleController) float32 {
+	return float32(C.JPH_WheeledVehicleController_GetBrakeInput(controller))
+}
+
+func JPH_WheeledVehicleController_SetHandBrakeInput(controller *C.JPH_WheeledVehicleController, handBrakeInput float32) {
+	C.JPH_WheeledVehicleController_SetHandBrakeInput(controller, C.float(handBrakeInput))
+}
+
+func JPH_WheeledVehicleController_GetHandBrakeInput(controller *C.JPH_WheeledVehicleController) float32 {
+	return float32(C.JPH_WheeledVehicleController_GetHandBrakeInput(controller))
+}
+
+func JPH_WheeledVehicleController_GetWheelSpeedAtClutch(controller *C.JPH_WheeledVehicleController) float32 {
+	return float32(C.JPH_WheeledVehicleController_GetWheelSpeedAtClutch(controller))
+}
+
+func JPH_WheeledVehicleController_SetTireMaxImpulseCallback(controller *C.JPH_WheeledVehicleController, tireMaxImpulseCallback C.JPH_TireMaxImpulseCallback, userData unsafe.Pointer) {
+	C.JPH_WheeledVehicleController_SetTireMaxImpulseCallback(controller, tireMaxImpulseCallback, userData)
+}
+
+func JPH_WheeledVehicleController_GetEngine(controller *C.JPH_WheeledVehicleController) *C.JPH_VehicleEngine {
+	return C.JPH_WheeledVehicleController_GetEngine(controller)
+}
+
+func JPH_WheeledVehicleController_GetTransmission(controller *C.JPH_WheeledVehicleController) *C.JPH_VehicleTransmission {
+	return C.JPH_WheeledVehicleController_GetTransmission(controller)
+}
+
+func JPH_VehicleTrackSettings_Init(settings *C.JPH_VehicleTrackSettings) {
+	C.JPH_VehicleTrackSettings_Init(settings)
+}
+
+func JPH_VehicleTrack_GetAngularVelocity(track *C.JPH_VehicleTrack) float32 {
+	return float32(C.JPH_VehicleTrack_GetAngularVelocity(track))
+}
+
+func JPH_VehicleTrack_SetAngularVelocity(track *C.JPH_VehicleTrack, velocity float32) {
+	C.JPH_VehicleTrack_SetAngularVelocity(track, C.float(velocity))
+}
+
+func JPH_VehicleTrack_GetDrivenWheel(track *C.JPH_VehicleTrack) uint32 {
+	return uint32(C.JPH_VehicleTrack_GetDrivenWheel(track))
+}
+
+func JPH_VehicleTrack_GetInertia(track *C.JPH_VehicleTrack) float32 {
+	return float32(C.JPH_VehicleTrack_GetInertia(track))
+}
+
+func JPH_VehicleTrack_GetAngularDamping(track *C.JPH_VehicleTrack) float32 {
+	return float32(C.JPH_VehicleTrack_GetAngularDamping(track))
+}
+
+func JPH_VehicleTrack_GetMaxBrakeTorque(track *C.JPH_VehicleTrack) float32 {
+	return float32(C.JPH_VehicleTrack_GetMaxBrakeTorque(track))
+}
+
+func JPH_VehicleTrack_GetDifferentialRatio(track *C.JPH_VehicleTrack) float32 {
+	return float32(C.JPH_VehicleTrack_GetDifferentialRatio(track))
+}
+
+func JPH_TrackedVehicleController_GetTrack(controller *C.JPH_TrackedVehicleController, side C.JPH_TrackSide) *C.JPH_VehicleTrack {
+	return C.JPH_TrackedVehicleController_GetTrack(controller, side)
+}
+
+func JPH_WheelSettingsTV_Create() *C.JPH_WheelSettingsTV {
+	return C.JPH_WheelSettingsTV_Create()
+}
+
+func JPH_WheelSettingsTV_GetLongitudinalFriction(settings *C.JPH_WheelSettingsTV) float32 {
+	return float32(C.JPH_WheelSettingsTV_GetLongitudinalFriction(settings))
+}
+
+func JPH_WheelSettingsTV_SetLongitudinalFriction(settings *C.JPH_WheelSettingsTV, value float32) {
+	C.JPH_WheelSettingsTV_SetLongitudinalFriction(settings, C.float(value))
+}
+
+func JPH_WheelSettingsTV_GetLateralFriction(settings *C.JPH_WheelSettingsTV) float32 {
+	return float32(C.JPH_WheelSettingsTV_GetLateralFriction(settings))
+}
+
+func JPH_WheelSettingsTV_SetLateralFriction(settings *C.JPH_WheelSettingsTV, value float32) {
+	C.JPH_WheelSettingsTV_SetLateralFriction(settings, C.float(value))
+}
+
+func JPH_WheelTV_Create(settings *C.JPH_WheelSettingsTV) *C.JPH_WheelTV {
+	return C.JPH_WheelTV_Create(settings)
+}
+
+func JPH_WheelTV_GetSettings(wheel *C.JPH_WheelTV) *C.JPH_WheelSettingsTV {
+	return C.JPH_WheelTV_GetSettings(wheel)
+}
+
+func JPH_TrackedVehicleControllerSettings_Create() *C.JPH_TrackedVehicleControllerSettings {
+	return C.JPH_TrackedVehicleControllerSettings_Create()
+}
+
+func JPH_TrackedVehicleControllerSettings_GetEngine(settings *C.JPH_TrackedVehicleControllerSettings, result *C.JPH_VehicleEngineSettings) {
+	C.JPH_TrackedVehicleControllerSettings_GetEngine(settings, result)
+}
+
+func JPH_TrackedVehicleControllerSettings_SetEngine(settings *C.JPH_TrackedVehicleControllerSettings, value *C.JPH_VehicleEngineSettings) {
+	C.JPH_TrackedVehicleControllerSettings_SetEngine(settings, value)
+}
+
+func JPH_TrackedVehicleControllerSettings_GetTransmission(settings *C.JPH_TrackedVehicleControllerSettings) *C.JPH_VehicleTransmissionSettings {
+	return C.JPH_TrackedVehicleControllerSettings_GetTransmission(settings)
+}
+
+func JPH_TrackedVehicleControllerSettings_SetTransmission(settings *C.JPH_TrackedVehicleControllerSettings, value *C.JPH_VehicleTransmissionSettings) {
+	C.JPH_TrackedVehicleControllerSettings_SetTransmission(settings, value)
+}
+
+func JPH_TrackedVehicleControllerSettings_SetTrack(settings *C.JPH_TrackedVehicleControllerSettings, index uint32, track *C.JPH_VehicleTrackSettings) {
+	C.JPH_TrackedVehicleControllerSettings_SetTrack(settings, C.uint32_t(index), track)
+}
+
+func JPH_TrackedVehicleController_SetDriverInput(controller *C.JPH_TrackedVehicleController, forward float32, leftRatio float32, rightRatio float32, brake float32) {
+	C.JPH_TrackedVehicleController_SetDriverInput(controller, C.float(forward), C.float(leftRatio), C.float(rightRatio), C.float(brake))
+}
+
+func JPH_TrackedVehicleController_GetForwardInput(controller *C.JPH_TrackedVehicleController) float32 {
+	return float32(C.JPH_TrackedVehicleController_GetForwardInput(controller))
+}
+
+func JPH_TrackedVehicleController_SetForwardInput(controller *C.JPH_TrackedVehicleController, value float32) {
+	C.JPH_TrackedVehicleController_SetForwardInput(controller, C.float(value))
+}
+
+func JPH_TrackedVehicleController_GetLeftRatio(controller *C.JPH_TrackedVehicleController) float32 {
+	return float32(C.JPH_TrackedVehicleController_GetLeftRatio(controller))
+}
+
+func JPH_TrackedVehicleController_SetLeftRatio(controller *C.JPH_TrackedVehicleController, value float32) {
+	C.JPH_TrackedVehicleController_SetLeftRatio(controller, C.float(value))
+}
+
+func JPH_TrackedVehicleController_GetRightRatio(controller *C.JPH_TrackedVehicleController) float32 {
+	return float32(C.JPH_TrackedVehicleController_GetRightRatio(controller))
+}
+
+func JPH_TrackedVehicleController_SetRightRatio(controller *C.JPH_TrackedVehicleController, value float32) {
+	C.JPH_TrackedVehicleController_SetRightRatio(controller, C.float(value))
+}
+
+func JPH_TrackedVehicleController_GetBrakeInput(controller *C.JPH_TrackedVehicleController) float32 {
+	return float32(C.JPH_TrackedVehicleController_GetBrakeInput(controller))
+}
+
+func JPH_TrackedVehicleController_SetBrakeInput(controller *C.JPH_TrackedVehicleController, value float32) {
+	C.JPH_TrackedVehicleController_SetBrakeInput(controller, C.float(value))
+}
+
+func JPH_TrackedVehicleController_GetEngine(controller *C.JPH_TrackedVehicleController) *C.JPH_VehicleEngine {
+	return C.JPH_TrackedVehicleController_GetEngine(controller)
+}
+
+func JPH_TrackedVehicleController_GetTransmission(controller *C.JPH_TrackedVehicleController) *C.JPH_VehicleTransmission {
+	return C.JPH_TrackedVehicleController_GetTransmission(controller)
+}
+
+func JPH_MotorcycleControllerSettings_Create() *C.JPH_MotorcycleControllerSettings {
+	return C.JPH_MotorcycleControllerSettings_Create()
+}
+
+func JPH_MotorcycleControllerSettings_GetMaxLeanAngle(settings *C.JPH_MotorcycleControllerSettings) float32 {
+	return float32(C.JPH_MotorcycleControllerSettings_GetMaxLeanAngle(settings))
+}
+
+func JPH_MotorcycleControllerSettings_SetMaxLeanAngle(settings *C.JPH_MotorcycleControllerSettings, value float32) {
+	C.JPH_MotorcycleControllerSettings_SetMaxLeanAngle(settings, C.float(value))
+}
+
+func JPH_MotorcycleControllerSettings_GetLeanSpringConstant(settings *C.JPH_MotorcycleControllerSettings) float32 {
+	return float32(C.JPH_MotorcycleControllerSettings_GetLeanSpringConstant(settings))
+}
+
+func JPH_MotorcycleControllerSettings_SetLeanSpringConstant(settings *C.JPH_MotorcycleControllerSettings, value float32) {
+	C.JPH_MotorcycleControllerSettings_SetLeanSpringConstant(settings, C.float(value))
+}
+
+func JPH_MotorcycleControllerSettings_GetLeanSpringDamping(settings *C.JPH_MotorcycleControllerSettings) float32 {
+	return float32(C.JPH_MotorcycleControllerSettings_GetLeanSpringDamping(settings))
+}
+
+func JPH_MotorcycleControllerSettings_SetLeanSpringDamping(settings *C.JPH_MotorcycleControllerSettings, value float32) {
+	C.JPH_MotorcycleControllerSettings_SetLeanSpringDamping(settings, C.float(value))
+}
+
+func JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficient(settings *C.JPH_MotorcycleControllerSettings) float32 {
+	return float32(C.JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficient(settings))
+}
+
+func JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficient(settings *C.JPH_MotorcycleControllerSettings, value float32) {
+	C.JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficient(settings, C.float(value))
+}
+
+func JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficientDecay(settings *C.JPH_MotorcycleControllerSettings) float32 {
+	return float32(C.JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficientDecay(settings))
+}
+
+func JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficientDecay(settings *C.JPH_MotorcycleControllerSettings, value float32) {
+	C.JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficientDecay(settings, C.float(value))
+}
+
+func JPH_MotorcycleControllerSettings_GetLeanSmoothingFactor(settings *C.JPH_MotorcycleControllerSettings) float32 {
+	return float32(C.JPH_MotorcycleControllerSettings_GetLeanSmoothingFactor(settings))
+}
+
+func JPH_MotorcycleControllerSettings_SetLeanSmoothingFactor(settings *C.JPH_MotorcycleControllerSettings, value float32) {
+	C.JPH_MotorcycleControllerSettings_SetLeanSmoothingFactor(settings, C.float(value))
+}
+
+func JPH_MotorcycleController_GetWheelBase(controller *C.JPH_MotorcycleController) float32 {
+	return float32(C.JPH_MotorcycleController_GetWheelBase(controller))
+}
+
+func JPH_MotorcycleController_IsLeanControllerEnabled(controller *C.JPH_MotorcycleController) bool {
+	return bool(C.JPH_MotorcycleController_IsLeanControllerEnabled(controller))
+}
+
+func JPH_MotorcycleController_EnableLeanController(controller *C.JPH_MotorcycleController, value bool) {
+	C.JPH_MotorcycleController_EnableLeanController(controller, C.bool(value))
+}
+
+func JPH_MotorcycleController_IsLeanSteeringLimitEnabled(controller *C.JPH_MotorcycleController) bool {
+	return bool(C.JPH_MotorcycleController_IsLeanSteeringLimitEnabled(controller))
+}
+
+func JPH_MotorcycleController_EnableLeanSteeringLimit(controller *C.JPH_MotorcycleController, value bool) {
+	C.JPH_MotorcycleController_EnableLeanSteeringLimit(controller, C.bool(value))
+}
+
+func JPH_MotorcycleController_GetLeanSpringConstant(controller *C.JPH_MotorcycleController) float32 {
+	return float32(C.JPH_MotorcycleController_GetLeanSpringConstant(controller))
+}
+
+func JPH_MotorcycleController_SetLeanSpringConstant(controller *C.JPH_MotorcycleController, value float32) {
+	C.JPH_MotorcycleController_SetLeanSpringConstant(controller, C.float(value))
+}
+
+func JPH_MotorcycleController_GetLeanSpringDamping(controller *C.JPH_MotorcycleController) float32 {
+	return float32(C.JPH_MotorcycleController_GetLeanSpringDamping(controller))
+}
+
+func JPH_MotorcycleController_SetLeanSpringDamping(controller *C.JPH_MotorcycleController, value float32) {
+	C.JPH_MotorcycleController_SetLeanSpringDamping(controller, C.float(value))
+}
+
+func JPH_MotorcycleController_GetLeanSpringIntegrationCoefficient(controller *C.JPH_MotorcycleController) float32 {
+	return float32(C.JPH_MotorcycleController_GetLeanSpringIntegrationCoefficient(controller))
+}
+
+func JPH_MotorcycleController_SetLeanSpringIntegrationCoefficient(controller *C.JPH_MotorcycleController, value float32) {
+	C.JPH_MotorcycleController_SetLeanSpringIntegrationCoefficient(controller, C.float(value))
+}
+
+func JPH_MotorcycleController_GetLeanSpringIntegrationCoefficientDecay(controller *C.JPH_MotorcycleController) float32 {
+	return float32(C.JPH_MotorcycleController_GetLeanSpringIntegrationCoefficientDecay(controller))
+}
+
+func JPH_MotorcycleController_SetLeanSpringIntegrationCoefficientDecay(controller *C.JPH_MotorcycleController, value float32) {
+	C.JPH_MotorcycleController_SetLeanSpringIntegrationCoefficientDecay(controller, C.float(value))
+}
+
+func JPH_MotorcycleController_GetLeanSmoothingFactor(controller *C.JPH_MotorcycleController) float32 {
+	return float32(C.JPH_MotorcycleController_GetLeanSmoothingFactor(controller))
+}
+
+func JPH_MotorcycleController_SetLeanSmoothingFactor(controller *C.JPH_MotorcycleController, value float32) {
+	C.JPH_MotorcycleController_SetLeanSmoothingFactor(controller, C.float(value))
+}
+
+func JPH_LinearCurve_Create() *C.JPH_LinearCurve {
+	return C.JPH_LinearCurve_Create()
+}
+
+func JPH_LinearCurve_Destroy(curve *C.JPH_LinearCurve) { C.JPH_LinearCurve_Destroy(curve) }
+
+func JPH_LinearCurve_Clear(curve *C.JPH_LinearCurve) { C.JPH_LinearCurve_Clear(curve) }
+
+func JPH_LinearCurve_Reserve(curve *C.JPH_LinearCurve, numPoints uint32) {
+	C.JPH_LinearCurve_Reserve(curve, C.uint32_t(numPoints))
+}
+
+func JPH_LinearCurve_AddPoint(curve *C.JPH_LinearCurve, x float32, y float32) {
+	C.JPH_LinearCurve_AddPoint(curve, C.float(x), C.float(y))
+}
+
+func JPH_LinearCurve_Sort(curve *C.JPH_LinearCurve) { C.JPH_LinearCurve_Sort(curve) }
+
+func JPH_LinearCurve_GetMinX(curve *C.JPH_LinearCurve) float32 {
+	return float32(C.JPH_LinearCurve_GetMinX(curve))
+}
+
+func JPH_LinearCurve_GetMaxX(curve *C.JPH_LinearCurve) float32 {
+	return float32(C.JPH_LinearCurve_GetMaxX(curve))
+}
+
+func JPH_LinearCurve_GetValue(curve *C.JPH_LinearCurve, x float32) float32 {
+	return float32(C.JPH_LinearCurve_GetValue(curve, C.float(x)))
+}
+
+func JPH_LinearCurve_GetPointCount(curve *C.JPH_LinearCurve) uint32 {
+	return uint32(C.JPH_LinearCurve_GetPointCount(curve))
+}
+
+func JPH_LinearCurve_GetPoint(curve *C.JPH_LinearCurve, index uint32, result *C.JPH_Point) {
+	C.JPH_LinearCurve_GetPoint(curve, C.uint32_t(index), result)
+}
+
+func JPH_LinearCurve_GetPoints(curve *C.JPH_LinearCurve, points *C.JPH_Point, count unsafe.Pointer) {
+	C.JPH_LinearCurve_GetPoints(curve, points, (*C.uint32_t)(unsafe.Pointer(count)))
+}
+
+func JPH_TempAllocator_Create(size uint32) *C.JPH_TempAllocator {
+	return C.JPH_TempAllocator_Create(C.uint32_t(size))
+}
+
+func JPH_TempAllocatorMalloc_Create() *C.JPH_TempAllocator {
+	return C.JPH_TempAllocatorMalloc_Create()
+}
+
+func JPH_TempAllocator_Destroy(allocator *C.JPH_TempAllocator) {
+	C.JPH_TempAllocator_Destroy(allocator)
+}
+
+func JPH_PhysicsSystem_Update2(system *C.JPH_PhysicsSystem, deltaTime float32, collisionSteps int32, tempAllocator *C.JPH_TempAllocator, jobSystem *C.JPH_JobSystem) C.JPH_PhysicsUpdateError {
+	return C.JPH_PhysicsSystem_Update2(system, C.float(deltaTime), C.int(collisionSteps), tempAllocator, jobSystem)
+}

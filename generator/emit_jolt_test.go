@@ -69,7 +69,8 @@ var _ = Describe("EmitJolt — ref-counted types", func() {
 	It("emits constructor with finalizer for BoxShape_Create", func() {
 		src := generator.EmitJolt(h)
 		Expect(src).To(ContainSubstring("func NewBoxShape(halfExtent Vec3, convexRadius float32) *BoxShape {"))
-		Expect(src).To(ContainSubstring("h := cjolt.JPH_BoxShape_Create("))
+		// Constructor uses raw := then h := (cast to root type)
+		Expect(src).To(ContainSubstring("raw := cjolt.JPH_BoxShape_Create("))
 		Expect(src).To(ContainSubstring("(*cjolt.C_JPH_Vec3)(unsafe.Pointer(&halfExtent))"))
 		Expect(src).To(ContainSubstring("runtime.SetFinalizer(s, (*BoxShape).finalize)"))
 		// Embedded chain literal
@@ -95,12 +96,12 @@ var _ = Describe("EmitJolt — non-Shape ref-counted root", func() {
 				Params: []generator.Param{{Name: "self", CType: "JPH_PhysicsMaterial *"}}},
 		},
 	}
-	It("emits constructor with correct root-type Release call", func() {
+	It("emits constructor with correct root-type Destroy call", func() {
 		src := generator.EmitJolt(h)
 		Expect(src).To(ContainSubstring("func NewPhysicsMaterial() *PhysicsMaterial {"))
-		// Critical: finalize must use PhysicsMaterial_Release, not Shape_Release
-		Expect(src).To(ContainSubstring("cjolt.JPH_PhysicsMaterial_Release(s.h)"))
-		Expect(src).NotTo(ContainSubstring("cjolt.JPH_Shape_Release(s.h)"))
+		// Critical: finalize must use PhysicsMaterial_Destroy, not Shape_Destroy
+		Expect(src).To(ContainSubstring("cjolt.JPH_PhysicsMaterial_Destroy(s.h)"))
+		Expect(src).NotTo(ContainSubstring("cjolt.JPH_Shape_Destroy(s.h)"))
 	})
 })
 

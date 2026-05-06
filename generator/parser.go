@@ -133,15 +133,35 @@ func ParseHeader(path string) (*Header, error) {
 
 			switch t.Kind() {
 			case cc.Function:
+				// Skip typedef'd function types (e.g. `typedef void T(...)`)
+				// These are callback typedef declarations, not real callable functions.
+				// Real functions are NOT typedefs; callable function declarations have isTypedef=false.
+				if isTypedef {
+					// Record as a FuncTypedef so emitters can export the type alias.
+					// These appear as "T *" (pointer to function type) in function params.
+					if alias := d.Name(); alias != "" {
+						h.FuncTypedefs = append(h.FuncTypedefs, alias)
+					}
+					break
+				}
 				fn := extractFunc(d, t.(*cc.FunctionType))
 				h.Funcs = append(h.Funcs, fn)
 
 			default:
-				// Simple typedef alias (e.g. typedef uint32_t JPH_ObjectLayer).
-				// Use the DeclarationSpecifiers type to get the underlying type name
-				// so we get "uint32_t" rather than the alias being defined.
 				if isTypedef {
 					alias := d.Name()
+					// Check if this is a function pointer typedef (typedef void(*T)(...)).
+					// These have t.Kind() == cc.Ptr and elem.Kind() == cc.Function.
+					if t.Kind() == cc.Ptr {
+						elem := t.(*cc.PointerType).Elem()
+						if elem.Kind() == cc.Function && alias != "" {
+							h.FuncTypedefs = append(h.FuncTypedefs, alias)
+							break
+						}
+					}
+					// Simple typedef alias (e.g. typedef uint32_t JPH_ObjectLayer).
+					// Use the DeclarationSpecifiers type to get the underlying type name
+					// so we get "uint32_t" rather than the alias being defined.
 					underlying := ""
 					if dsType != nil {
 						if name := dsType.Typedef().Name(); name != "" {
@@ -248,6 +268,36 @@ func renderType(t cc.Type) string {
 	if t.Kind() == cc.Ptr {
 		pt := t.(*cc.PointerType)
 		elem := pt.Elem()
+		// void * → use the sentinel "void *" so emitters can map to unsafe.Pointer.
+		if elem.Kind() == cc.Void {
+			return "void *"
+		}
+		// Function pointer type: e.g. JPH_TraceFunc (typedef void(*T)(...)) appears as
+		// a pointer whose typedef name IS the function pointer type name.
+		// If the pointer type itself has a typedef name, use it directly.
+		if tName := t.Typedef().Name(); tName != "" && elem.Kind() == cc.Function {
+			return tName
+		}
+		// Pointer to function typedef (e.g. JPH_CastRayResultCallback*): the elem has
+		// a typedef name and is a function type. Use the elem's typedef name as the base.
+		if elem.Kind() == cc.Function {
+			if eName := elem.Typedef().Name(); eName != "" {
+				return eName + " *"
+			}
+			// Unnamed function type pointer → treat as void *.
+			return "void *"
+		}
+		// Pointer-to-pointer (T**, void**): render as "T **" with the inner elem name,
+		// so emitters can generate the appropriate C cast at call sites.
+		// cgo cannot implicitly convert unsafe.Pointer to **T but can with explicit casts.
+		if elem.Kind() == cc.Ptr {
+			innerElem := elem.(*cc.PointerType).Elem()
+			if innerElem.Kind() == cc.Void {
+				return "void *" // void ** → treat as void *
+			}
+			innerName := elemTypeName(innerElem)
+			return innerName + " **"
+		}
 		base := elemTypeName(elem)
 		if elem.Attributes().IsConst() {
 			return "const " + base + " *"

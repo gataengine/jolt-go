@@ -30,14 +30,37 @@ var _ cgo.Handle
 	// Track which Go types have already been emitted as struct definitions.
 	alreadyEmitted := map[string]bool{}
 
+	// Math types are defined in math.go, not generated. Pre-mark them so emitters
+	// don't re-emit them or their methods.
+	for t := range mathReturnTypes {
+		alreadyEmitted[t] = true
+	}
+
+	// Build the complete set of Go types that have a .h handle field and set
+	// the package-level variable used by param-type resolution.
+	joltHandleTypes = buildKnownHandleTypes(h)
+
 	// Emit Go-side aliases for integer typedefs (e.g. ObjectLayer = uint16).
 	b.WriteString(emitTypedefs(h))
 
+	// Build a set of listener Go type names so we can skip them in emitOwned
+	// and emitPlainHandleTypes (listeners get their own dedicated emitter).
+	listenerTypes := make(map[string]bool)
+	for _, spec := range Annotations.Listeners {
+		goName := strings.TrimPrefix(spec.CType, "JPH_")
+		listenerTypes[goName] = true
+		// Pre-mark as emitted so plain handle emitter skips them.
+		alreadyEmitted[goName] = true
+	}
+
 	// Pair Create/Destroy by type name and emit one OwnedType block per pair
-	// that is *not* in the RefCounted set.
+	// that is *not* in the RefCounted set and not a listener (listeners get their own emitter).
 	pairs := pairCreateDestroy(h)
 	for _, p := range pairs {
 		if isRefCounted(p.GoType) {
+			continue
+		}
+		if listenerTypes[p.GoType] {
 			continue
 		}
 		b.WriteString(emitOwned(p))
@@ -72,6 +95,24 @@ var _ cgo.Handle
 		b.WriteString(emitSettingsType(s))
 		alreadyEmitted[goName] = true
 	}
+
+	// Emit concrete (non-opaque) structs not covered above as opaque Go types.
+	// These allow unsafe.Pointer casts from the cjolt layer (e.g. ContactSettings,
+	// SubShapeIDPair) without exposing their C layout in Go.
+	b.WriteString(emitConcreteStructTypes(h, alreadyEmitted))
+	// Update alreadyEmitted for concrete structs.
+	for _, s := range h.Structs {
+		if !s.Opaque {
+			goName := strings.TrimPrefix(s.Name, "JPH_")
+			alreadyEmitted[goName] = true
+		}
+	}
+
+	// Emit enum type aliases (e.g. ValidateResult = C.JPH_ValidateResult).
+	b.WriteString(emitEnumAliases(h, alreadyEmitted))
+
+	// Emit function-pointer typedef aliases.
+	b.WriteString(emitFuncTypedefAliases(h, alreadyEmitted))
 
 	// Emit listener types (struct-of-funcs + NewX factory + finalize).
 	b.WriteString(emitListenerTypes(h))
@@ -178,18 +219,27 @@ func emitRefCountedConstructor(goType string, f Func) string {
 	paramList := strings.Join(goParams, ", ")
 	argList := strings.Join(cjoltArgs, ", ")
 
+	// Find the root ref-counted type to know what handle type Shape.h has.
+	root := rootRefCountedType(goType)
+
 	fmt.Fprintf(&b, "func New%s(%s) *%s {\n", goType, paramList, goType)
-	fmt.Fprintf(&b, "    h := cjolt.%s(%s)\n", f.Name, argList)
+	fmt.Fprintf(&b, "    raw := cjolt.%s(%s)\n", f.Name, argList)
+	// Cast the returned *C.JPH_<GoType> to the root handle type *C.JPH_<Root>.
+	// The C inheritance means the pointer values are layout-compatible.
+	if root != goType {
+		fmt.Fprintf(&b, "    h := (*cjolt.C_JPH_%s)(unsafe.Pointer(raw))\n", root)
+	} else {
+		fmt.Fprintf(&b, "    h := raw\n")
+	}
 	chain := buildEmbeddedChain(goType)
 	fmt.Fprintf(&b, "    s := &%s{%s}\n", goType, chain)
 	fmt.Fprintf(&b, "    runtime.SetFinalizer(s, (*%s).finalize)\n", goType)
 	fmt.Fprintf(&b, "    return s\n}\n\n")
 
-	// finalize method — calls the root type's Release (walks up Inheritance to find root).
-	root := rootRefCountedType(goType)
+	// finalize method — calls the root type's Destroy to free the underlying C object.
 	fmt.Fprintf(&b, "func (s *%s) finalize() {\n", goType)
 	fmt.Fprintf(&b, "    if s.h != nil {\n")
-	fmt.Fprintf(&b, "        cjolt.JPH_%s_Release(s.h)\n", root)
+	fmt.Fprintf(&b, "        cjolt.JPH_%s_Destroy(s.h)\n", root)
 	fmt.Fprintf(&b, "        s.h = nil\n")
 	fmt.Fprintf(&b, "    }\n}\n\n")
 
@@ -201,9 +251,23 @@ func emitRefCountedConstructor(goType string, f Func) string {
 func joltParamFromCType(cType, argName string) (goType, callExpr string) {
 	s := strings.TrimPrefix(cType, "const ")
 	s = strings.TrimSpace(s)
+	// Pointer-to-pointer (T **): expose as unsafe.Pointer in the jolt API.
+	if _, ok := strings.CutSuffix(s, " **"); ok {
+		return "unsafe.Pointer", argName
+	}
 	// Pointer type: strip trailing '*'.
 	if base, ok := strings.CutSuffix(s, "*"); ok {
 		base = strings.TrimSpace(base)
+		// Strip const qualifier from the base type (handles "const const T *" → "T *").
+		base = strings.TrimPrefix(base, "const ")
+		base = strings.TrimSpace(base)
+		// void*, char* and primitive pointer types → unsafe.Pointer.
+		switch base {
+		case "void", "char", "float", "double",
+			"uint8_t", "uint16_t", "uint32_t", "uint64_t",
+			"int8_t", "int16_t", "int32_t", "int64_t", "bool", "_Bool":
+			return "unsafe.Pointer", argName
+		}
 		switch base {
 		case "JPH_Vec3":
 			return "Vec3", "(*cjolt.C_JPH_Vec3)(unsafe.Pointer(&" + argName + "))"
@@ -212,8 +276,16 @@ func joltParamFromCType(cType, argName string) (goType, callExpr string) {
 		case "JPH_RVec3":
 			return "RVec3", "(*cjolt.C_JPH_RVec3)(unsafe.Pointer(&" + argName + "))"
 		}
-		// Other pointer: pass through opaque handle.
-		return "*" + strings.TrimPrefix(base, "JPH_"), argName + ".h"
+		goTypeName := strings.TrimPrefix(base, "JPH_")
+		// Only use .h accessor if the Go type is a known opaque handle wrapper.
+		// Concrete value types (JPH_Plane, JPH_AABox, etc.) don't have .h.
+		if joltHandleTypes[goTypeName] {
+			return "*" + goTypeName, argName + ".h"
+		}
+		// Concrete JPH_ value type: accept as unsafe.Pointer but cast to the
+		// cjolt C type at the call site so cgo's type checking passes.
+		cast := "(*cjolt.C_" + base + ")(unsafe.Pointer(" + argName + "))"
+		return "unsafe.Pointer", cast
 	}
 	// Scalars — map to Go-native; no cast needed (cjolt wrapper already accepts Go-native).
 	switch s {
@@ -221,7 +293,7 @@ func joltParamFromCType(cType, argName string) (goType, callExpr string) {
 		return "float32", argName
 	case "double":
 		return "float64", argName
-	case "bool":
+	case "bool", "_Bool":
 		return "bool", argName
 	case "int", "int32_t":
 		return "int32", argName
@@ -275,17 +347,27 @@ func buildEmbeddedChain(goType string) string {
 
 // emitOwned emits the public Go API for one owned-type pair: type, constructor with finalizer, Close, finalize.
 func emitOwned(p ownedPair) string {
-	return fmt.Sprintf(`type %[1]s struct {
-    h *cjolt.C_JPH_%[1]s
-}
+	var b strings.Builder
+	fmt.Fprintf(&b, "type %s struct {\n    h *cjolt.C_JPH_%s\n}\n\n", p.GoType, p.GoType)
 
-func New%[1]s() *%[1]s {
-    p := &%[1]s{h: cjolt.JPH_%[1]s_Create()}
-    runtime.SetFinalizer(p, (*%[1]s).finalize)
-    return p
-}
+	// Build constructor signature from the Create function's params.
+	var goParams []string
+	var callArgs []string
+	for _, param := range p.Create.Params {
+		safe := safeParamName(param.Name)
+		gt, ce := joltParamFromCType(param.CType, safe)
+		goParams = append(goParams, safe+" "+gt)
+		callArgs = append(callArgs, ce)
+	}
+	paramList := strings.Join(goParams, ", ")
+	argList := strings.Join(callArgs, ", ")
 
-func (p *%[1]s) Close() error {
+	fmt.Fprintf(&b, "func New%s(%s) *%s {\n", p.GoType, paramList, p.GoType)
+	fmt.Fprintf(&b, "    p := &%s{h: cjolt.%s(%s)}\n", p.GoType, p.Create.Name, argList)
+	fmt.Fprintf(&b, "    runtime.SetFinalizer(p, (*%s).finalize)\n", p.GoType)
+	fmt.Fprintf(&b, "    return p\n}\n\n")
+
+	fmt.Fprintf(&b, `func (p *%[1]s) Close() error {
     if p.h != nil {
         cjolt.JPH_%[1]s_Destroy(p.h)
         p.h = nil
@@ -297,6 +379,7 @@ func (p *%[1]s) Close() error {
 func (p *%[1]s) finalize() { _ = p.Close() }
 
 `, p.GoType)
+	return b.String()
 }
 
 // emitTypedefs emits Go-side aliases for joltc integer typedefs.
@@ -382,6 +465,67 @@ func emitSettingsType(s Struct) string {
 	return b.String()
 }
 
+// emitFuncTypedefAliases emits Go type aliases for function-pointer typedef types.
+// e.g. JPH_TireMaxImpulseCallback → type TireMaxImpulseCallback = cjolt.C_JPH_TireMaxImpulseCallback
+func emitFuncTypedefAliases(h *Header, alreadyEmitted map[string]bool) string {
+	var b strings.Builder
+	for _, ft := range h.FuncTypedefs {
+		goName := strings.TrimPrefix(ft, "JPH_")
+		if alreadyEmitted[goName] {
+			continue
+		}
+		fmt.Fprintf(&b, "type %s = cjolt.C_%s\n", goName, ft)
+	}
+	if b.Len() > 0 {
+		b.WriteString("\n")
+	}
+	return b.String()
+}
+
+// emitConcreteStructTypes emits Go type aliases for non-opaque (concrete) JPH_ structs
+// that aren't already emitted via SettingsInit or math.go. These types appear in
+// listener bridge code and receiver methods and need Go-accessible type names.
+func emitConcreteStructTypes(h *Header, alreadyEmitted map[string]bool) string {
+	var b strings.Builder
+	for _, s := range h.Structs {
+		if s.Opaque {
+			continue
+		}
+		goName := strings.TrimPrefix(s.Name, "JPH_")
+		if alreadyEmitted[goName] {
+			continue
+		}
+		// Skip math types defined in math.go.
+		if mathReturnTypes[goName] {
+			continue
+		}
+		// Emit as a Go type alias to the cjolt-exposed C type.
+		fmt.Fprintf(&b, "type %s = cjolt.C_%s\n", goName, s.Name)
+	}
+	if b.Len() > 0 {
+		b.WriteString("\n")
+	}
+	return b.String()
+}
+
+// emitEnumAliases emits Go type aliases for enums defined in joltc.h.
+// Enums are exposed as C types in cjolt; here we alias them in jolt for usability.
+func emitEnumAliases(h *Header, alreadyEmitted map[string]bool) string {
+	var b strings.Builder
+	for _, e := range h.Enums {
+		goName := strings.TrimPrefix(e.Name, "JPH_")
+		if alreadyEmitted[goName] {
+			continue
+		}
+		// Emit as a Go type alias to the cjolt-exposed C type.
+		fmt.Fprintf(&b, "type %s = cjolt.C_%s\n", goName, e.Name)
+	}
+	if b.Len() > 0 {
+		b.WriteString("\n")
+	}
+	return b.String()
+}
+
 // mapCFieldTypeToGo maps a C field type string to the corresponding Go type.
 // JPH_Vec3 → Vec3, JPH_ObjectLayer → ObjectLayer (typedef alias),
 // uint64_t → uint64, _Bool → bool, float → float32, etc.
@@ -415,10 +559,39 @@ func mapCFieldTypeToGo(cType string) string {
 }
 
 // mathReturnTypes is the set of Go math types that require the unsafe.Pointer
-// cast pattern when returned from cjolt functions.
+// cast pattern when returned from cjolt functions. Also used to skip method
+// generation for types already hand-written in math.go.
 var mathReturnTypes = map[string]bool{
 	"Vec3": true, "Quat": true, "Mat44": true,
-	"RVec3": true, "RMat44": true,
+	"RVec3": true, "RMat4": true,
+}
+
+// joltHandleTypes is the set of Go type names that have a .h handle field
+// (opaque handle wrappers, ref-counted types, listener types, owned types).
+// Set by EmitJolt before any emitter runs.
+var joltHandleTypes map[string]bool
+
+// buildKnownHandleTypes builds the complete set of Go type names that will have
+// a .h field in the generated code. Used by joltParamFromCType to distinguish
+// opaque handle types (argName.h) from concrete value types (unsafe.Pointer).
+func buildKnownHandleTypes(h *Header) map[string]bool {
+	known := make(map[string]bool)
+	// All opaque structs become handle types.
+	for _, s := range h.Structs {
+		if s.Opaque {
+			known[strings.TrimPrefix(s.Name, "JPH_")] = true
+		}
+	}
+	// All ref-counted types have a .h field (directly or via embedded root).
+	for _, name := range Annotations.RefCounted {
+		known[name] = true
+	}
+	// All listener types have a .h field.
+	for _, spec := range Annotations.Listeners {
+		known[strings.TrimPrefix(spec.CType, "JPH_")] = true
+	}
+	// Math types (Vec3, Quat, etc.) are NOT handle types — handled specially.
+	return known
 }
 
 // skipMethods lists C method names that are handled by dedicated emitters and
@@ -620,8 +793,15 @@ func methodParamFromCType(cType, argName string) (goType, callExpr string, needs
 	s := strings.TrimPrefix(cType, "const ")
 	s = strings.TrimSpace(s)
 
+	// Pointer-to-pointer (T **): expose as unsafe.Pointer.
+	if _, ok := strings.CutSuffix(s, " **"); ok {
+		return "unsafe.Pointer", argName, false
+	}
 	// Pointer type check.
 	if base, ok := strings.CutSuffix(s, "*"); ok {
+		base = strings.TrimSpace(base)
+		// Strip const qualifier (handles "const const T *" → "T").
+		base = strings.TrimPrefix(base, "const ")
 		base = strings.TrimSpace(base)
 		// Settings pointer: const JPH_XSettings * → *XSettings
 		stripped := strings.TrimPrefix(base, "JPH_")
@@ -637,6 +817,18 @@ func methodParamFromCType(cType, argName string) (goType, callExpr string, needs
 
 	// Non-pointer JPH_X type: treat as Go-side typedef/enum.
 	if stripped, ok := strings.CutPrefix(s, "JPH_"); ok {
+		// Apply special name mappings (C name → Go name) for types with
+		// different naming between joltc.h and math.go.
+		switch stripped {
+		case "RMat4":
+			// math.go defines RMat44 (struct); pass via unsafe.Pointer reinterpret.
+			cast := "*(*cjolt.C_JPH_RMat4)(unsafe.Pointer(&" + argName + "))"
+			return "RMat44", cast, false
+		case "Mat4":
+			// Analogous to RMat4.
+			cast := "*(*cjolt.C_JPH_Mat4)(unsafe.Pointer(&" + argName + "))"
+			return "Mat44", cast, false
+		}
 		cast := "cjolt.C_JPH_" + stripped + "(" + argName + ")"
 		return stripped, cast, false
 	}
@@ -647,10 +839,17 @@ func methodParamFromCType(cType, argName string) (goType, callExpr string, needs
 }
 
 // parsePointerReturn checks if a C return type is JPH_X* (a plain opaque pointer)
-// and returns (goTypeName, true) if so. Math/void returns give ("", false).
+// and returns (goTypeName, true) if so. Math/void/char/primitive returns give ("", false).
 func parsePointerReturn(ret string) (goType string, ok bool) {
 	ret = strings.TrimSpace(ret)
 	if ret == "void" {
+		return "", false
+	}
+	// Strip outer const qualifier.
+	ret = strings.TrimPrefix(ret, "const ")
+	ret = strings.TrimSpace(ret)
+	// Pointer-to-pointer (T **) → not a typed return for the jolt API.
+	if strings.HasSuffix(ret, " **") {
 		return "", false
 	}
 	base, hasStar := strings.CutSuffix(ret, "*")
@@ -658,9 +857,23 @@ func parsePointerReturn(ret string) (goType string, ok bool) {
 		return "", false
 	}
 	base = strings.TrimSpace(base)
+	// Strip any nested const from base.
+	base = strings.TrimPrefix(base, "const ")
+	base = strings.TrimSpace(base)
+	// void *, char *, or primitive pointer → not a typed opaque pointer return.
+	switch base {
+	case "void", "char", "float", "double", "int", "uint8_t", "uint16_t", "uint32_t", "uint64_t",
+		"int8_t", "int16_t", "int32_t", "int64_t", "bool", "_Bool":
+		return "", false
+	}
 	goT := strings.TrimPrefix(base, "JPH_")
 	// Math types are not returned as wrapped struct pointers from receiver methods.
 	if mathReturnTypes[goT] {
+		return "", false
+	}
+	// Non-handle types (scalar typedefs like BodyID, enums, etc.) are not wrapped in structs.
+	// Only opaque handle wrapper types have a .h field and can be returned as *T.
+	if !joltHandleTypes[goT] {
 		return "", false
 	}
 	return goT, true
@@ -699,6 +912,17 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 		if !alreadyEmitted[goRecv] {
 			continue
 		}
+		// Skip methods for math types (Vec3, Quat, etc.) — hand-written in math.go.
+		if mathReturnTypes[goRecv] {
+			continue
+		}
+		// Skip methods for concrete value types (type aliases to cjolt C_ types).
+		// These types don't have a .h handle field; they are the C struct directly.
+		// Methods on these types would fail because: (1) they're type aliases so Go
+		// forbids new methods, and (2) .h is not a valid field on value types.
+		if !joltHandleTypes[goRecv] {
+			continue
+		}
 
 		// Receiver variable: extract lowercase initials from each capital segment.
 		recvVar := receiverShortName(goRecv)
@@ -713,11 +937,34 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 		var goParams []string
 		var callArgs []string
 		var settingsKeepAlives []string // param names needing KeepAlive after the cgo call
-		callArgs = append(callArgs, recvVar+".h")
+		usedParamNames := map[string]bool{recvVar: true}
+		// First call arg is the receiver handle. For RefCounted non-root types, the handle
+		// field holds *C.JPH_Root (e.g. Shape), but cjolt methods expect *C.JPH_X.
+		// Cast via unsafe.Pointer to avoid "cannot use *C.JPH_Shape as *C.JPH_ConvexShape".
+		if isRefCounted(goRecv) && rootRefCountedType(goRecv) != goRecv {
+			callArgs = append(callArgs, fmt.Sprintf("(*cjolt.C_JPH_%s)(unsafe.Pointer(%s.h))", goRecv, recvVar))
+		} else {
+			callArgs = append(callArgs, recvVar+".h")
+		}
 		for _, p := range f.Params[1:] {
 			rawName := safeParamName(p.Name)
 			// Abbreviate long param names in receiver methods only.
 			paramName := abbreviateParamName(rawName)
+			// Avoid duplicate parameter names: fall back to original name if abbreviation collides.
+			if usedParamNames[paramName] {
+				paramName = rawName
+			}
+			// If original name is also taken (e.g. both params named "b"), suffix with index.
+			if usedParamNames[paramName] {
+				for i := 1; ; i++ {
+					candidate := fmt.Sprintf("%s%d", paramName, i)
+					if !usedParamNames[candidate] {
+						paramName = candidate
+						break
+					}
+				}
+			}
+			usedParamNames[paramName] = true
 
 			gt, callExpr, keepAlive := methodParamFromCType(p.CType, paramName)
 			goParams = append(goParams, paramName+" "+gt)
@@ -741,12 +988,50 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 				fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", ka)
 			}
 			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
-			fmt.Fprintf(&b, "    return &%s{h: out}\n", ptrGoType)
+			// RefCounted types have embedded inheritance — use the embedded chain and
+			// cast the returned pointer to the root handle type.
+			if isRefCounted(ptrGoType) {
+				root := rootRefCountedType(ptrGoType)
+				chain := buildEmbeddedChain(ptrGoType)
+				if root != ptrGoType {
+					fmt.Fprintf(&b, "    h := (*cjolt.C_JPH_%s)(unsafe.Pointer(out))\n", root)
+					fmt.Fprintf(&b, "    return &%s{%s}\n", ptrGoType, chain)
+				} else {
+					fmt.Fprintf(&b, "    return &%s{h: out}\n", ptrGoType)
+				}
+			} else {
+				fmt.Fprintf(&b, "    return &%s{h: out}\n", ptrGoType)
+			}
 			fmt.Fprintf(&b, "}\n\n")
 			continue
 		}
 
-		goRet := strings.TrimPrefix(ret, "JPH_")
+		// For pointer returns that parsePointerReturn rejected (char*, float*, void*, etc.),
+		// skip the method — it needs special handling beyond scope of generated code.
+		if strings.HasSuffix(ret, "*") {
+			continue
+		}
+
+		// Strip const qualifier and JPH_ prefix for scalar return.
+		goRet := strings.TrimPrefix(ret, "const ")
+		goRet = strings.TrimSpace(goRet)
+		goRet = strings.TrimPrefix(goRet, "JPH_")
+		// Apply special name mappings (C name after stripping JPH_ → Go name).
+		switch goRet {
+		case "RMat4":
+			goRet = "RMat44"
+		case "Mat4":
+			goRet = "Mat44"
+		}
+		// Map C scalar types to Go-native types.
+		if mapped, ok := map[string]string{
+			"uint8_t": "uint8", "uint16_t": "uint16", "uint32_t": "uint32", "uint64_t": "uint64",
+			"int8_t": "int8", "int16_t": "int16", "int32_t": "int32", "int64_t": "int64",
+			"float": "float32", "double": "float64", "bool": "bool", "_Bool": "bool",
+			"int": "int32", "unsigned int": "uint32",
+		}[goRet]; ok {
+			goRet = mapped
+		}
 
 		if ret == "void" {
 			// No return value.
@@ -768,14 +1053,16 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 			fmt.Fprintf(&b, "    return *(*%s)(unsafe.Pointer(&out))\n", goRet)
 			fmt.Fprintf(&b, "}\n\n")
 		} else {
-			// Scalar or other return: direct return.
+			// Scalar or other return: direct return with explicit type conversion.
+			// Required because cjolt may return C._Ctype_JPH_BodyID etc. which isn't
+			// directly assignable to Go uint32/BodyID even though layout-compatible.
 			fmt.Fprintf(&b, "func (%s *%s) %s(%s) %s {\n", recvVar, goRecv, goMethod, paramList, goRet)
 			fmt.Fprintf(&b, "    result := cjolt.%s(%s)\n", f.Name, argList)
 			for _, ka := range settingsKeepAlives {
 				fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", ka)
 			}
 			fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", recvVar)
-			fmt.Fprintf(&b, "    return result\n")
+			fmt.Fprintf(&b, "    return %s(result)\n", goRet)
 			fmt.Fprintf(&b, "}\n\n")
 		}
 	}

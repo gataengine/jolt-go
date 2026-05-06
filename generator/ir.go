@@ -34,10 +34,11 @@ type EnumMember struct {
 
 // Header is the parsed contents of joltc.h.
 type Header struct {
-	Funcs    []Func
-	Structs  []Struct
-	Enums    []Enum
-	Typedefs map[string]string // alias -> underlying
+	Funcs        []Func
+	Structs      []Struct
+	Enums        []Enum
+	Typedefs     map[string]string // alias -> underlying (scalar typedefs)
+	FuncTypedefs []string          // names of function-pointer typedef types (e.g. JPH_TireMaxImpulseCallback)
 }
 
 // SplitMethod splits a JPH_<Receiver>_<Method> name. Returns ok=false if the

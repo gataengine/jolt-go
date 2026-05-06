@@ -13,6 +13,7 @@ package cjolt
 #cgo CXXFLAGS: -I${SRCDIR}/../../third_party/joltc/include
 #cgo CXXFLAGS: -I${SRCDIR}/../../third_party/JoltPhysics
 #cgo CXXFLAGS: -DJPH_OBJECT_LAYER_BITS=32
+#cgo CXXFLAGS: -DJPH_DEBUG_RENDERER
 #cgo CFLAGS: -I${SRCDIR}/../../third_party/joltc/include
 #cgo amd64 CXXFLAGS: -DJPH_USE_SSE4_1 -DJPH_USE_SSE4_2 -DJPH_USE_AVX
 #cgo arm64 CXXFLAGS: -DJPH_USE_NEON

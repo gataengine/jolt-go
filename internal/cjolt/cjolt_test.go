@@ -7,6 +7,8 @@ import (
 )
 
 func TestCgoLinks(t *testing.T) {
-	cjolt.RegisterTypes()
-	cjolt.UnregisterTypes()
+	if !cjolt.JPH_Init() {
+		t.Fatal("JPH_Init failed")
+	}
+	cjolt.JPH_Shutdown()
 }
