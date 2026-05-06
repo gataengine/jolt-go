@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/format"
 	"slices"
+	"sort"
 	"strings"
 )
 
@@ -26,6 +27,9 @@ var _ = runtime.GC
 
 	// Track which Go types have already been emitted as struct definitions.
 	alreadyEmitted := map[string]bool{}
+
+	// Emit Go-side aliases for integer typedefs (e.g. ObjectLayer = uint16).
+	b.WriteString(emitTypedefs(h))
 
 	// Pair Create/Destroy by type name and emit one OwnedType block per pair
 	// that is *not* in the RefCounted set.
@@ -52,6 +56,19 @@ var _ = runtime.GC
 			goName := strings.TrimPrefix(s.Name, "JPH_")
 			alreadyEmitted[goName] = true
 		}
+	}
+
+	// Emit settings structs (Approach 1: layout-match Go struct + SetX setters).
+	for _, s := range h.Structs {
+		if s.Opaque {
+			continue
+		}
+		goName := strings.TrimPrefix(s.Name, "JPH_")
+		if _, ok := Annotations.SettingsInit[goName]; !ok {
+			continue
+		}
+		b.WriteString(emitSettingsType(s))
+		alreadyEmitted[goName] = true
 	}
 
 	// Emit method bindings on receiver types.
@@ -275,6 +292,121 @@ func (p *%[1]s) Close() error {
 func (p *%[1]s) finalize() { _ = p.Close() }
 
 `, p.GoType)
+}
+
+// emitTypedefs emits Go-side aliases for joltc integer typedefs.
+// e.g., "typedef uint16_t JPH_ObjectLayer" → "type ObjectLayer = uint16"
+func emitTypedefs(h *Header) string {
+	var b strings.Builder
+	cToGo := map[string]string{
+		"uint8_t":  "uint8",
+		"int8_t":   "int8",
+		"uint16_t": "uint16",
+		"int16_t":  "int16",
+		"uint32_t": "uint32",
+		"int32_t":  "int32",
+		"uint64_t": "uint64",
+		"int64_t":  "int64",
+		"float":    "float32",
+		"double":   "float64",
+	}
+	// Sort for deterministic output.
+	var aliases []string
+	for k := range h.Typedefs {
+		aliases = append(aliases, k)
+	}
+	sort.Strings(aliases)
+
+	for _, alias := range aliases {
+		underlying := h.Typedefs[alias]
+		goType, ok := cToGo[underlying]
+		if !ok {
+			continue
+		}
+		goName := strings.TrimPrefix(alias, "JPH_")
+		fmt.Fprintf(&b, "type %s = %s\n", goName, goType)
+	}
+	if b.Len() > 0 {
+		b.WriteString("\n")
+	}
+	return b.String()
+}
+
+// emitSettingsType emits a Go struct mirroring a JPH_*Settings C struct (Approach 1).
+// Every scalar/math field maps directly. Pointer fields become unexported uintptr
+// slots with a SetX(*X) setter that stores via unsafe.Pointer + KeepAlive.
+func emitSettingsType(s Struct) string {
+	goName := strings.TrimPrefix(s.Name, "JPH_")
+	var b strings.Builder
+	fmt.Fprintf(&b, "type %s struct {\n", goName)
+
+	type ptrSetter struct {
+		Field string // "Shape"
+		Type  string // "Shape" (without JPH_)
+	}
+	var pointerFields []ptrSetter
+
+	for _, f := range s.Fields {
+		cType := f.CType
+		// Pointer fields become unexported uintptr slots and need setters.
+		if strings.HasSuffix(cType, "*") {
+			// e.g., "JPH_Shape *" → field "shape uintptr"
+			pointerFields = append(pointerFields, ptrSetter{
+				Field: f.Name,
+				Type:  strings.TrimSpace(strings.TrimPrefix(strings.TrimSuffix(strings.TrimSpace(cType), "*"), "JPH_")),
+			})
+			// Lowercase first letter for the unexported slot.
+			slotName := strings.ToLower(f.Name[:1]) + f.Name[1:]
+			fmt.Fprintf(&b, "    %s uintptr\n", slotName)
+			continue
+		}
+		// Map C type to Go type.
+		goType := mapCFieldTypeToGo(cType)
+		fmt.Fprintf(&b, "    %s %s\n", f.Name, goType)
+	}
+	b.WriteString("}\n\n")
+
+	for _, p := range pointerFields {
+		slotName := strings.ToLower(p.Field[:1]) + p.Field[1:]
+		argName := strings.ToLower(p.Type[:1]) + p.Type[1:]
+		fmt.Fprintf(&b, "func (s *%s) Set%s(%s *%s) {\n", goName, p.Field, argName, p.Type)
+		fmt.Fprintf(&b, "    s.%s = uintptr(unsafe.Pointer(%s.h))\n", slotName, argName)
+		fmt.Fprintf(&b, "    runtime.KeepAlive(%s)\n", argName)
+		b.WriteString("}\n\n")
+	}
+	return b.String()
+}
+
+// mapCFieldTypeToGo maps a C field type string to the corresponding Go type.
+// JPH_Vec3 → Vec3, JPH_ObjectLayer → ObjectLayer (typedef alias),
+// uint64_t → uint64, _Bool → bool, float → float32, etc.
+func mapCFieldTypeToGo(cType string) string {
+	cType = strings.TrimSpace(cType)
+	// JPH_-prefixed types: strip the prefix; the type is defined either in math.go
+	// (Vec3/Quat/...) or via emitTypedefs (ObjectLayer/MotionType) or as opaque struct.
+	if strings.HasPrefix(cType, "JPH_") {
+		return strings.TrimPrefix(cType, "JPH_")
+	}
+	// C scalars.
+	cToGo := map[string]string{
+		"uint8_t":  "uint8",
+		"int8_t":   "int8",
+		"uint16_t": "uint16",
+		"int16_t":  "int16",
+		"uint32_t": "uint32",
+		"int32_t":  "int32",
+		"uint64_t": "uint64",
+		"int64_t":  "int64",
+		"float":    "float32",
+		"double":   "float64",
+		"bool":     "bool",
+		"_Bool":    "bool",
+	}
+	if goT, ok := cToGo[cType]; ok {
+		return goT
+	}
+	// Unknown type: pass through (likely fails compile in Task 33).
+	return cType
 }
 
 // mathReturnTypes is the set of Go math types that require the unsafe.Pointer

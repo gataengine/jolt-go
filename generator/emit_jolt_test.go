@@ -131,3 +131,31 @@ var _ = Describe("EmitJolt — methods on receiver types", func() {
 		})
 	})
 })
+
+var _ = Describe("EmitJolt — settings struct", func() {
+	Context("settings struct (Approach 1)", func() {
+		var h *generator.Header
+		BeforeEach(func() {
+			var err error
+			h, err = generator.ParseHeader("testdata/settings.h")
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("emits a layout-match Go struct", func() {
+			src := generator.EmitJolt(h)
+			Expect(src).To(ContainSubstring("type BodyCreationSettings struct {"))
+			Expect(src).To(ContainSubstring("Position        RVec3"))
+			Expect(src).To(ContainSubstring("Rotation        Quat"))
+			Expect(src).To(ContainSubstring("UserData        uint64"))
+			Expect(src).To(ContainSubstring("ObjectLayer     ObjectLayer"))
+			Expect(src).To(ContainSubstring("MotionType      MotionType"))
+			Expect(src).To(ContainSubstring("AllowSleeping   bool"))
+			Expect(src).To(ContainSubstring("shape           uintptr"))
+		})
+		It("emits SetShape using uintptr", func() {
+			src := generator.EmitJolt(h)
+			Expect(src).To(ContainSubstring("func (s *BodyCreationSettings) SetShape(shape *Shape) {"))
+			Expect(src).To(ContainSubstring("s.shape = uintptr(unsafe.Pointer(shape.h))"))
+			Expect(src).To(ContainSubstring("runtime.KeepAlive(shape)"))
+		})
+	})
+})
