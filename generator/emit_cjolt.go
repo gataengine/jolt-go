@@ -37,9 +37,8 @@ func cjoltGoType(cType string) string {
 	s = strings.TrimPrefix(s, "const ")
 	s = strings.TrimSpace(s)
 	// Pointer type: ends with '*' after trimming.
-	if strings.HasSuffix(s, "*") {
-		base := strings.TrimSpace(strings.TrimSuffix(s, "*"))
-		return "*C." + base
+	if base, ok := strings.CutSuffix(s, "*"); ok {
+		return "*C." + strings.TrimSpace(base)
 	}
 	// Scalar / enum type.
 	return "C." + s
