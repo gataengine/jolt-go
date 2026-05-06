@@ -192,3 +192,27 @@ var _ = Describe("EmitCjolt — opaque type re-exports", func() {
 		})
 	})
 })
+
+var _ = Describe("EmitCjolt — listener trampolines", func() {
+	Context("listener trampolines", func() {
+		h := &generator.Header{}
+		It("emits ContactListenerHandle struct with C.*-typed func fields", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring("type ContactListenerHandle struct {"))
+			Expect(src).To(ContainSubstring(
+				"OnContactAdded     func(b1, b2 *C.JPH_Body, manifold *C.JPH_ContactManifold, settings *C.JPH_ContactSettings)",
+			))
+		})
+		It("emits exported trampolines and init() that registers Procs", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring("//export jolt_go_contactListener_OnContactAdded"))
+			Expect(src).To(ContainSubstring(
+				"func jolt_go_contactListener_OnContactAdded(userData unsafe.Pointer, b1, b2 *C.JPH_Body, manifold *C.JPH_ContactManifold, settings *C.JPH_ContactSettings) {",
+			))
+			Expect(src).To(ContainSubstring(`h := cgo.Handle(uintptr(userData))`))
+			Expect(src).To(ContainSubstring(`cl := h.Value().(*ContactListenerHandle)`))
+			Expect(src).To(ContainSubstring("func init() {"))
+			Expect(src).To(ContainSubstring("C.JPH_ContactListener_SetProcs("))
+		})
+	})
+})

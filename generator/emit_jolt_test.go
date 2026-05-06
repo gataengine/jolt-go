@@ -213,7 +213,11 @@ var _ = Describe("EmitJolt — ContactListener", func() {
 		It("emits NewContactListener registering cgo.Handle as userData", func() {
 			src := generator.EmitJolt(h)
 			Expect(src).To(ContainSubstring("func NewContactListener(l ContactListener) *ContactListener {"))
-			Expect(src).To(ContainSubstring("cl.handle = cgo.NewHandle(cl)"))
+			// Task 31: factory now constructs a bridge ContactListenerHandle and stores
+			// THAT in the cgo.Handle (not the public ContactListener), because the
+			// cjolt-side trampolines expect *ContactListenerHandle as h.Value().
+			Expect(src).To(ContainSubstring("bridge := &cjolt.ContactListenerHandle{"))
+			Expect(src).To(ContainSubstring("cl.handle = cgo.NewHandle(bridge)"))
 			Expect(src).To(ContainSubstring("cl.h = cjolt.JPH_ContactListener_Create(unsafe.Pointer(uintptr(cl.handle)))"))
 			Expect(src).To(ContainSubstring("runtime.SetFinalizer(cl, (*ContactListener).finalize)"))
 		})

@@ -483,7 +483,13 @@ func emitOneListener(spec ListenerSpec) string {
 	recv := receiverShortName(goName) // ContactListener -> cl
 	fmt.Fprintf(&b, "func New%s(l %s) *%s {\n", goName, goName, goName)
 	fmt.Fprintf(&b, "    %s := &l\n", recv)
-	fmt.Fprintf(&b, "    %s.handle = cgo.NewHandle(%s)\n", recv, recv)
+	// Task 31: emit the bridge construction if this is a ContactListener.
+	if spec.CType == "JPH_ContactListener" {
+		b.WriteString(emitContactListenerBridge())
+		fmt.Fprintf(&b, "    %s.handle = cgo.NewHandle(bridge)\n", recv)
+	} else {
+		fmt.Fprintf(&b, "    %s.handle = cgo.NewHandle(%s)\n", recv, recv)
+	}
 	fmt.Fprintf(&b, "    %s.h = cjolt.%s(unsafe.Pointer(uintptr(%s.handle)))\n",
 		recv, listenerCreateFunc(spec), recv)
 	fmt.Fprintf(&b, "    runtime.SetFinalizer(%s, (*%s).finalize)\n", recv, goName)
@@ -502,6 +508,49 @@ func emitOneListener(spec ListenerSpec) string {
 	fmt.Fprintf(&b, "}\n\n")
 
 	return b.String()
+}
+
+// emitContactListenerBridge returns the bridge construction code for
+// NewContactListener. The bridge is a *cjolt.ContactListenerHandle whose
+// func fields are closures that convert C.* params to Go-native and call
+// the user's func fields.
+func emitContactListenerBridge() string {
+	return `    bridge := &cjolt.ContactListenerHandle{
+        OnContactValidate: func(b1, b2 *cjolt.C_JPH_Body, baseOffset *cjolt.C_JPH_RVec3, result *cjolt.C_JPH_CollideShapeResult) cjolt.C_JPH_ValidateResult {
+            if cl.OnContactValidate != nil {
+                return cjolt.C_JPH_ValidateResult(cl.OnContactValidate(
+                    &Body{h: b1}, &Body{h: b2},
+                    *(*RVec3)(unsafe.Pointer(baseOffset)),
+                    (*CollideShapeResult)(unsafe.Pointer(result)),
+                ))
+            }
+            return 0
+        },
+        OnContactAdded: func(b1, b2 *cjolt.C_JPH_Body, manifold *cjolt.C_JPH_ContactManifold, settings *cjolt.C_JPH_ContactSettings) {
+            if cl.OnContactAdded != nil {
+                cl.OnContactAdded(
+                    &Body{h: b1}, &Body{h: b2},
+                    (*ContactManifold)(unsafe.Pointer(manifold)),
+                    (*ContactSettings)(unsafe.Pointer(settings)),
+                )
+            }
+        },
+        OnContactPersisted: func(b1, b2 *cjolt.C_JPH_Body, manifold *cjolt.C_JPH_ContactManifold, settings *cjolt.C_JPH_ContactSettings) {
+            if cl.OnContactPersisted != nil {
+                cl.OnContactPersisted(
+                    &Body{h: b1}, &Body{h: b2},
+                    (*ContactManifold)(unsafe.Pointer(manifold)),
+                    (*ContactSettings)(unsafe.Pointer(settings)),
+                )
+            }
+        },
+        OnContactRemoved: func(subShapePair *cjolt.C_JPH_SubShapeIDPair) {
+            if cl.OnContactRemoved != nil {
+                cl.OnContactRemoved((*SubShapeIDPair)(unsafe.Pointer(subShapePair)))
+            }
+        },
+    }
+`
 }
 
 // listenerCreateFunc derives the cjolt _Create function name.
