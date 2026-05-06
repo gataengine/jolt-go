@@ -222,7 +222,7 @@ var _ = Describe("EmitJolt — ContactListener", func() {
 			// cjolt-side trampolines expect *ContactListenerHandle as h.Value().
 			Expect(src).To(ContainSubstring("bridge := &cjolt.ContactListenerHandle{"))
 			Expect(src).To(ContainSubstring("cl.handle = cgo.NewHandle(bridge)"))
-			Expect(src).To(ContainSubstring("cl.h = cjolt.JPH_ContactListener_Create(unsafe.Pointer(uintptr(cl.handle)))"))
+			Expect(src).To(ContainSubstring("cl.h = cjolt.JPH_ContactListener_Create(*(*unsafe.Pointer)(unsafe.Pointer(&cl.handle)))"))
 			Expect(src).To(ContainSubstring("runtime.SetFinalizer(cl, (*ContactListener).finalize)"))
 		})
 	})

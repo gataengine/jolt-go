@@ -156,6 +156,7 @@ func pairCreateDestroy(h *Header) []ownedPair {
 			out = append(out, ownedPair{GoType: t, Create: c, Destroy: d})
 		}
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].GoType < out[j].GoType })
 	return out
 }
 
@@ -663,7 +664,7 @@ func emitOneListener(spec ListenerSpec) string {
 	} else {
 		fmt.Fprintf(&b, "    %s.handle = cgo.NewHandle(%s)\n", recv, recv)
 	}
-	fmt.Fprintf(&b, "    %s.h = cjolt.%s(unsafe.Pointer(uintptr(%s.handle)))\n",
+	fmt.Fprintf(&b, "    %s.h = cjolt.%s(*(*unsafe.Pointer)(unsafe.Pointer(&%s.handle)))\n",
 		recv, listenerCreateFunc(spec), recv)
 	fmt.Fprintf(&b, "    runtime.SetFinalizer(%s, (*%s).finalize)\n", recv, goName)
 	fmt.Fprintf(&b, "    return %s\n}\n\n", recv)

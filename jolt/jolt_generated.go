@@ -46,215 +46,26 @@ func (p *BodyActivationListener) Close() error {
 
 func (p *BodyActivationListener) finalize() { _ = p.Close() }
 
-type DebugRenderer struct {
-	h *cjolt.C_JPH_DebugRenderer
+type BodyCreationSettings struct {
+	h *cjolt.C_JPH_BodyCreationSettings
 }
 
-func NewDebugRenderer(userData unsafe.Pointer) *DebugRenderer {
-	p := &DebugRenderer{h: cjolt.JPH_DebugRenderer_Create(userData)}
-	runtime.SetFinalizer(p, (*DebugRenderer).finalize)
+func NewBodyCreationSettings() *BodyCreationSettings {
+	p := &BodyCreationSettings{h: cjolt.JPH_BodyCreationSettings_Create()}
+	runtime.SetFinalizer(p, (*BodyCreationSettings).finalize)
 	return p
 }
 
-func (p *DebugRenderer) Close() error {
+func (p *BodyCreationSettings) Close() error {
 	if p.h != nil {
-		cjolt.JPH_DebugRenderer_Destroy(p.h)
+		cjolt.JPH_BodyCreationSettings_Destroy(p.h)
 		p.h = nil
 		runtime.SetFinalizer(p, nil)
 	}
 	return nil
 }
 
-func (p *DebugRenderer) finalize() { _ = p.Close() }
-
-type SoftBodyCreationSettings struct {
-	h *cjolt.C_JPH_SoftBodyCreationSettings
-}
-
-func NewSoftBodyCreationSettings() *SoftBodyCreationSettings {
-	p := &SoftBodyCreationSettings{h: cjolt.JPH_SoftBodyCreationSettings_Create()}
-	runtime.SetFinalizer(p, (*SoftBodyCreationSettings).finalize)
-	return p
-}
-
-func (p *SoftBodyCreationSettings) Close() error {
-	if p.h != nil {
-		cjolt.JPH_SoftBodyCreationSettings_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *SoftBodyCreationSettings) finalize() { _ = p.Close() }
-
-type BodyFilter struct {
-	h *cjolt.C_JPH_BodyFilter
-}
-
-func NewBodyFilter(userData unsafe.Pointer) *BodyFilter {
-	p := &BodyFilter{h: cjolt.JPH_BodyFilter_Create(userData)}
-	runtime.SetFinalizer(p, (*BodyFilter).finalize)
-	return p
-}
-
-func (p *BodyFilter) Close() error {
-	if p.h != nil {
-		cjolt.JPH_BodyFilter_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *BodyFilter) finalize() { _ = p.Close() }
-
-type SkeletonMapper struct {
-	h *cjolt.C_JPH_SkeletonMapper
-}
-
-func NewSkeletonMapper() *SkeletonMapper {
-	p := &SkeletonMapper{h: cjolt.JPH_SkeletonMapper_Create()}
-	runtime.SetFinalizer(p, (*SkeletonMapper).finalize)
-	return p
-}
-
-func (p *SkeletonMapper) Close() error {
-	if p.h != nil {
-		cjolt.JPH_SkeletonMapper_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *SkeletonMapper) finalize() { _ = p.Close() }
-
-type WheelSettings struct {
-	h *cjolt.C_JPH_WheelSettings
-}
-
-func NewWheelSettings() *WheelSettings {
-	p := &WheelSettings{h: cjolt.JPH_WheelSettings_Create()}
-	runtime.SetFinalizer(p, (*WheelSettings).finalize)
-	return p
-}
-
-func (p *WheelSettings) Close() error {
-	if p.h != nil {
-		cjolt.JPH_WheelSettings_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *WheelSettings) finalize() { _ = p.Close() }
-
-type BroadPhaseLayerFilter struct {
-	h *cjolt.C_JPH_BroadPhaseLayerFilter
-}
-
-func NewBroadPhaseLayerFilter(userData unsafe.Pointer) *BroadPhaseLayerFilter {
-	p := &BroadPhaseLayerFilter{h: cjolt.JPH_BroadPhaseLayerFilter_Create(userData)}
-	runtime.SetFinalizer(p, (*BroadPhaseLayerFilter).finalize)
-	return p
-}
-
-func (p *BroadPhaseLayerFilter) Close() error {
-	if p.h != nil {
-		cjolt.JPH_BroadPhaseLayerFilter_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *BroadPhaseLayerFilter) finalize() { _ = p.Close() }
-
-type SimShapeFilter struct {
-	h *cjolt.C_JPH_SimShapeFilter
-}
-
-func NewSimShapeFilter(userData unsafe.Pointer) *SimShapeFilter {
-	p := &SimShapeFilter{h: cjolt.JPH_SimShapeFilter_Create(userData)}
-	runtime.SetFinalizer(p, (*SimShapeFilter).finalize)
-	return p
-}
-
-func (p *SimShapeFilter) Close() error {
-	if p.h != nil {
-		cjolt.JPH_SimShapeFilter_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *SimShapeFilter) finalize() { _ = p.Close() }
-
-type SkeletalAnimation struct {
-	h *cjolt.C_JPH_SkeletalAnimation
-}
-
-func NewSkeletalAnimation() *SkeletalAnimation {
-	p := &SkeletalAnimation{h: cjolt.JPH_SkeletalAnimation_Create()}
-	runtime.SetFinalizer(p, (*SkeletalAnimation).finalize)
-	return p
-}
-
-func (p *SkeletalAnimation) Close() error {
-	if p.h != nil {
-		cjolt.JPH_SkeletalAnimation_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *SkeletalAnimation) finalize() { _ = p.Close() }
-
-type PhysicsStepListener struct {
-	h *cjolt.C_JPH_PhysicsStepListener
-}
-
-func NewPhysicsStepListener(userData unsafe.Pointer) *PhysicsStepListener {
-	p := &PhysicsStepListener{h: cjolt.JPH_PhysicsStepListener_Create(userData)}
-	runtime.SetFinalizer(p, (*PhysicsStepListener).finalize)
-	return p
-}
-
-func (p *PhysicsStepListener) Close() error {
-	if p.h != nil {
-		cjolt.JPH_PhysicsStepListener_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *PhysicsStepListener) finalize() { _ = p.Close() }
-
-type ShapeFilter struct {
-	h *cjolt.C_JPH_ShapeFilter
-}
-
-func NewShapeFilter(userData unsafe.Pointer) *ShapeFilter {
-	p := &ShapeFilter{h: cjolt.JPH_ShapeFilter_Create(userData)}
-	runtime.SetFinalizer(p, (*ShapeFilter).finalize)
-	return p
-}
-
-func (p *ShapeFilter) Close() error {
-	if p.h != nil {
-		cjolt.JPH_ShapeFilter_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *ShapeFilter) finalize() { _ = p.Close() }
+func (p *BodyCreationSettings) finalize() { _ = p.Close() }
 
 type BodyDrawFilter struct {
 	h *cjolt.C_JPH_BodyDrawFilter
@@ -277,47 +88,47 @@ func (p *BodyDrawFilter) Close() error {
 
 func (p *BodyDrawFilter) finalize() { _ = p.Close() }
 
-type TempAllocator struct {
-	h *cjolt.C_JPH_TempAllocator
+type BodyFilter struct {
+	h *cjolt.C_JPH_BodyFilter
 }
 
-func NewTempAllocator(size uint32) *TempAllocator {
-	p := &TempAllocator{h: cjolt.JPH_TempAllocator_Create(size)}
-	runtime.SetFinalizer(p, (*TempAllocator).finalize)
+func NewBodyFilter(userData unsafe.Pointer) *BodyFilter {
+	p := &BodyFilter{h: cjolt.JPH_BodyFilter_Create(userData)}
+	runtime.SetFinalizer(p, (*BodyFilter).finalize)
 	return p
 }
 
-func (p *TempAllocator) Close() error {
+func (p *BodyFilter) Close() error {
 	if p.h != nil {
-		cjolt.JPH_TempAllocator_Destroy(p.h)
+		cjolt.JPH_BodyFilter_Destroy(p.h)
 		p.h = nil
 		runtime.SetFinalizer(p, nil)
 	}
 	return nil
 }
 
-func (p *TempAllocator) finalize() { _ = p.Close() }
+func (p *BodyFilter) finalize() { _ = p.Close() }
 
-type SoftBodySharedSettings struct {
-	h *cjolt.C_JPH_SoftBodySharedSettings
+type BroadPhaseLayerFilter struct {
+	h *cjolt.C_JPH_BroadPhaseLayerFilter
 }
 
-func NewSoftBodySharedSettings() *SoftBodySharedSettings {
-	p := &SoftBodySharedSettings{h: cjolt.JPH_SoftBodySharedSettings_Create()}
-	runtime.SetFinalizer(p, (*SoftBodySharedSettings).finalize)
+func NewBroadPhaseLayerFilter(userData unsafe.Pointer) *BroadPhaseLayerFilter {
+	p := &BroadPhaseLayerFilter{h: cjolt.JPH_BroadPhaseLayerFilter_Create(userData)}
+	runtime.SetFinalizer(p, (*BroadPhaseLayerFilter).finalize)
 	return p
 }
 
-func (p *SoftBodySharedSettings) Close() error {
+func (p *BroadPhaseLayerFilter) Close() error {
 	if p.h != nil {
-		cjolt.JPH_SoftBodySharedSettings_Destroy(p.h)
+		cjolt.JPH_BroadPhaseLayerFilter_Destroy(p.h)
 		p.h = nil
 		runtime.SetFinalizer(p, nil)
 	}
 	return nil
 }
 
-func (p *SoftBodySharedSettings) finalize() { _ = p.Close() }
+func (p *BroadPhaseLayerFilter) finalize() { _ = p.Close() }
 
 type CharacterContactListener struct {
 	h *cjolt.C_JPH_CharacterContactListener
@@ -361,6 +172,27 @@ func (p *CharacterVsCharacterCollision) Close() error {
 
 func (p *CharacterVsCharacterCollision) finalize() { _ = p.Close() }
 
+type DebugRenderer struct {
+	h *cjolt.C_JPH_DebugRenderer
+}
+
+func NewDebugRenderer(userData unsafe.Pointer) *DebugRenderer {
+	p := &DebugRenderer{h: cjolt.JPH_DebugRenderer_Create(userData)}
+	runtime.SetFinalizer(p, (*DebugRenderer).finalize)
+	return p
+}
+
+func (p *DebugRenderer) Close() error {
+	if p.h != nil {
+		cjolt.JPH_DebugRenderer_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *DebugRenderer) finalize() { _ = p.Close() }
+
 type LinearCurve struct {
 	h *cjolt.C_JPH_LinearCurve
 }
@@ -381,48 +213,6 @@ func (p *LinearCurve) Close() error {
 }
 
 func (p *LinearCurve) finalize() { _ = p.Close() }
-
-type BodyCreationSettings struct {
-	h *cjolt.C_JPH_BodyCreationSettings
-}
-
-func NewBodyCreationSettings() *BodyCreationSettings {
-	p := &BodyCreationSettings{h: cjolt.JPH_BodyCreationSettings_Create()}
-	runtime.SetFinalizer(p, (*BodyCreationSettings).finalize)
-	return p
-}
-
-func (p *BodyCreationSettings) Close() error {
-	if p.h != nil {
-		cjolt.JPH_BodyCreationSettings_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *BodyCreationSettings) finalize() { _ = p.Close() }
-
-type SkeletonPose struct {
-	h *cjolt.C_JPH_SkeletonPose
-}
-
-func NewSkeletonPose() *SkeletonPose {
-	p := &SkeletonPose{h: cjolt.JPH_SkeletonPose_Create()}
-	runtime.SetFinalizer(p, (*SkeletonPose).finalize)
-	return p
-}
-
-func (p *SkeletonPose) Close() error {
-	if p.h != nil {
-		cjolt.JPH_SkeletonPose_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *SkeletonPose) finalize() { _ = p.Close() }
 
 type ObjectLayerFilter struct {
 	h *cjolt.C_JPH_ObjectLayerFilter
@@ -445,6 +235,132 @@ func (p *ObjectLayerFilter) Close() error {
 
 func (p *ObjectLayerFilter) finalize() { _ = p.Close() }
 
+type PhysicsStepListener struct {
+	h *cjolt.C_JPH_PhysicsStepListener
+}
+
+func NewPhysicsStepListener(userData unsafe.Pointer) *PhysicsStepListener {
+	p := &PhysicsStepListener{h: cjolt.JPH_PhysicsStepListener_Create(userData)}
+	runtime.SetFinalizer(p, (*PhysicsStepListener).finalize)
+	return p
+}
+
+func (p *PhysicsStepListener) Close() error {
+	if p.h != nil {
+		cjolt.JPH_PhysicsStepListener_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *PhysicsStepListener) finalize() { _ = p.Close() }
+
+type PhysicsSystem struct {
+	h *cjolt.C_JPH_PhysicsSystem
+}
+
+func NewPhysicsSystem(settings unsafe.Pointer) *PhysicsSystem {
+	p := &PhysicsSystem{h: cjolt.JPH_PhysicsSystem_Create((*cjolt.C_JPH_PhysicsSystemSettings)(unsafe.Pointer(settings)))}
+	runtime.SetFinalizer(p, (*PhysicsSystem).finalize)
+	return p
+}
+
+func (p *PhysicsSystem) Close() error {
+	if p.h != nil {
+		cjolt.JPH_PhysicsSystem_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *PhysicsSystem) finalize() { _ = p.Close() }
+
+type RagdollSettings struct {
+	h *cjolt.C_JPH_RagdollSettings
+}
+
+func NewRagdollSettings() *RagdollSettings {
+	p := &RagdollSettings{h: cjolt.JPH_RagdollSettings_Create()}
+	runtime.SetFinalizer(p, (*RagdollSettings).finalize)
+	return p
+}
+
+func (p *RagdollSettings) Close() error {
+	if p.h != nil {
+		cjolt.JPH_RagdollSettings_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *RagdollSettings) finalize() { _ = p.Close() }
+
+type ShapeFilter struct {
+	h *cjolt.C_JPH_ShapeFilter
+}
+
+func NewShapeFilter(userData unsafe.Pointer) *ShapeFilter {
+	p := &ShapeFilter{h: cjolt.JPH_ShapeFilter_Create(userData)}
+	runtime.SetFinalizer(p, (*ShapeFilter).finalize)
+	return p
+}
+
+func (p *ShapeFilter) Close() error {
+	if p.h != nil {
+		cjolt.JPH_ShapeFilter_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *ShapeFilter) finalize() { _ = p.Close() }
+
+type SimShapeFilter struct {
+	h *cjolt.C_JPH_SimShapeFilter
+}
+
+func NewSimShapeFilter(userData unsafe.Pointer) *SimShapeFilter {
+	p := &SimShapeFilter{h: cjolt.JPH_SimShapeFilter_Create(userData)}
+	runtime.SetFinalizer(p, (*SimShapeFilter).finalize)
+	return p
+}
+
+func (p *SimShapeFilter) Close() error {
+	if p.h != nil {
+		cjolt.JPH_SimShapeFilter_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *SimShapeFilter) finalize() { _ = p.Close() }
+
+type SkeletalAnimation struct {
+	h *cjolt.C_JPH_SkeletalAnimation
+}
+
+func NewSkeletalAnimation() *SkeletalAnimation {
+	p := &SkeletalAnimation{h: cjolt.JPH_SkeletalAnimation_Create()}
+	runtime.SetFinalizer(p, (*SkeletalAnimation).finalize)
+	return p
+}
+
+func (p *SkeletalAnimation) Close() error {
+	if p.h != nil {
+		cjolt.JPH_SkeletalAnimation_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *SkeletalAnimation) finalize() { _ = p.Close() }
+
 type Skeleton struct {
 	h *cjolt.C_JPH_Skeleton
 }
@@ -465,6 +381,111 @@ func (p *Skeleton) Close() error {
 }
 
 func (p *Skeleton) finalize() { _ = p.Close() }
+
+type SkeletonMapper struct {
+	h *cjolt.C_JPH_SkeletonMapper
+}
+
+func NewSkeletonMapper() *SkeletonMapper {
+	p := &SkeletonMapper{h: cjolt.JPH_SkeletonMapper_Create()}
+	runtime.SetFinalizer(p, (*SkeletonMapper).finalize)
+	return p
+}
+
+func (p *SkeletonMapper) Close() error {
+	if p.h != nil {
+		cjolt.JPH_SkeletonMapper_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *SkeletonMapper) finalize() { _ = p.Close() }
+
+type SkeletonPose struct {
+	h *cjolt.C_JPH_SkeletonPose
+}
+
+func NewSkeletonPose() *SkeletonPose {
+	p := &SkeletonPose{h: cjolt.JPH_SkeletonPose_Create()}
+	runtime.SetFinalizer(p, (*SkeletonPose).finalize)
+	return p
+}
+
+func (p *SkeletonPose) Close() error {
+	if p.h != nil {
+		cjolt.JPH_SkeletonPose_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *SkeletonPose) finalize() { _ = p.Close() }
+
+type SoftBodyCreationSettings struct {
+	h *cjolt.C_JPH_SoftBodyCreationSettings
+}
+
+func NewSoftBodyCreationSettings() *SoftBodyCreationSettings {
+	p := &SoftBodyCreationSettings{h: cjolt.JPH_SoftBodyCreationSettings_Create()}
+	runtime.SetFinalizer(p, (*SoftBodyCreationSettings).finalize)
+	return p
+}
+
+func (p *SoftBodyCreationSettings) Close() error {
+	if p.h != nil {
+		cjolt.JPH_SoftBodyCreationSettings_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *SoftBodyCreationSettings) finalize() { _ = p.Close() }
+
+type SoftBodySharedSettings struct {
+	h *cjolt.C_JPH_SoftBodySharedSettings
+}
+
+func NewSoftBodySharedSettings() *SoftBodySharedSettings {
+	p := &SoftBodySharedSettings{h: cjolt.JPH_SoftBodySharedSettings_Create()}
+	runtime.SetFinalizer(p, (*SoftBodySharedSettings).finalize)
+	return p
+}
+
+func (p *SoftBodySharedSettings) Close() error {
+	if p.h != nil {
+		cjolt.JPH_SoftBodySharedSettings_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *SoftBodySharedSettings) finalize() { _ = p.Close() }
+
+type TempAllocator struct {
+	h *cjolt.C_JPH_TempAllocator
+}
+
+func NewTempAllocator(size uint32) *TempAllocator {
+	p := &TempAllocator{h: cjolt.JPH_TempAllocator_Create(size)}
+	runtime.SetFinalizer(p, (*TempAllocator).finalize)
+	return p
+}
+
+func (p *TempAllocator) Close() error {
+	if p.h != nil {
+		cjolt.JPH_TempAllocator_Destroy(p.h)
+		p.h = nil
+		runtime.SetFinalizer(p, nil)
+	}
+	return nil
+}
+
+func (p *TempAllocator) finalize() { _ = p.Close() }
 
 type VehicleTransmissionSettings struct {
 	h *cjolt.C_JPH_VehicleTransmissionSettings
@@ -508,47 +529,26 @@ func (p *Wheel) Close() error {
 
 func (p *Wheel) finalize() { _ = p.Close() }
 
-type PhysicsSystem struct {
-	h *cjolt.C_JPH_PhysicsSystem
+type WheelSettings struct {
+	h *cjolt.C_JPH_WheelSettings
 }
 
-func NewPhysicsSystem(settings unsafe.Pointer) *PhysicsSystem {
-	p := &PhysicsSystem{h: cjolt.JPH_PhysicsSystem_Create((*cjolt.C_JPH_PhysicsSystemSettings)(unsafe.Pointer(settings)))}
-	runtime.SetFinalizer(p, (*PhysicsSystem).finalize)
+func NewWheelSettings() *WheelSettings {
+	p := &WheelSettings{h: cjolt.JPH_WheelSettings_Create()}
+	runtime.SetFinalizer(p, (*WheelSettings).finalize)
 	return p
 }
 
-func (p *PhysicsSystem) Close() error {
+func (p *WheelSettings) Close() error {
 	if p.h != nil {
-		cjolt.JPH_PhysicsSystem_Destroy(p.h)
+		cjolt.JPH_WheelSettings_Destroy(p.h)
 		p.h = nil
 		runtime.SetFinalizer(p, nil)
 	}
 	return nil
 }
 
-func (p *PhysicsSystem) finalize() { _ = p.Close() }
-
-type RagdollSettings struct {
-	h *cjolt.C_JPH_RagdollSettings
-}
-
-func NewRagdollSettings() *RagdollSettings {
-	p := &RagdollSettings{h: cjolt.JPH_RagdollSettings_Create()}
-	runtime.SetFinalizer(p, (*RagdollSettings).finalize)
-	return p
-}
-
-func (p *RagdollSettings) Close() error {
-	if p.h != nil {
-		cjolt.JPH_RagdollSettings_Destroy(p.h)
-		p.h = nil
-		runtime.SetFinalizer(p, nil)
-	}
-	return nil
-}
-
-func (p *RagdollSettings) finalize() { _ = p.Close() }
+func (p *WheelSettings) finalize() { _ = p.Close() }
 
 type Shape struct{ h *cjolt.C_JPH_Shape }
 type ConvexShape struct{ Shape }
@@ -1153,7 +1153,7 @@ func NewContactListener(l ContactListener) *ContactListener {
 		},
 	}
 	cl.handle = cgo.NewHandle(bridge)
-	cl.h = cjolt.JPH_ContactListener_Create(unsafe.Pointer(uintptr(cl.handle)))
+	cl.h = cjolt.JPH_ContactListener_Create(*(*unsafe.Pointer)(unsafe.Pointer(&cl.handle)))
 	runtime.SetFinalizer(cl, (*ContactListener).finalize)
 	return cl
 }
