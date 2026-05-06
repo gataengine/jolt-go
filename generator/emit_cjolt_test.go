@@ -60,3 +60,39 @@ var _ = Describe("EmitCjolt", func() {
 		})
 	})
 })
+
+var _ = Describe("EmitCjolt — math types", func() {
+	Context("math types", func() {
+		h := &generator.Header{
+			Funcs: []generator.Func{
+				{
+					Name:   "JPH_Body_GetPosition",
+					Return: "JPH_RVec3",
+					Params: []generator.Param{{Name: "self", CType: "const JPH_Body *"}},
+				},
+				{
+					Name:   "JPH_Body_SetLinearVelocity",
+					Return: "void",
+					Params: []generator.Param{
+						{Name: "self", CType: "JPH_Body *"},
+						{Name: "v", CType: "const JPH_Vec3 *"},
+					},
+				},
+			},
+		}
+		It("returns RVec3 by value, taking the C type and passing through", func() {
+			src := generator.EmitCjolt(h)
+			Expect(src).To(ContainSubstring(
+				"func JPH_Body_GetPosition(self *C.JPH_Body) C.JPH_RVec3 {",
+			))
+		})
+		It("accepts JPH_Vec3 pointer through unsafe.Pointer cast at higher layer", func() {
+			src := generator.EmitCjolt(h)
+			// cjolt is "raw"; it accepts the C struct pointer directly. The unsafe
+			// cast happens in the public API. Verify the wrapper signature here.
+			Expect(src).To(ContainSubstring(
+				"func JPH_Body_SetLinearVelocity(self *C.JPH_Body, v *C.JPH_Vec3) {",
+			))
+		})
+	})
+})
