@@ -67,3 +67,39 @@ func (q Quat) RotateVec3(v Vec3) Vec3 {
 		),
 	)
 }
+
+// Mat44 is a column-major 4x4 single-precision matrix.
+// Layout matches JPH_Mat4 (16 floats, columns first).
+type Mat44 struct{ M [16]float32 }
+
+func Mat44Identity() Mat44 {
+	return Mat44{M: [16]float32{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1,
+	}}
+}
+
+func (a Mat44) Mul(b Mat44) Mat44 {
+	var r Mat44
+	for col := range 4 {
+		for row := range 4 {
+			var s float32
+			for k := range 4 {
+				s += a.M[k*4+row] * b.M[col*4+k]
+			}
+			r.M[col*4+row] = s
+		}
+	}
+	return r
+}
+
+// Transform applies the matrix to v as a point (w=1).
+func (m Mat44) Transform(v Vec3) Vec3 {
+	return Vec3{
+		X: m.M[0]*v.X + m.M[4]*v.Y + m.M[8]*v.Z + m.M[12],
+		Y: m.M[1]*v.X + m.M[5]*v.Y + m.M[9]*v.Z + m.M[13],
+		Z: m.M[2]*v.X + m.M[6]*v.Y + m.M[10]*v.Z + m.M[14],
+	}
+}

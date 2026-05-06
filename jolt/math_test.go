@@ -77,3 +77,25 @@ var _ = Describe("Quat", func() {
 		Expect(jolt.QuatIdentity().RotateVec3(v)).To(Equal(v))
 	})
 })
+
+var _ = Describe("Mat44", func() {
+	It("Identity layout is column-major and 64 bytes", func() {
+		var m jolt.Mat44
+		Expect(unsafe.Sizeof(m)).To(Equal(uintptr(64)))
+		id := jolt.Mat44Identity()
+		Expect(id.M[0]).To(Equal(float32(1)))
+		Expect(id.M[5]).To(Equal(float32(1)))
+		Expect(id.M[10]).To(Equal(float32(1)))
+		Expect(id.M[15]).To(Equal(float32(1)))
+	})
+	It("Mul(Identity, X) = X", func() {
+		x := jolt.Mat44Identity()
+		x.M[12] = 7 // tx
+		Expect(jolt.Mat44Identity().Mul(x)).To(Equal(x))
+	})
+	It("Transform translates", func() {
+		m := jolt.Mat44Identity()
+		m.M[12], m.M[13], m.M[14] = 1, 2, 3
+		Expect(m.Transform(jolt.Vec3{0, 0, 0})).To(Equal(jolt.Vec3{1, 2, 3}))
+	})
+})
