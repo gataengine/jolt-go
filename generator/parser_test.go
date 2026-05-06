@@ -58,3 +58,50 @@ func findFunc(fs []generator.Func, name string) generator.Func {
 	Fail("func not found: " + name)
 	return generator.Func{}
 }
+
+var _ = Describe("Parser types", func() {
+	var h *generator.Header
+	BeforeEach(func() {
+		var err error
+		h, err = generator.ParseHeader("testdata/types.h")
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("recognizes opaque struct", func() {
+		s := findStruct(h.Structs, "JPH_Shape")
+		Expect(s.Opaque).To(BeTrue())
+	})
+	It("extracts struct fields", func() {
+		s := findStruct(h.Structs, "JPH_BodyID")
+		Expect(s.Fields).To(HaveLen(1))
+		Expect(s.Fields[0].Name).To(Equal("id"))
+	})
+	It("extracts enum members", func() {
+		e := findEnum(h.Enums, "JPH_MotionType")
+		Expect(e.Members).To(HaveLen(3))
+		Expect(e.Members[2]).To(Equal(generator.EnumMember{Name: "JPH_MotionType_Dynamic", Value: 2}))
+	})
+	It("extracts simple typedefs", func() {
+		Expect(h.Typedefs["JPH_ObjectLayer"]).To(Equal("uint32_t"))
+	})
+})
+
+func findStruct(ss []generator.Struct, name string) generator.Struct {
+	for _, s := range ss {
+		if s.Name == name {
+			return s
+		}
+	}
+	Fail("struct not found: " + name)
+	return generator.Struct{}
+}
+
+func findEnum(es []generator.Enum, name string) generator.Enum {
+	for _, e := range es {
+		if e.Name == name {
+			return e
+		}
+	}
+	Fail("enum not found: " + name)
+	return generator.Enum{}
+}
