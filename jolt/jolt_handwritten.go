@@ -31,6 +31,52 @@ const (
 	ActivationDontActivate Activation = 1 // JPH_Activation_DontActivate
 )
 
+// ShapeType values — mirror JPH_ShapeType in joltc.h.
+const (
+	ShapeTypeConvex      ShapeType = 0 // JPH_ShapeType_Convex
+	ShapeTypeCompound    ShapeType = 1 // JPH_ShapeType_Compound
+	ShapeTypeDecorated   ShapeType = 2 // JPH_ShapeType_Decorated
+	ShapeTypeMesh        ShapeType = 3 // JPH_ShapeType_Mesh
+	ShapeTypeHeightField ShapeType = 4 // JPH_ShapeType_HeightField
+	ShapeTypeSoftBody    ShapeType = 5 // JPH_ShapeType_SoftBody
+)
+
+// ShapeSubType values — mirror JPH_ShapeSubType in joltc.h.
+const (
+	ShapeSubTypeSphere             ShapeSubType = 0
+	ShapeSubTypeBox                ShapeSubType = 1
+	ShapeSubTypeTriangle           ShapeSubType = 2
+	ShapeSubTypeCapsule            ShapeSubType = 3
+	ShapeSubTypeTaperedCapsule     ShapeSubType = 4
+	ShapeSubTypeCylinder           ShapeSubType = 5
+	ShapeSubTypeConvexHull         ShapeSubType = 6
+	ShapeSubTypeStaticCompound     ShapeSubType = 7
+	ShapeSubTypeMutableCompound    ShapeSubType = 8
+	ShapeSubTypeRotatedTranslated  ShapeSubType = 9
+	ShapeSubTypeScaled             ShapeSubType = 10
+	ShapeSubTypeOffsetCenterOfMass ShapeSubType = 11
+	ShapeSubTypeMesh               ShapeSubType = 12
+	ShapeSubTypeHeightField        ShapeSubType = 13
+	ShapeSubTypeSoftBody           ShapeSubType = 14
+)
+
+// BodyType values — mirror JPH_BodyType in joltc.h.
+const (
+	BodyTypeRigid BodyType = 0
+	BodyTypeSoft  BodyType = 1
+)
+
+// PhysicsUpdateError values — mirror JPH_PhysicsUpdateError in joltc.h.
+const (
+	PhysicsUpdateErrorNone                   PhysicsUpdateError = 0
+	PhysicsUpdateErrorManifoldCacheFull      PhysicsUpdateError = 1 << 0
+	PhysicsUpdateErrorBodyPairCacheFull      PhysicsUpdateError = 1 << 1
+	PhysicsUpdateErrorContactConstraintsFull PhysicsUpdateError = 1 << 2
+)
+
+// DefaultConvexRadius mirrors JPH_DEFAULT_CONVEX_RADIUS from joltc.h.
+const DefaultConvexRadius float32 = 0.05
+
 // ObjectLayerMaskMake encodes group and mask bits into an ObjectLayer value
 // for use with the ObjectLayerPairFilterMask / BroadPhaseLayerInterfaceMask
 // scheme.
