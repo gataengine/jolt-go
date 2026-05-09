@@ -190,4 +190,76 @@ var _ = Describe("PhysicsSystemTest (joltc test_physics_system.cpp)", func() {
 
 		bi.RemoveAndDestroyBody(bodyID)
 	})
+
+	It("Body_GetMotionType", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 10, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		Expect(bi.MotionType(bodyID)).To(Equal(jolt.MotionTypeDynamic))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
+
+	It("Body_ActivateDeactivate", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 10, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+
+		bi.AddBody(bodyID, jolt.ActivationDontActivate)
+		Expect(bi.IsActive(bodyID)).To(BeFalse())
+
+		bi.ActivateBody(bodyID)
+		Expect(bi.IsActive(bodyID)).To(BeTrue())
+
+		bi.DeactivateBody(bodyID)
+		Expect(bi.IsActive(bodyID)).To(BeFalse())
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
+
+	It("Body_Restitution", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 10, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		bi.SetRestitution(bodyID, 0.8)
+		Expect(bi.Restitution(bodyID)).To(BeNumerically("~", 0.8, 1e-5))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
+
+	It("Body_Friction", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 10, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		bi.SetFriction(bodyID, 0.5)
+		Expect(bi.Friction(bodyID)).To(BeNumerically("~", 0.5, 1e-5))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
 })
