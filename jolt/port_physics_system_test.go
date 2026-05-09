@@ -108,4 +108,47 @@ var _ = Describe("PhysicsSystemTest (joltc test_physics_system.cpp)", func() {
 
 		bi.RemoveAndDestroyBody(bodyID)
 	})
+
+	// ------------------------------------------------------------------
+	// Body kinematics
+	// ------------------------------------------------------------------
+
+	It("Body_GetPosition", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 1, Y: 2, Z: 3},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		p := bi.GetPosition(bodyID)
+		Expect(float32(p.X)).To(BeNumerically("~", 1.0, 1e-5))
+		Expect(float32(p.Y)).To(BeNumerically("~", 2.0, 1e-5))
+		Expect(float32(p.Z)).To(BeNumerically("~", 3.0, 1e-5))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
+
+	It("Body_SetPosition", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 0, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		bi.SetPosition(bodyID, jolt.RVec3{X: 5, Y: 10, Z: 15}, jolt.ActivationActivate)
+		p := bi.GetPosition(bodyID)
+		Expect(float32(p.X)).To(BeNumerically("~", 5.0, 1e-5))
+		Expect(float32(p.Y)).To(BeNumerically("~", 10.0, 1e-5))
+		Expect(float32(p.Z)).To(BeNumerically("~", 15.0, 1e-5))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
 })
