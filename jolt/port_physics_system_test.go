@@ -14,12 +14,14 @@ var _ = Describe("PhysicsSystemTest (joltc test_physics_system.cpp)", func() {
 	var (
 		js *jolt.JobSystem
 		ps *portSystem
+		bi *jolt.BodyInterface
 	)
 
 	BeforeEach(func() {
 		Expect(jolt.Init()).To(BeTrue())
 		js = jolt.NewJobSystemThreadPoolDefault()
 		ps = newTwoLayerSystem()
+		bi = ps.System.BodyInterface()
 	})
 	AfterEach(func() {
 		ps.Close()
@@ -62,5 +64,48 @@ var _ = Describe("PhysicsSystemTest (joltc test_physics_system.cpp)", func() {
 	It("GetMaxBodies", func() {
 		// newTwoLayerSystem allocates 1024 bodies (matching joltc).
 		Expect(ps.System.MaxBodies()).To(Equal(uint32(1024)))
+	})
+
+	// ------------------------------------------------------------------
+	// Body lifecycle
+	// ------------------------------------------------------------------
+
+	It("CreateBody_Sphere", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 10, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+
+		body := bi.CreateBody(settings)
+		Expect(body).NotTo(BeNil())
+
+		bodyID := body.ID()
+		Expect(uint32(bodyID)).NotTo(Equal(uint32(0xFFFFFFFF))) // JPH_INVALID_BODY_ID
+		Expect(ps.System.NumBodies()).To(Equal(uint32(1)))
+
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+		Expect(ps.System.NumActiveBodies(jolt.BodyTypeRigid)).To(Equal(uint32(1)))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
+
+	It("CreateBody_Box", func() {
+		shape := jolt.NewBoxShape(jolt.Vec3{X: 1, Y: 1, Z: 1}, jolt.DefaultConvexRadius)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 0, Z: 0},
+			jolt.MotionTypeStatic, jolt.ObjectLayerNonMoving,
+		)
+
+		body := bi.CreateBody(settings)
+		Expect(body).NotTo(BeNil())
+
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationDontActivate)
+		Expect(ps.System.NumActiveBodies(jolt.BodyTypeRigid)).To(Equal(uint32(0)))
+
+		bi.RemoveAndDestroyBody(bodyID)
 	})
 })
