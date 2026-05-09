@@ -411,3 +411,39 @@ func (bs *BoxShape) GetHalfExtent() Vec3 {
 	runtime.KeepAlive(bs)
 	return out
 }
+
+// NewCapsuleShapeSettings creates a CapsuleShapeSettings.
+func NewCapsuleShapeSettings(halfHeightOfCylinder, radius float32) *CapsuleShapeSettings {
+	h := cjolt.JPH_CapsuleShapeSettings_Create(halfHeightOfCylinder, radius)
+	return &CapsuleShapeSettings{h: h}
+}
+
+// NewCylinderShapeSettings creates a CylinderShapeSettings.
+func NewCylinderShapeSettings(halfHeight, radius, convexRadius float32) *CylinderShapeSettings {
+	h := cjolt.JPH_CylinderShapeSettings_Create(halfHeight, radius, convexRadius)
+	return &CylinderShapeSettings{h: h}
+}
+
+// GetVertex1 returns vertex 1 of the TriangleShape.
+func (ts *TriangleShape) GetVertex1() Vec3 {
+	var out Vec3
+	cjolt.JPH_TriangleShape_GetVertex1((*cjolt.C_JPH_TriangleShape)(unsafe.Pointer(ts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ts)
+	return out
+}
+
+// GetVertex2 returns vertex 2 of the TriangleShape.
+func (ts *TriangleShape) GetVertex2() Vec3 {
+	var out Vec3
+	cjolt.JPH_TriangleShape_GetVertex2((*cjolt.C_JPH_TriangleShape)(unsafe.Pointer(ts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ts)
+	return out
+}
+
+// GetVertex3 returns vertex 3 of the TriangleShape.
+func (ts *TriangleShape) GetVertex3() Vec3 {
+	var out Vec3
+	cjolt.JPH_TriangleShape_GetVertex3((*cjolt.C_JPH_TriangleShape)(unsafe.Pointer(ts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ts)
+	return out
+}
