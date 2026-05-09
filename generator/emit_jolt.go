@@ -606,6 +606,14 @@ var skipMethods = map[string]bool{
 	"SetProcs": true,
 }
 
+// skipFunctions lists full C function names whose generated Go receiver methods
+// are replaced by hand-written carve-outs in jolt_handwritten.go.
+// The carve-out may have the same Go name but adds nil-safety or a different
+// return type that the generator cannot produce.
+var skipFunctions = map[string]bool{
+	"JPH_Shape_CollidePoint": true, // carve-out handles nil shapeFilter
+}
+
 // emitPlainHandleTypes emits "type Foo struct{ h *cjolt.C_JPH_Foo }" for each
 // opaque struct that doesn't have a Create/Destroy pair (Owned) and isn't
 // in the RefCounted set.
@@ -896,6 +904,9 @@ func emitReceiverMethods(h *Header, alreadyEmitted map[string]bool) string {
 			continue
 		}
 		if skipMethods[method] {
+			continue
+		}
+		if skipFunctions[f.Name] {
 			continue
 		}
 		if len(f.Params) == 0 {

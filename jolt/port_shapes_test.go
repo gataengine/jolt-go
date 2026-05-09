@@ -1,0 +1,449 @@
+package jolt_test
+
+// port_shapes_test.go ports third_party/joltc/tests/test_shapes.cpp.
+
+import (
+	"math"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/gataengine/jolt-go/jolt"
+)
+
+var _ = Describe("ShapesTest (joltc test_shapes.cpp)", func() {
+	BeforeEach(func() {
+		Expect(jolt.Init()).To(BeTrue())
+	})
+	AfterEach(func() {
+		jolt.Shutdown()
+	})
+
+	Describe("SphereShape", func() {
+		It("SphereShape_Create", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.Radius()).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("SphereShape_CreateWithSettings", func() {
+			settings := jolt.NewSphereShapeSettings(2.0)
+			Expect(settings).NotTo(BeNil())
+			Expect(settings.Radius()).To(BeNumerically("~", 2.0, 1e-5))
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.Radius()).To(BeNumerically("~", 2.0, 1e-5))
+		})
+
+		It("SphereShapeSettings_SetRadius", func() {
+			settings := jolt.NewSphereShapeSettings(1.0)
+			Expect(settings).NotTo(BeNil())
+
+			settings.SetRadius(3.0)
+			Expect(settings.Radius()).To(BeNumerically("~", 3.0, 1e-5))
+		})
+
+		It("SphereShape_GetType", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.Type()).To(Equal(jolt.ShapeTypeConvex))
+			Expect(shape.SubType()).To(Equal(jolt.ShapeSubTypeSphere))
+		})
+
+		It("SphereShape_GetVolume", func() {
+			shape := jolt.NewSphereShape(1.0)
+			expected := float32(4.0/3.0) * float32(math.Pi)
+			Expect(shape.Volume()).To(BeNumerically("~", expected, 1e-3))
+		})
+	})
+
+	Describe("BoxShape", func() {
+		It("BoxShape_Create", func() {
+			shape := jolt.NewBoxShape(jolt.Vec3{X: 1, Y: 2, Z: 3}, jolt.DefaultConvexRadius)
+			Expect(shape).NotTo(BeNil())
+
+			h := shape.GetHalfExtent()
+			Expect(h.X).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(h.Y).To(BeNumerically("~", 2.0, 1e-5))
+			Expect(h.Z).To(BeNumerically("~", 3.0, 1e-5))
+		})
+
+		It("BoxShape_CreateWithSettings", func() {
+			settings := jolt.NewBoxShapeSettings(jolt.Vec3{X: 2, Y: 2, Z: 2}, jolt.DefaultConvexRadius)
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+
+			h := shape.GetHalfExtent()
+			Expect(h.X).To(BeNumerically("~", 2.0, 1e-5))
+			Expect(h.Y).To(BeNumerically("~", 2.0, 1e-5))
+			Expect(h.Z).To(BeNumerically("~", 2.0, 1e-5))
+		})
+
+		It("BoxShape_GetConvexRadius", func() {
+			shape := jolt.NewBoxShape(jolt.Vec3{X: 1, Y: 1, Z: 1}, 0.1)
+			Expect(shape.ConvexRadius()).To(BeNumerically("~", 0.1, 1e-5))
+		})
+
+		It("BoxShape_GetType", func() {
+			shape := jolt.NewBoxShape(jolt.Vec3{X: 1, Y: 1, Z: 1}, jolt.DefaultConvexRadius)
+			Expect(shape.Type()).To(Equal(jolt.ShapeTypeConvex))
+			Expect(shape.SubType()).To(Equal(jolt.ShapeSubTypeBox))
+		})
+	})
+
+	Describe("CapsuleShape", func() {
+		It("CapsuleShape_Create", func() {
+			shape := jolt.NewCapsuleShape(1.0, 0.5)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.HalfHeightOfCylinder()).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(shape.Radius()).To(BeNumerically("~", 0.5, 1e-5))
+		})
+
+		It("CapsuleShape_CreateWithSettings", func() {
+			settings := jolt.NewCapsuleShapeSettings(2.0, 1.0)
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.HalfHeightOfCylinder()).To(BeNumerically("~", 2.0, 1e-5))
+			Expect(shape.Radius()).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("CapsuleShape_GetType", func() {
+			shape := jolt.NewCapsuleShape(1.0, 0.5)
+			Expect(shape.SubType()).To(Equal(jolt.ShapeSubTypeCapsule))
+		})
+	})
+
+	Describe("CylinderShape", func() {
+		It("CylinderShape_Create", func() {
+			shape := jolt.NewCylinderShape(1.0, 0.5)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.HalfHeight()).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(shape.Radius()).To(BeNumerically("~", 0.5, 1e-5))
+		})
+
+		It("CylinderShape_CreateWithSettings", func() {
+			settings := jolt.NewCylinderShapeSettings(2.0, 1.0, jolt.DefaultConvexRadius)
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.HalfHeight()).To(BeNumerically("~", 2.0, 1e-5))
+			Expect(shape.Radius()).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("CylinderShape_GetType", func() {
+			shape := jolt.NewCylinderShape(1.0, 0.5)
+			Expect(shape.SubType()).To(Equal(jolt.ShapeSubTypeCylinder))
+		})
+	})
+
+	Describe("TriangleShape", func() {
+		v1 := jolt.Vec3{X: 0, Y: 0, Z: 0}
+		v2 := jolt.Vec3{X: 1, Y: 0, Z: 0}
+		v3 := jolt.Vec3{X: 0, Y: 1, Z: 0}
+
+		It("TriangleShape_Create", func() {
+			shape := jolt.NewTriangleShape(v1, v2, v3, 0.0)
+			Expect(shape).NotTo(BeNil())
+
+			Expect(shape.GetVertex1()).To(Equal(v1))
+			Expect(shape.GetVertex2()).To(Equal(v2))
+			Expect(shape.GetVertex3()).To(Equal(v3))
+		})
+
+		It("TriangleShape_GetType", func() {
+			shape := jolt.NewTriangleShape(v1, v2, v3, 0.0)
+			Expect(shape.SubType()).To(Equal(jolt.ShapeSubTypeTriangle))
+		})
+	})
+
+	Describe("TaperedCapsuleShape", func() {
+		It("TaperedCapsuleShape_Create", func() {
+			settings := jolt.NewTaperedCapsuleShapeSettings(1.0, 0.5, 0.3)
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.TopRadius()).To(BeNumerically("~", 0.5, 1e-5))
+			Expect(shape.BottomRadius()).To(BeNumerically("~", 0.3, 1e-5))
+			Expect(shape.HalfHeight()).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("TaperedCapsuleShape_GetType", func() {
+			settings := jolt.NewTaperedCapsuleShapeSettings(1.0, 0.5, 0.3)
+			shape := settings.CreateShape()
+			Expect(shape.SubType()).To(Equal(jolt.ShapeSubTypeTaperedCapsule))
+		})
+	})
+
+	Describe("TaperedCylinderShape", func() {
+		It("TaperedCylinderShape_Create", func() {
+			settings := jolt.NewTaperedCylinderShapeSettings(1.0, 0.5, 1.0, jolt.DefaultConvexRadius)
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.TopRadius()).To(BeNumerically("~", 0.5, 1e-5))
+			Expect(shape.BottomRadius()).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(shape.HalfHeight()).To(BeNumerically("~", 1.0, 1e-5))
+		})
+	})
+
+	Describe("ConvexHullShape", func() {
+		// Tetrahedron — same vertices as the joltc test.
+		points := []jolt.Vec3{
+			{X: 0, Y: 0, Z: 0},
+			{X: 1, Y: 0, Z: 0},
+			{X: 0.5, Y: 1, Z: 0},
+			{X: 0.5, Y: 0.5, Z: 1},
+		}
+
+		It("ConvexHullShape_Create", func() {
+			settings := jolt.NewConvexHullShapeSettings(points, jolt.DefaultConvexRadius)
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.NumPoints()).To(Equal(uint32(4)))
+			Expect(shape.NumFaces()).To(Equal(uint32(4))) // tetrahedron
+		})
+
+		It("ConvexHullShape_GetPoint", func() {
+			settings := jolt.NewConvexHullShapeSettings(points, jolt.DefaultConvexRadius)
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+
+			// Hull may reorder points; just assert non-NaN.
+			p := shape.GetPoint(0)
+			Expect(math.IsNaN(float64(p.X))).To(BeFalse())
+			Expect(math.IsNaN(float64(p.Y))).To(BeFalse())
+			Expect(math.IsNaN(float64(p.Z))).To(BeFalse())
+		})
+	})
+
+	Describe("PlaneShape", func() {
+		It("PlaneShape_Create", func() {
+			plane := jolt.GoPlane{Normal: jolt.Vec3{X: 0, Y: 1, Z: 0}, Distance: 0}
+			shape := jolt.NewPlaneShapeFromGoPlane(plane, nil, 1000.0)
+			Expect(shape).NotTo(BeNil())
+
+			result := shape.GetPlane()
+			Expect(result.Normal.X).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(result.Normal.Y).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(result.Normal.Z).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(result.Distance).To(BeNumerically("~", 0.0, 1e-5))
+
+			Expect(shape.HalfExtent()).To(BeNumerically("~", 1000.0, 1e-3))
+		})
+	})
+
+	Describe("Shape (base)", func() {
+		It("Shape_UserData", func() {
+			shape := jolt.NewSphereShape(1.0)
+			shape.SetUserData(12345)
+			Expect(shape.UserData()).To(Equal(uint64(12345)))
+		})
+
+		It("Shape_GetLocalBounds", func() {
+			shape := jolt.NewSphereShape(1.0)
+			b := shape.GetLocalBounds()
+			Expect(b.Min.X).To(BeNumerically("~", -1.0, 1e-5))
+			Expect(b.Min.Y).To(BeNumerically("~", -1.0, 1e-5))
+			Expect(b.Min.Z).To(BeNumerically("~", -1.0, 1e-5))
+			Expect(b.Max.X).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(b.Max.Y).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(b.Max.Z).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("Shape_GetCenterOfMass", func() {
+			shape := jolt.NewSphereShape(1.0)
+			com := shape.GetCenterOfMass()
+			Expect(com.X).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(com.Y).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(com.Z).To(BeNumerically("~", 0.0, 1e-5))
+		})
+
+		It("Shape_GetInnerRadius", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.InnerRadius()).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("Shape_MustBeStatic", func() {
+			sphere := jolt.NewSphereShape(1.0)
+			Expect(sphere.MustBeStatic()).To(BeFalse())
+
+			plane := jolt.GoPlane{Normal: jolt.Vec3{X: 0, Y: 1, Z: 0}, Distance: 0}
+			planeShape := jolt.NewPlaneShapeFromGoPlane(plane, nil, 1000.0)
+			Expect(planeShape.MustBeStatic()).To(BeTrue())
+		})
+
+		It("Shape_GetMassProperties", Pending, func() {
+			// MassProperties accessors not yet emitted by the generator.
+			// joltc test asserts massProps.mass > 0.
+		})
+	})
+
+	Describe("ConvexShape Density", func() {
+		It("ConvexShape_Density", func() {
+			shape := jolt.NewSphereShape(1.0)
+			defaultDensity := shape.Density()
+			Expect(defaultDensity).To(BeNumerically(">", 0.0))
+
+			shape.SetDensity(2000.0)
+			Expect(shape.Density()).To(BeNumerically("~", 2000.0, 1e-3))
+		})
+
+		It("ConvexShape_SetDensity", func() {
+			shape := jolt.NewSphereShape(1.0)
+			defaultDensity := shape.Density()
+			Expect(defaultDensity).To(BeNumerically(">", 0.0))
+
+			shape.SetDensity(5000.0)
+			Expect(shape.Density()).To(BeNumerically("~", 5000.0, 1e-3))
+		})
+	})
+
+	Describe("ShapeSettings UserData", func() {
+		It("ShapeSettings_UserData", func() {
+			settings := jolt.NewSphereShapeSettings(1.0)
+			Expect(settings).NotTo(BeNil())
+
+			// The joltc test calls JPH_ShapeSettings_SetUserData on the upcast
+			// pointer. SphereShapeSettings embeds ConvexShapeSettings which
+			// embeds ShapeSettings — methods are promoted.
+			settings.SetUserData(99999)
+			Expect(settings.UserData()).To(Equal(uint64(99999)))
+		})
+	})
+
+	Describe("Decorated shapes", func() {
+		It("RotatedTranslatedShape_Create", func() {
+			inner := jolt.NewSphereShape(1.0)
+			pos := jolt.Vec3{X: 1, Y: 2, Z: 3}
+			rot := jolt.Quat{X: 0, Y: 0, Z: 0, W: 1}
+
+			shape := jolt.NewRotatedTranslatedShape(pos, rot, &inner.Shape)
+			Expect(shape).NotTo(BeNil())
+
+			Expect(shape.GetPosition()).To(Equal(pos))
+			Expect(shape.GetRotation().W).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("ScaledShape_Create", func() {
+			inner := jolt.NewSphereShape(1.0)
+			scale := jolt.Vec3{X: 2, Y: 2, Z: 2}
+
+			shape := jolt.NewScaledShape(&inner.Shape, scale)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.GetScale()).To(Equal(scale))
+		})
+
+		It("OffsetCenterOfMassShape_Create", func() {
+			inner := jolt.NewSphereShape(1.0)
+			offset := jolt.Vec3{X: 0, Y: 1, Z: 0}
+
+			shape := jolt.NewOffsetCenterOfMassShape(offset, &inner.Shape)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.GetOffset()).To(Equal(offset))
+		})
+	})
+
+	Describe("Compound shapes", func() {
+		It("StaticCompoundShape_Create", func() {
+			settings := jolt.NewStaticCompoundShapeSettings()
+			Expect(settings).NotTo(BeNil())
+
+			s1 := jolt.NewSphereShape(1.0)
+			s2 := jolt.NewSphereShape(0.5)
+			rot := jolt.Quat{X: 0, Y: 0, Z: 0, W: 1}
+
+			settings.AddShape2(jolt.Vec3{X: -1, Y: 0, Z: 0}, rot, &s1.Shape, 0)
+			settings.AddShape2(jolt.Vec3{X: 1, Y: 0, Z: 0}, rot, &s2.Shape, 0)
+
+			shape := jolt.NewStaticCompoundShape(settings)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.NumSubShapes()).To(Equal(uint32(2)))
+		})
+
+		It("MutableCompoundShape_Create", func() {
+			settings := jolt.NewMutableCompoundShapeSettings()
+			Expect(settings).NotTo(BeNil())
+
+			shape := jolt.NewMutableCompoundShape(settings)
+			Expect(shape).NotTo(BeNil())
+
+			s := jolt.NewSphereShape(1.0)
+			rot := jolt.Quat{X: 0, Y: 0, Z: 0, W: 1}
+
+			idx := shape.AddShape(jolt.Vec3{X: 0, Y: 0, Z: 0}, rot, &s.Shape, 0, ^uint32(0))
+			Expect(idx).To(Equal(uint32(0)))
+			Expect(shape.NumSubShapes()).To(Equal(uint32(1)))
+
+			shape.RemoveShape(0)
+			Expect(shape.NumSubShapes()).To(Equal(uint32(0)))
+		})
+	})
+
+	Describe("EmptyShape", func() {
+		It("EmptyShape_Create", func() {
+			settings := jolt.NewEmptyShapeSettings(jolt.Vec3{})
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.Volume()).To(BeNumerically("~", 0.0, 1e-5))
+		})
+	})
+
+	Describe("Shape CastRay", func() {
+		It("Shape_CastRay", func() {
+			shape := jolt.NewSphereShape(1.0)
+			origin := jolt.Vec3{X: -5, Y: 0, Z: 0}
+			direction := jolt.Vec3{X: 10, Y: 0, Z: 0} // unnormalized; Jolt expects ray length encoded
+
+			hit, ok := shape.CastRayResult(origin, direction)
+			Expect(ok).To(BeTrue())
+			// Hit at x = -1, fraction = (5 - 1) / 10 = 0.4
+			Expect(hit.Fraction).To(BeNumerically("~", float32(0.4), float32(0.01)))
+		})
+
+		It("Shape_CastRay_Miss", func() {
+			shape := jolt.NewSphereShape(1.0)
+			origin := jolt.Vec3{X: 0, Y: 5, Z: 0}
+			direction := jolt.Vec3{X: 1, Y: 0, Z: 0}
+
+			_, ok := shape.CastRayResult(origin, direction)
+			Expect(ok).To(BeFalse())
+		})
+	})
+
+	Describe("Shape CollidePoint", func() {
+		It("Shape_CollidePoint_Inside", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.CollidePoint(jolt.Vec3{X: 0, Y: 0, Z: 0}, nil)).To(BeTrue())
+		})
+
+		It("Shape_CollidePoint_Outside", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.CollidePoint(jolt.Vec3{X: 5, Y: 0, Z: 0}, nil)).To(BeFalse())
+		})
+	})
+
+	Describe("Shape scale validation", func() {
+		It("Shape_IsValidScale", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.IsValidScale(jolt.Vec3{X: 2, Y: 2, Z: 2})).To(BeTrue())
+			Expect(shape.IsValidScale(jolt.Vec3{X: 2, Y: 1, Z: 1})).To(BeFalse())
+		})
+
+		It("Shape_MakeScaleValid", func() {
+			shape := jolt.NewSphereShape(1.0)
+			fixed := shape.MakeScaleValidResult(jolt.Vec3{X: 2, Y: 1, Z: 1})
+			Expect(shape.IsValidScale(fixed)).To(BeTrue())
+		})
+	})
+})

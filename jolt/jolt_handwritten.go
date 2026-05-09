@@ -31,6 +31,52 @@ const (
 	ActivationDontActivate Activation = 1 // JPH_Activation_DontActivate
 )
 
+// ShapeType values — mirror JPH_ShapeType in joltc.h.
+const (
+	ShapeTypeConvex      ShapeType = 0 // JPH_ShapeType_Convex
+	ShapeTypeCompound    ShapeType = 1 // JPH_ShapeType_Compound
+	ShapeTypeDecorated   ShapeType = 2 // JPH_ShapeType_Decorated
+	ShapeTypeMesh        ShapeType = 3 // JPH_ShapeType_Mesh
+	ShapeTypeHeightField ShapeType = 4 // JPH_ShapeType_HeightField
+	ShapeTypeSoftBody    ShapeType = 5 // JPH_ShapeType_SoftBody
+)
+
+// ShapeSubType values — mirror JPH_ShapeSubType in joltc.h.
+const (
+	ShapeSubTypeSphere             ShapeSubType = 0
+	ShapeSubTypeBox                ShapeSubType = 1
+	ShapeSubTypeTriangle           ShapeSubType = 2
+	ShapeSubTypeCapsule            ShapeSubType = 3
+	ShapeSubTypeTaperedCapsule     ShapeSubType = 4
+	ShapeSubTypeCylinder           ShapeSubType = 5
+	ShapeSubTypeConvexHull         ShapeSubType = 6
+	ShapeSubTypeStaticCompound     ShapeSubType = 7
+	ShapeSubTypeMutableCompound    ShapeSubType = 8
+	ShapeSubTypeRotatedTranslated  ShapeSubType = 9
+	ShapeSubTypeScaled             ShapeSubType = 10
+	ShapeSubTypeOffsetCenterOfMass ShapeSubType = 11
+	ShapeSubTypeMesh               ShapeSubType = 12
+	ShapeSubTypeHeightField        ShapeSubType = 13
+	ShapeSubTypeSoftBody           ShapeSubType = 14
+)
+
+// BodyType values — mirror JPH_BodyType in joltc.h.
+const (
+	BodyTypeRigid BodyType = 0
+	BodyTypeSoft  BodyType = 1
+)
+
+// PhysicsUpdateError values — mirror JPH_PhysicsUpdateError in joltc.h.
+const (
+	PhysicsUpdateErrorNone                   PhysicsUpdateError = 0
+	PhysicsUpdateErrorManifoldCacheFull      PhysicsUpdateError = 1 << 0
+	PhysicsUpdateErrorBodyPairCacheFull      PhysicsUpdateError = 1 << 1
+	PhysicsUpdateErrorContactConstraintsFull PhysicsUpdateError = 1 << 2
+)
+
+// DefaultConvexRadius mirrors JPH_DEFAULT_CONVEX_RADIUS from joltc.h.
+const DefaultConvexRadius float32 = 0.05
+
 // ObjectLayerMaskMake encodes group and mask bits into an ObjectLayer value
 // for use with the ObjectLayerPairFilterMask / BroadPhaseLayerInterfaceMask
 // scheme.
@@ -183,6 +229,16 @@ func NewJobSystemThreadPool(maxJobs, maxBarriers uint32, numThreads int32) *JobS
 	return js
 }
 
+// NewJobSystemThreadPoolDefault creates a Jolt thread-pool job system
+// using the Jolt-recommended defaults (nullptr config in C: maxJobs =
+// JPH_MAX_PHYSICS_JOBS, maxBarriers = JPH_MAX_PHYSICS_BARRIERS,
+// numThreads = -1 / auto).
+func NewJobSystemThreadPoolDefault() *JobSystem {
+	js := &JobSystem{h: cjolt.JPH_JobSystemThreadPool_Create(nil)}
+	runtime.SetFinalizer(js, (*JobSystem).finalize)
+	return js
+}
+
 // Close destroys the underlying job system and releases its resources.
 func (js *JobSystem) Close() error {
 	if js.h != nil {
@@ -220,6 +276,12 @@ func NewTaperedCylinderShapeSettings(halfHeight, topRadius, bottomRadius, convex
 func NewEmptyShapeSettings(centerOfMass Vec3) *EmptyShapeSettings {
 	h := cjolt.JPH_EmptyShapeSettings_Create((*cjolt.C_JPH_Vec3)(unsafe.Pointer(&centerOfMass)))
 	return &EmptyShapeSettings{h: h}
+}
+
+// NewSphereShapeSettings creates a SphereShapeSettings with the given radius.
+func NewSphereShapeSettings(radius float32) *SphereShapeSettings {
+	h := cjolt.JPH_SphereShapeSettings_Create(radius)
+	return &SphereShapeSettings{h: h}
 }
 
 // ---------------------------------------------------------------------------
@@ -301,6 +363,7 @@ func NewBodyCreationSettingsWithShape(
 		cjolt.C_JPH_MotionType(motionType),
 		cjolt.C_JPH_ObjectLayer(objectLayer),
 	)
+	runtime.KeepAlive(shape)
 	p := &BodyCreationSettings{h: h}
 	runtime.SetFinalizer(p, (*BodyCreationSettings).finalize)
 	return p
@@ -331,4 +394,299 @@ func (bi *BodyInterface) GetPosition(b BodyID) RVec3 {
 func (bpli *BroadPhaseLayerInterface) ConfigureLayer(broadPhaseLayer uint8, groupsToInclude, groupsToExclude uint32) {
 	cjolt.JPH_BroadPhaseLayerInterfaceMask_ConfigureLayer(bpli.h, cjolt.C_JPH_BroadPhaseLayer(broadPhaseLayer), groupsToInclude, groupsToExclude)
 	runtime.KeepAlive(bpli)
+}
+
+// NewBoxShapeSettings creates a BoxShapeSettings.
+func NewBoxShapeSettings(halfExtent Vec3, convexRadius float32) *BoxShapeSettings {
+	h := cjolt.JPH_BoxShapeSettings_Create((*cjolt.C_JPH_Vec3)(unsafe.Pointer(&halfExtent)), convexRadius)
+	return &BoxShapeSettings{h: h}
+}
+
+// GetHalfExtent returns the half-extent of the BoxShape.
+//
+// TODO(generator): emit Get* variants for out-pointer accessors so this
+// kind of carve-out becomes unnecessary across the API.
+func (bs *BoxShape) GetHalfExtent() Vec3 {
+	var out Vec3
+	cjolt.JPH_BoxShape_GetHalfExtent((*cjolt.C_JPH_BoxShape)(unsafe.Pointer(bs.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(bs)
+	return out
+}
+
+// NewCapsuleShapeSettings creates a CapsuleShapeSettings.
+func NewCapsuleShapeSettings(halfHeightOfCylinder, radius float32) *CapsuleShapeSettings {
+	h := cjolt.JPH_CapsuleShapeSettings_Create(halfHeightOfCylinder, radius)
+	return &CapsuleShapeSettings{h: h}
+}
+
+// NewCylinderShapeSettings creates a CylinderShapeSettings.
+func NewCylinderShapeSettings(halfHeight, radius, convexRadius float32) *CylinderShapeSettings {
+	h := cjolt.JPH_CylinderShapeSettings_Create(halfHeight, radius, convexRadius)
+	return &CylinderShapeSettings{h: h}
+}
+
+// GetVertex1 returns vertex 1 of the TriangleShape.
+func (ts *TriangleShape) GetVertex1() Vec3 {
+	var out Vec3
+	cjolt.JPH_TriangleShape_GetVertex1((*cjolt.C_JPH_TriangleShape)(unsafe.Pointer(ts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ts)
+	return out
+}
+
+// GetVertex2 returns vertex 2 of the TriangleShape.
+func (ts *TriangleShape) GetVertex2() Vec3 {
+	var out Vec3
+	cjolt.JPH_TriangleShape_GetVertex2((*cjolt.C_JPH_TriangleShape)(unsafe.Pointer(ts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ts)
+	return out
+}
+
+// GetVertex3 returns vertex 3 of the TriangleShape.
+func (ts *TriangleShape) GetVertex3() Vec3 {
+	var out Vec3
+	cjolt.JPH_TriangleShape_GetVertex3((*cjolt.C_JPH_TriangleShape)(unsafe.Pointer(ts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ts)
+	return out
+}
+
+// NewConvexHullShapeSettings creates a ConvexHullShapeSettings from a slice
+// of vertices. The slice must have at least 4 points to form a valid hull.
+func NewConvexHullShapeSettings(points []Vec3, maxConvexRadius float32) *ConvexHullShapeSettings {
+	if len(points) == 0 {
+		return nil
+	}
+	h := cjolt.JPH_ConvexHullShapeSettings_Create(
+		(*cjolt.C_JPH_Vec3)(unsafe.Pointer(&points[0])),
+		uint32(len(points)),
+		maxConvexRadius,
+	)
+	return &ConvexHullShapeSettings{h: h}
+}
+
+// GetPoint returns the i'th hull vertex.
+func (chs *ConvexHullShape) GetPoint(i uint32) Vec3 {
+	var out Vec3
+	cjolt.JPH_ConvexHullShape_GetPoint((*cjolt.C_JPH_ConvexHullShape)(unsafe.Pointer(chs.h)), i, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(chs)
+	return out
+}
+
+// GetPlane returns the plane equation of the PlaneShape.
+func (ps *PlaneShape) GetPlane() GoPlane {
+	var out GoPlane
+	cjolt.JPH_PlaneShape_GetPlane((*cjolt.C_JPH_PlaneShape)(unsafe.Pointer(ps.h)), (*cjolt.C_JPH_Plane)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ps)
+	return out
+}
+
+// ---------------------------------------------------------------------------
+// Shape base-class carve-outs
+//
+// The generated Shape methods for GetLocalBounds and GetCenterOfMass use
+// out-pointer parameters with CGo types whose fields are unexported from Go.
+// These carve-outs return Go-native types instead.
+// ---------------------------------------------------------------------------
+
+// GoAABox is a layout-compatible mirror of JPH_AABox so test/user code
+// can read Min/Max without unexported-field constraints.
+// C layout: JPH_Vec3 min; JPH_Vec3 max — 24 bytes.
+type GoAABox struct {
+	Min Vec3
+	Max Vec3
+}
+
+// ---------------------------------------------------------------------------
+// ShapeSettings UserData promotion carve-outs
+//
+// The generator emits SetUserData/UserData on *ShapeSettings only.
+// Concrete settings types hold their own h pointer, so Go embedding is not
+// used and method promotion does not occur automatically.  The helpers below
+// forward to the base-class C function via an unsafe upcast — valid because
+// JPH_SphereShapeSettings* IS-A JPH_ShapeSettings* in C.
+// ---------------------------------------------------------------------------
+
+// SetUserData sets the opaque user-data value on the SphereShapeSettings.
+func (sss *SphereShapeSettings) SetUserData(u uint64) {
+	cjolt.JPH_ShapeSettings_SetUserData((*cjolt.C_JPH_ShapeSettings)(unsafe.Pointer(sss.h)), u)
+	runtime.KeepAlive(sss)
+}
+
+// UserData returns the opaque user-data value from the SphereShapeSettings.
+func (sss *SphereShapeSettings) UserData() uint64 {
+	result := cjolt.JPH_ShapeSettings_GetUserData((*cjolt.C_JPH_ShapeSettings)(unsafe.Pointer(sss.h)))
+	runtime.KeepAlive(sss)
+	return result
+}
+
+// GetLocalBounds returns the local-space AABB of the shape.
+func (s *Shape) GetLocalBounds() GoAABox {
+	var out GoAABox
+	cjolt.JPH_Shape_GetLocalBounds(s.h, (*cjolt.C_JPH_AABox)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	return out
+}
+
+// GetCenterOfMass returns the center-of-mass position in local space.
+func (s *Shape) GetCenterOfMass() Vec3 {
+	var out Vec3
+	cjolt.JPH_Shape_GetCenterOfMass(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	return out
+}
+
+// ---------------------------------------------------------------------------
+// Compound shape settings constructors and carve-outs
+// ---------------------------------------------------------------------------
+
+// NewStaticCompoundShapeSettings creates an empty StaticCompoundShapeSettings.
+// Add sub-shapes via the embedded CompoundShapeSettings.AddShape2 method.
+func NewStaticCompoundShapeSettings() *StaticCompoundShapeSettings {
+	h := cjolt.JPH_StaticCompoundShapeSettings_Create()
+	return &StaticCompoundShapeSettings{h: h}
+}
+
+// NewMutableCompoundShapeSettings creates an empty MutableCompoundShapeSettings.
+func NewMutableCompoundShapeSettings() *MutableCompoundShapeSettings {
+	h := cjolt.JPH_MutableCompoundShapeSettings_Create()
+	return &MutableCompoundShapeSettings{h: h}
+}
+
+// AddShape2 adds a sub-shape to a StaticCompoundShapeSettings.
+//
+// The base CompoundShapeSettings.AddShape2 method is not promoted because
+// StaticCompoundShapeSettings does not embed CompoundShapeSettings (the
+// generator emits each Settings type as an independent struct). Carve out
+// an upcast wrapper here. JPH_StaticCompoundShapeSettings* IS-A
+// JPH_CompoundShapeSettings* in C.
+func (s *StaticCompoundShapeSettings) AddShape2(position Vec3, rotation Quat, shape *Shape, userData uint32) {
+	cjolt.JPH_CompoundShapeSettings_AddShape2(
+		(*cjolt.C_JPH_CompoundShapeSettings)(unsafe.Pointer(s.h)),
+		(*cjolt.C_JPH_Vec3)(unsafe.Pointer(&position)),
+		(*cjolt.C_JPH_Quat)(unsafe.Pointer(&rotation)),
+		shape.h,
+		userData,
+	)
+	runtime.KeepAlive(s)
+	runtime.KeepAlive(shape)
+}
+
+// ---------------------------------------------------------------------------
+// Decorated shape carve-outs — GetPosition/GetRotation/GetScale/GetOffset
+//
+// The generator emits Position(Vec3), Rotation(Quat), Scale(Vec3), Offset(Vec3)
+// as out-pointer methods that pass by value, so the C write is lost.  These
+// carve-outs return the value directly.
+// ---------------------------------------------------------------------------
+
+// GetPosition returns the offset position of the RotatedTranslatedShape.
+func (rts *RotatedTranslatedShape) GetPosition() Vec3 {
+	var out Vec3
+	cjolt.JPH_RotatedTranslatedShape_GetPosition((*cjolt.C_JPH_RotatedTranslatedShape)(unsafe.Pointer(rts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(rts)
+	return out
+}
+
+// GetRotation returns the offset rotation of the RotatedTranslatedShape.
+func (rts *RotatedTranslatedShape) GetRotation() Quat {
+	var out Quat
+	cjolt.JPH_RotatedTranslatedShape_GetRotation((*cjolt.C_JPH_RotatedTranslatedShape)(unsafe.Pointer(rts.h)), (*cjolt.C_JPH_Quat)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(rts)
+	return out
+}
+
+// GetScale returns the scale of the ScaledShape.
+func (ss *ScaledShape) GetScale() Vec3 {
+	var out Vec3
+	cjolt.JPH_ScaledShape_GetScale((*cjolt.C_JPH_ScaledShape)(unsafe.Pointer(ss.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ss)
+	return out
+}
+
+// GetOffset returns the COM offset of the OffsetCenterOfMassShape.
+func (ocoms *OffsetCenterOfMassShape) GetOffset() Vec3 {
+	var out Vec3
+	cjolt.JPH_OffsetCenterOfMassShape_GetOffset((*cjolt.C_JPH_OffsetCenterOfMassShape)(unsafe.Pointer(ocoms.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ocoms)
+	return out
+}
+
+// ---------------------------------------------------------------------------
+// Shape ray-cast and point-collision carve-outs
+//
+// The generated Shape.CastRay passes the result via unsafe.Pointer.
+// GoRayCastResult is a layout-compatible Go-native mirror so callers can
+// read fields without unexported CGo field constraints.
+// C layout: JPH_BodyID bodyID (uint32) + float fraction + JPH_SubShapeID subShapeID2 (uint32) = 12 bytes.
+//
+// The generated Shape.CollidePoint does not guard against a nil shapeFilter,
+// but the underlying C function accepts NULL. The carve-out below handles nil.
+// ---------------------------------------------------------------------------
+
+// CollidePoint returns true if point p is inside the shape.
+// shapeFilter may be nil (no filter).
+func (s *Shape) CollidePoint(p Vec3, shapeFilter *ShapeFilter) bool {
+	var sfh *cjolt.C_JPH_ShapeFilter
+	if shapeFilter != nil {
+		sfh = shapeFilter.h
+	}
+	result := cjolt.JPH_Shape_CollidePoint(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&p)), sfh)
+	runtime.KeepAlive(s)
+	runtime.KeepAlive(shapeFilter)
+	return bool(result)
+}
+
+// GoRayCastResult is a layout-compatible mirror of JPH_RayCastResult so
+// callers can read fields without unexported-name CGo constraints.
+// C layout: JPH_BodyID bodyID (uint32) + float fraction + JPH_SubShapeID subShapeID2 (uint32) = 12 bytes.
+type GoRayCastResult struct {
+	BodyID     BodyID
+	Fraction   float32
+	SubShapeID SubShapeID
+}
+
+// CastRayResult is a typed wrapper for Shape.CastRay that returns the hit
+// info via a Go-native struct rather than an unsafe.Pointer.
+//
+// Returns (hit, true) on a hit and (zero, false) on a miss.
+func (s *Shape) CastRayResult(origin, direction Vec3) (GoRayCastResult, bool) {
+	var out GoRayCastResult
+	hit := cjolt.JPH_Shape_CastRay(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&origin)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&direction)), (*cjolt.C_JPH_RayCastResult)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	if !hit {
+		return GoRayCastResult{}, false
+	}
+	return out, true
+}
+
+// MakeScaleValidResult clamps the given scale to a valid value for this shape
+// and returns the result.
+func (s *Shape) MakeScaleValidResult(scale Vec3) Vec3 {
+	var out Vec3
+	cjolt.JPH_Shape_MakeScaleValid(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&scale)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	return out
+}
+
+// ---------------------------------------------------------------------------
+// PhysicsSystem carve-outs
+//
+// GetGravity: the generator emits Gravity(r Vec3) which passes r by value,
+// so the C write-back is lost. GetGravity returns the value directly.
+// ---------------------------------------------------------------------------
+
+// GetGravity returns the world gravity vector currently configured on the
+// PhysicsSystem.
+func (ps *PhysicsSystem) GetGravity() Vec3 {
+	var out Vec3
+	cjolt.JPH_PhysicsSystem_GetGravity(ps.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ps)
+	return out
+}
+
+// GetLinearVelocity returns the linear velocity of the body with the given ID.
+func (bi *BodyInterface) GetLinearVelocity(b BodyID) Vec3 {
+	var out Vec3
+	cjolt.JPH_BodyInterface_GetLinearVelocity(bi.h, cjolt.C_JPH_BodyID(b), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(bi)
+	return out
 }
