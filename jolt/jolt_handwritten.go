@@ -665,3 +665,19 @@ func (s *Shape) MakeScaleValidResult(scale Vec3) Vec3 {
 	runtime.KeepAlive(s)
 	return out
 }
+
+// ---------------------------------------------------------------------------
+// PhysicsSystem carve-outs
+//
+// GetGravity: the generator emits Gravity(r Vec3) which passes r by value,
+// so the C write-back is lost. GetGravity returns the value directly.
+// ---------------------------------------------------------------------------
+
+// GetGravity returns the world gravity vector currently configured on the
+// PhysicsSystem.
+func (ps *PhysicsSystem) GetGravity() Vec3 {
+	var out Vec3
+	cjolt.JPH_PhysicsSystem_GetGravity(ps.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ps)
+	return out
+}
