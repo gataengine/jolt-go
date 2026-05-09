@@ -363,6 +363,7 @@ func NewBodyCreationSettingsWithShape(
 		cjolt.C_JPH_MotionType(motionType),
 		cjolt.C_JPH_ObjectLayer(objectLayer),
 	)
+	runtime.KeepAlive(shape)
 	p := &BodyCreationSettings{h: h}
 	runtime.SetFinalizer(p, (*BodyCreationSettings).finalize)
 	return p
