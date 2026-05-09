@@ -494,6 +494,29 @@ type GoAABox struct {
 	Max Vec3
 }
 
+// ---------------------------------------------------------------------------
+// ShapeSettings UserData promotion carve-outs
+//
+// The generator emits SetUserData/UserData on *ShapeSettings only.
+// Concrete settings types hold their own h pointer, so Go embedding is not
+// used and method promotion does not occur automatically.  The helpers below
+// forward to the base-class C function via an unsafe upcast — valid because
+// JPH_SphereShapeSettings* IS-A JPH_ShapeSettings* in C.
+// ---------------------------------------------------------------------------
+
+// SetUserData sets the opaque user-data value on the SphereShapeSettings.
+func (sss *SphereShapeSettings) SetUserData(u uint64) {
+	cjolt.JPH_ShapeSettings_SetUserData((*cjolt.C_JPH_ShapeSettings)(unsafe.Pointer(sss.h)), u)
+	runtime.KeepAlive(sss)
+}
+
+// UserData returns the opaque user-data value from the SphereShapeSettings.
+func (sss *SphereShapeSettings) UserData() uint64 {
+	result := cjolt.JPH_ShapeSettings_GetUserData((*cjolt.C_JPH_ShapeSettings)(unsafe.Pointer(sss.h)))
+	runtime.KeepAlive(sss)
+	return result
+}
+
 // GetLocalBounds returns the local-space AABB of the shape.
 func (s *Shape) GetLocalBounds() GoAABox {
 	var out GoAABox

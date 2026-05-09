@@ -286,4 +286,37 @@ var _ = Describe("ShapesTest (joltc test_shapes.cpp)", func() {
 			// joltc test asserts massProps.mass > 0.
 		})
 	})
+
+	Describe("ConvexShape Density", func() {
+		It("ConvexShape_Density", func() {
+			shape := jolt.NewSphereShape(1.0)
+			defaultDensity := shape.Density()
+			Expect(defaultDensity).To(BeNumerically(">", 0.0))
+
+			shape.SetDensity(2000.0)
+			Expect(shape.Density()).To(BeNumerically("~", 2000.0, 1e-3))
+		})
+
+		It("ConvexShape_SetDensity", func() {
+			shape := jolt.NewSphereShape(1.0)
+			defaultDensity := shape.Density()
+			Expect(defaultDensity).To(BeNumerically(">", 0.0))
+
+			shape.SetDensity(5000.0)
+			Expect(shape.Density()).To(BeNumerically("~", 5000.0, 1e-3))
+		})
+	})
+
+	Describe("ShapeSettings UserData", func() {
+		It("ShapeSettings_UserData", func() {
+			settings := jolt.NewSphereShapeSettings(1.0)
+			Expect(settings).NotTo(BeNil())
+
+			// The joltc test calls JPH_ShapeSettings_SetUserData on the upcast
+			// pointer. SphereShapeSettings embeds ConvexShapeSettings which
+			// embeds ShapeSettings — methods are promoted.
+			settings.SetUserData(99999)
+			Expect(settings.UserData()).To(Equal(uint64(99999)))
+		})
+	})
 })
