@@ -278,6 +278,12 @@ func NewEmptyShapeSettings(centerOfMass Vec3) *EmptyShapeSettings {
 	return &EmptyShapeSettings{h: h}
 }
 
+// NewSphereShapeSettings creates a SphereShapeSettings with the given radius.
+func NewSphereShapeSettings(radius float32) *SphereShapeSettings {
+	h := cjolt.JPH_SphereShapeSettings_Create(radius)
+	return &SphereShapeSettings{h: h}
+}
+
 // ---------------------------------------------------------------------------
 // PlaneShape — Go-native layout-compatible Plane helper
 //
