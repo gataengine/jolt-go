@@ -432,4 +432,18 @@ var _ = Describe("ShapesTest (joltc test_shapes.cpp)", func() {
 			Expect(shape.CollidePoint(jolt.Vec3{X: 5, Y: 0, Z: 0}, nil)).To(BeFalse())
 		})
 	})
+
+	Describe("Shape scale validation", func() {
+		It("Shape_IsValidScale", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.IsValidScale(jolt.Vec3{X: 2, Y: 2, Z: 2})).To(BeTrue())
+			Expect(shape.IsValidScale(jolt.Vec3{X: 2, Y: 1, Z: 1})).To(BeFalse())
+		})
+
+		It("Shape_MakeScaleValid", func() {
+			shape := jolt.NewSphereShape(1.0)
+			fixed := shape.MakeScaleValidResult(jolt.Vec3{X: 2, Y: 1, Z: 1})
+			Expect(shape.IsValidScale(fixed)).To(BeTrue())
+		})
+	})
 })

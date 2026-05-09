@@ -656,3 +656,12 @@ func (s *Shape) CastRayResult(origin, direction Vec3) (GoRayCastResult, bool) {
 	}
 	return out, true
 }
+
+// MakeScaleValidResult clamps the given scale to a valid value for this shape
+// and returns the result.
+func (s *Shape) MakeScaleValidResult(scale Vec3) Vec3 {
+	var out Vec3
+	cjolt.JPH_Shape_MakeScaleValid(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&scale)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	return out
+}
