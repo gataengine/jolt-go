@@ -608,3 +608,51 @@ func (ocoms *OffsetCenterOfMassShape) GetOffset() Vec3 {
 	runtime.KeepAlive(ocoms)
 	return out
 }
+
+// ---------------------------------------------------------------------------
+// Shape ray-cast and point-collision carve-outs
+//
+// The generated Shape.CastRay passes the result via unsafe.Pointer.
+// GoRayCastResult is a layout-compatible Go-native mirror so callers can
+// read fields without unexported CGo field constraints.
+// C layout: JPH_BodyID bodyID (uint32) + float fraction + JPH_SubShapeID subShapeID2 (uint32) = 12 bytes.
+//
+// The generated Shape.CollidePoint does not guard against a nil shapeFilter,
+// but the underlying C function accepts NULL. The carve-out below handles nil.
+// ---------------------------------------------------------------------------
+
+// CollidePoint returns true if point p is inside the shape.
+// shapeFilter may be nil (no filter).
+func (s *Shape) CollidePoint(p Vec3, shapeFilter *ShapeFilter) bool {
+	var sfh *cjolt.C_JPH_ShapeFilter
+	if shapeFilter != nil {
+		sfh = shapeFilter.h
+	}
+	result := cjolt.JPH_Shape_CollidePoint(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&p)), sfh)
+	runtime.KeepAlive(s)
+	runtime.KeepAlive(shapeFilter)
+	return bool(result)
+}
+
+// GoRayCastResult is a layout-compatible mirror of JPH_RayCastResult so
+// callers can read fields without unexported-name CGo constraints.
+// C layout: JPH_BodyID bodyID (uint32) + float fraction + JPH_SubShapeID subShapeID2 (uint32) = 12 bytes.
+type GoRayCastResult struct {
+	BodyID     BodyID
+	Fraction   float32
+	SubShapeID SubShapeID
+}
+
+// CastRayResult is a typed wrapper for Shape.CastRay that returns the hit
+// info via a Go-native struct rather than an unsafe.Pointer.
+//
+// Returns (hit, true) on a hit and (zero, false) on a miss.
+func (s *Shape) CastRayResult(origin, direction Vec3) (GoRayCastResult, bool) {
+	var out GoRayCastResult
+	hit := cjolt.JPH_Shape_CastRay(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&origin)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&direction)), (*cjolt.C_JPH_RayCastResult)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	if !hit {
+		return GoRayCastResult{}, false
+	}
+	return out, true
+}

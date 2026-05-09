@@ -1528,12 +1528,6 @@ func (s *Shape) CastRay2(o Vec3, d Vec3, r *RayCastSettings, c CollisionCollecto
 	return bool(result)
 }
 
-func (s *Shape) CollidePoint(p Vec3, shapeFilter *ShapeFilter) bool {
-	result := cjolt.JPH_Shape_CollidePoint(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&p)), shapeFilter.h)
-	runtime.KeepAlive(s)
-	return bool(result)
-}
-
 func (s *Shape) CollidePoint2(p Vec3, c CollisionCollectorType, callback unsafe.Pointer, u unsafe.Pointer, shapeFilter *ShapeFilter) bool {
 	result := cjolt.JPH_Shape_CollidePoint2(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&p)), cjolt.C_JPH_CollisionCollectorType(c), (*cjolt.C_JPH_CollidePointResultCallback)(unsafe.Pointer(callback)), u, shapeFilter.h)
 	runtime.KeepAlive(s)

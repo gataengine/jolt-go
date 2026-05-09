@@ -398,4 +398,38 @@ var _ = Describe("ShapesTest (joltc test_shapes.cpp)", func() {
 			Expect(shape.Volume()).To(BeNumerically("~", 0.0, 1e-5))
 		})
 	})
+
+	Describe("Shape CastRay", func() {
+		It("Shape_CastRay", func() {
+			shape := jolt.NewSphereShape(1.0)
+			origin := jolt.Vec3{X: -5, Y: 0, Z: 0}
+			direction := jolt.Vec3{X: 10, Y: 0, Z: 0} // unnormalized; Jolt expects ray length encoded
+
+			hit, ok := shape.CastRayResult(origin, direction)
+			Expect(ok).To(BeTrue())
+			// Hit at x = -1, fraction = (5 - 1) / 10 = 0.4
+			Expect(hit.Fraction).To(BeNumerically("~", float32(0.4), float32(0.01)))
+		})
+
+		It("Shape_CastRay_Miss", func() {
+			shape := jolt.NewSphereShape(1.0)
+			origin := jolt.Vec3{X: 0, Y: 5, Z: 0}
+			direction := jolt.Vec3{X: 1, Y: 0, Z: 0}
+
+			_, ok := shape.CastRayResult(origin, direction)
+			Expect(ok).To(BeFalse())
+		})
+	})
+
+	Describe("Shape CollidePoint", func() {
+		It("Shape_CollidePoint_Inside", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.CollidePoint(jolt.Vec3{X: 0, Y: 0, Z: 0}, nil)).To(BeTrue())
+		})
+
+		It("Shape_CollidePoint_Outside", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.CollidePoint(jolt.Vec3{X: 5, Y: 0, Z: 0}, nil)).To(BeFalse())
+		})
+	})
 })
