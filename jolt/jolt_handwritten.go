@@ -394,3 +394,20 @@ func (bpli *BroadPhaseLayerInterface) ConfigureLayer(broadPhaseLayer uint8, grou
 	cjolt.JPH_BroadPhaseLayerInterfaceMask_ConfigureLayer(bpli.h, cjolt.C_JPH_BroadPhaseLayer(broadPhaseLayer), groupsToInclude, groupsToExclude)
 	runtime.KeepAlive(bpli)
 }
+
+// NewBoxShapeSettings creates a BoxShapeSettings.
+func NewBoxShapeSettings(halfExtent Vec3, convexRadius float32) *BoxShapeSettings {
+	h := cjolt.JPH_BoxShapeSettings_Create((*cjolt.C_JPH_Vec3)(unsafe.Pointer(&halfExtent)), convexRadius)
+	return &BoxShapeSettings{h: h}
+}
+
+// GetHalfExtent returns the half-extent of the BoxShape.
+//
+// TODO(generator): emit Get* variants for out-pointer accessors so this
+// kind of carve-out becomes unnecessary across the API.
+func (bs *BoxShape) GetHalfExtent() Vec3 {
+	var out Vec3
+	cjolt.JPH_BoxShape_GetHalfExtent((*cjolt.C_JPH_BoxShape)(unsafe.Pointer(bs.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(bs)
+	return out
+}
