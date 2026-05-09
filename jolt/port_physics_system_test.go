@@ -262,4 +262,57 @@ var _ = Describe("PhysicsSystemTest (joltc test_physics_system.cpp)", func() {
 
 		bi.RemoveAndDestroyBody(bodyID)
 	})
+
+	// ------------------------------------------------------------------
+	// Simulation
+	// ------------------------------------------------------------------
+
+	It("Update_FallingBody", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 100, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		ps.System.SetGravity(jolt.Vec3{X: 0, Y: -10, Z: 0})
+
+		initialPos := bi.GetPosition(bodyID)
+
+		ps.System.OptimizeBroadPhase()
+		err := ps.System.Update(1.0/60.0, 1, js)
+		Expect(err).To(Equal(jolt.PhysicsUpdateErrorNone))
+
+		newPos := bi.GetPosition(bodyID)
+		Expect(float32(newPos.Y)).To(BeNumerically("<", float32(initialPos.Y)))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
+
+	It("MultipleBodies", func() {
+		const numBodies = 10
+		bodyIDs := make([]jolt.BodyID, numBodies)
+
+		for i := range numBodies {
+			shape := jolt.NewSphereShape(1.0)
+			settings := jolt.NewBodyCreationSettingsWithShape(
+				&shape.Shape,
+				jolt.RVec3{X: jolt.Real(float32(i) * 3.0), Y: 10, Z: 0},
+				jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+			)
+			body := bi.CreateBody(settings)
+			bodyIDs[i] = body.ID()
+			bi.AddBody(bodyIDs[i], jolt.ActivationActivate)
+		}
+
+		Expect(ps.System.NumBodies()).To(Equal(uint32(numBodies)))
+		Expect(ps.System.NumActiveBodies(jolt.BodyTypeRigid)).To(Equal(uint32(numBodies)))
+
+		for _, id := range bodyIDs {
+			bi.RemoveAndDestroyBody(id)
+		}
+	})
 })
