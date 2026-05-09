@@ -229,6 +229,16 @@ func NewJobSystemThreadPool(maxJobs, maxBarriers uint32, numThreads int32) *JobS
 	return js
 }
 
+// NewJobSystemThreadPoolDefault creates a Jolt thread-pool job system
+// using the Jolt-recommended defaults (nullptr config in C: maxJobs =
+// JPH_MAX_PHYSICS_JOBS, maxBarriers = JPH_MAX_PHYSICS_BARRIERS,
+// numThreads = -1 / auto).
+func NewJobSystemThreadPoolDefault() *JobSystem {
+	js := &JobSystem{h: cjolt.JPH_JobSystemThreadPool_Create(nil)}
+	runtime.SetFinalizer(js, (*JobSystem).finalize)
+	return js
+}
+
 // Close destroys the underlying job system and releases its resources.
 func (js *JobSystem) Close() error {
 	if js.h != nil {
