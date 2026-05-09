@@ -532,3 +532,79 @@ func (s *Shape) GetCenterOfMass() Vec3 {
 	runtime.KeepAlive(s)
 	return out
 }
+
+// ---------------------------------------------------------------------------
+// Compound shape settings constructors and carve-outs
+// ---------------------------------------------------------------------------
+
+// NewStaticCompoundShapeSettings creates an empty StaticCompoundShapeSettings.
+// Add sub-shapes via the embedded CompoundShapeSettings.AddShape2 method.
+func NewStaticCompoundShapeSettings() *StaticCompoundShapeSettings {
+	h := cjolt.JPH_StaticCompoundShapeSettings_Create()
+	return &StaticCompoundShapeSettings{h: h}
+}
+
+// NewMutableCompoundShapeSettings creates an empty MutableCompoundShapeSettings.
+func NewMutableCompoundShapeSettings() *MutableCompoundShapeSettings {
+	h := cjolt.JPH_MutableCompoundShapeSettings_Create()
+	return &MutableCompoundShapeSettings{h: h}
+}
+
+// AddShape2 adds a sub-shape to a StaticCompoundShapeSettings.
+//
+// The base CompoundShapeSettings.AddShape2 method is not promoted because
+// StaticCompoundShapeSettings does not embed CompoundShapeSettings (the
+// generator emits each Settings type as an independent struct). Carve out
+// an upcast wrapper here. JPH_StaticCompoundShapeSettings* IS-A
+// JPH_CompoundShapeSettings* in C.
+func (s *StaticCompoundShapeSettings) AddShape2(position Vec3, rotation Quat, shape *Shape, userData uint32) {
+	cjolt.JPH_CompoundShapeSettings_AddShape2(
+		(*cjolt.C_JPH_CompoundShapeSettings)(unsafe.Pointer(s.h)),
+		(*cjolt.C_JPH_Vec3)(unsafe.Pointer(&position)),
+		(*cjolt.C_JPH_Quat)(unsafe.Pointer(&rotation)),
+		shape.h,
+		userData,
+	)
+	runtime.KeepAlive(s)
+	runtime.KeepAlive(shape)
+}
+
+// ---------------------------------------------------------------------------
+// Decorated shape carve-outs — GetPosition/GetRotation/GetScale/GetOffset
+//
+// The generator emits Position(Vec3), Rotation(Quat), Scale(Vec3), Offset(Vec3)
+// as out-pointer methods that pass by value, so the C write is lost.  These
+// carve-outs return the value directly.
+// ---------------------------------------------------------------------------
+
+// GetPosition returns the offset position of the RotatedTranslatedShape.
+func (rts *RotatedTranslatedShape) GetPosition() Vec3 {
+	var out Vec3
+	cjolt.JPH_RotatedTranslatedShape_GetPosition((*cjolt.C_JPH_RotatedTranslatedShape)(unsafe.Pointer(rts.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(rts)
+	return out
+}
+
+// GetRotation returns the offset rotation of the RotatedTranslatedShape.
+func (rts *RotatedTranslatedShape) GetRotation() Quat {
+	var out Quat
+	cjolt.JPH_RotatedTranslatedShape_GetRotation((*cjolt.C_JPH_RotatedTranslatedShape)(unsafe.Pointer(rts.h)), (*cjolt.C_JPH_Quat)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(rts)
+	return out
+}
+
+// GetScale returns the scale of the ScaledShape.
+func (ss *ScaledShape) GetScale() Vec3 {
+	var out Vec3
+	cjolt.JPH_ScaledShape_GetScale((*cjolt.C_JPH_ScaledShape)(unsafe.Pointer(ss.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ss)
+	return out
+}
+
+// GetOffset returns the COM offset of the OffsetCenterOfMassShape.
+func (ocoms *OffsetCenterOfMassShape) GetOffset() Vec3 {
+	var out Vec3
+	cjolt.JPH_OffsetCenterOfMassShape_GetOffset((*cjolt.C_JPH_OffsetCenterOfMassShape)(unsafe.Pointer(ocoms.h)), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ocoms)
+	return out
+}

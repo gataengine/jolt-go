@@ -319,4 +319,83 @@ var _ = Describe("ShapesTest (joltc test_shapes.cpp)", func() {
 			Expect(settings.UserData()).To(Equal(uint64(99999)))
 		})
 	})
+
+	Describe("Decorated shapes", func() {
+		It("RotatedTranslatedShape_Create", func() {
+			inner := jolt.NewSphereShape(1.0)
+			pos := jolt.Vec3{X: 1, Y: 2, Z: 3}
+			rot := jolt.Quat{X: 0, Y: 0, Z: 0, W: 1}
+
+			shape := jolt.NewRotatedTranslatedShape(pos, rot, &inner.Shape)
+			Expect(shape).NotTo(BeNil())
+
+			Expect(shape.GetPosition()).To(Equal(pos))
+			Expect(shape.GetRotation().W).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("ScaledShape_Create", func() {
+			inner := jolt.NewSphereShape(1.0)
+			scale := jolt.Vec3{X: 2, Y: 2, Z: 2}
+
+			shape := jolt.NewScaledShape(&inner.Shape, scale)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.GetScale()).To(Equal(scale))
+		})
+
+		It("OffsetCenterOfMassShape_Create", func() {
+			inner := jolt.NewSphereShape(1.0)
+			offset := jolt.Vec3{X: 0, Y: 1, Z: 0}
+
+			shape := jolt.NewOffsetCenterOfMassShape(offset, &inner.Shape)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.GetOffset()).To(Equal(offset))
+		})
+	})
+
+	Describe("Compound shapes", func() {
+		It("StaticCompoundShape_Create", func() {
+			settings := jolt.NewStaticCompoundShapeSettings()
+			Expect(settings).NotTo(BeNil())
+
+			s1 := jolt.NewSphereShape(1.0)
+			s2 := jolt.NewSphereShape(0.5)
+			rot := jolt.Quat{X: 0, Y: 0, Z: 0, W: 1}
+
+			settings.AddShape2(jolt.Vec3{X: -1, Y: 0, Z: 0}, rot, &s1.Shape, 0)
+			settings.AddShape2(jolt.Vec3{X: 1, Y: 0, Z: 0}, rot, &s2.Shape, 0)
+
+			shape := jolt.NewStaticCompoundShape(settings)
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.NumSubShapes()).To(Equal(uint32(2)))
+		})
+
+		It("MutableCompoundShape_Create", func() {
+			settings := jolt.NewMutableCompoundShapeSettings()
+			Expect(settings).NotTo(BeNil())
+
+			shape := jolt.NewMutableCompoundShape(settings)
+			Expect(shape).NotTo(BeNil())
+
+			s := jolt.NewSphereShape(1.0)
+			rot := jolt.Quat{X: 0, Y: 0, Z: 0, W: 1}
+
+			idx := shape.AddShape(jolt.Vec3{X: 0, Y: 0, Z: 0}, rot, &s.Shape, 0, ^uint32(0))
+			Expect(idx).To(Equal(uint32(0)))
+			Expect(shape.NumSubShapes()).To(Equal(uint32(1)))
+
+			shape.RemoveShape(0)
+			Expect(shape.NumSubShapes()).To(Equal(uint32(0)))
+		})
+	})
+
+	Describe("EmptyShape", func() {
+		It("EmptyShape_Create", func() {
+			settings := jolt.NewEmptyShapeSettings(jolt.Vec3{})
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.Volume()).To(BeNumerically("~", 0.0, 1e-5))
+		})
+	})
 })
