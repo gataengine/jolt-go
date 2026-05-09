@@ -681,3 +681,11 @@ func (ps *PhysicsSystem) GetGravity() Vec3 {
 	runtime.KeepAlive(ps)
 	return out
 }
+
+// GetLinearVelocity returns the linear velocity of the body with the given ID.
+func (bi *BodyInterface) GetLinearVelocity(b BodyID) Vec3 {
+	var out Vec3
+	cjolt.JPH_BodyInterface_GetLinearVelocity(bi.h, cjolt.C_JPH_BodyID(b), (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(bi)
+	return out
+}

@@ -151,4 +151,43 @@ var _ = Describe("PhysicsSystemTest (joltc test_physics_system.cpp)", func() {
 
 		bi.RemoveAndDestroyBody(bodyID)
 	})
+
+	It("Body_SetLinearVelocity", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 10, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		bi.SetLinearVelocity(bodyID, jolt.Vec3{X: 1, Y: 2, Z: 3})
+		v := bi.GetLinearVelocity(bodyID)
+		Expect(v.X).To(BeNumerically("~", 1.0, 1e-5))
+		Expect(v.Y).To(BeNumerically("~", 2.0, 1e-5))
+		Expect(v.Z).To(BeNumerically("~", 3.0, 1e-5))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
+
+	It("Body_AddImpulse", func() {
+		shape := jolt.NewSphereShape(1.0)
+		settings := jolt.NewBodyCreationSettingsWithShape(
+			&shape.Shape,
+			jolt.RVec3{X: 0, Y: 10, Z: 0},
+			jolt.MotionTypeDynamic, jolt.ObjectLayerMoving,
+		)
+		body := bi.CreateBody(settings)
+		bodyID := body.ID()
+		bi.AddBody(bodyID, jolt.ActivationActivate)
+
+		Expect(bi.GetLinearVelocity(bodyID).X).To(BeNumerically("~", 0.0, 1e-5))
+
+		bi.AddImpulse(bodyID, jolt.Vec3{X: 10, Y: 0, Z: 0})
+		Expect(bi.GetLinearVelocity(bodyID).X).To(BeNumerically(">", 0.0))
+
+		bi.RemoveAndDestroyBody(bodyID)
+	})
 })
