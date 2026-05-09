@@ -477,3 +477,35 @@ func (ps *PlaneShape) GetPlane() GoPlane {
 	runtime.KeepAlive(ps)
 	return out
 }
+
+// ---------------------------------------------------------------------------
+// Shape base-class carve-outs
+//
+// The generated Shape methods for GetLocalBounds and GetCenterOfMass use
+// out-pointer parameters with CGo types whose fields are unexported from Go.
+// These carve-outs return Go-native types instead.
+// ---------------------------------------------------------------------------
+
+// GoAABox is a layout-compatible mirror of JPH_AABox so test/user code
+// can read Min/Max without unexported-field constraints.
+// C layout: JPH_Vec3 min; JPH_Vec3 max — 24 bytes.
+type GoAABox struct {
+	Min Vec3
+	Max Vec3
+}
+
+// GetLocalBounds returns the local-space AABB of the shape.
+func (s *Shape) GetLocalBounds() GoAABox {
+	var out GoAABox
+	cjolt.JPH_Shape_GetLocalBounds(s.h, (*cjolt.C_JPH_AABox)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	return out
+}
+
+// GetCenterOfMass returns the center-of-mass position in local space.
+func (s *Shape) GetCenterOfMass() Vec3 {
+	var out Vec3
+	cjolt.JPH_Shape_GetCenterOfMass(s.h, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(s)
+	return out
+}

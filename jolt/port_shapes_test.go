@@ -240,4 +240,50 @@ var _ = Describe("ShapesTest (joltc test_shapes.cpp)", func() {
 			Expect(shape.HalfExtent()).To(BeNumerically("~", 1000.0, 1e-3))
 		})
 	})
+
+	Describe("Shape (base)", func() {
+		It("Shape_UserData", func() {
+			shape := jolt.NewSphereShape(1.0)
+			shape.SetUserData(12345)
+			Expect(shape.UserData()).To(Equal(uint64(12345)))
+		})
+
+		It("Shape_GetLocalBounds", func() {
+			shape := jolt.NewSphereShape(1.0)
+			b := shape.GetLocalBounds()
+			Expect(b.Min.X).To(BeNumerically("~", -1.0, 1e-5))
+			Expect(b.Min.Y).To(BeNumerically("~", -1.0, 1e-5))
+			Expect(b.Min.Z).To(BeNumerically("~", -1.0, 1e-5))
+			Expect(b.Max.X).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(b.Max.Y).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(b.Max.Z).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("Shape_GetCenterOfMass", func() {
+			shape := jolt.NewSphereShape(1.0)
+			com := shape.GetCenterOfMass()
+			Expect(com.X).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(com.Y).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(com.Z).To(BeNumerically("~", 0.0, 1e-5))
+		})
+
+		It("Shape_GetInnerRadius", func() {
+			shape := jolt.NewSphereShape(1.0)
+			Expect(shape.InnerRadius()).To(BeNumerically("~", 1.0, 1e-5))
+		})
+
+		It("Shape_MustBeStatic", func() {
+			sphere := jolt.NewSphereShape(1.0)
+			Expect(sphere.MustBeStatic()).To(BeFalse())
+
+			plane := jolt.GoPlane{Normal: jolt.Vec3{X: 0, Y: 1, Z: 0}, Distance: 0}
+			planeShape := jolt.NewPlaneShapeFromGoPlane(plane, nil, 1000.0)
+			Expect(planeShape.MustBeStatic()).To(BeTrue())
+		})
+
+		It("Shape_GetMassProperties", Pending, func() {
+			// MassProperties accessors not yet emitted by the generator.
+			// joltc test asserts massProps.mass > 0.
+		})
+	})
 })
