@@ -192,4 +192,52 @@ var _ = Describe("ShapesTest (joltc test_shapes.cpp)", func() {
 			Expect(shape.HalfHeight()).To(BeNumerically("~", 1.0, 1e-5))
 		})
 	})
+
+	Describe("ConvexHullShape", func() {
+		// Tetrahedron — same vertices as the joltc test.
+		points := []jolt.Vec3{
+			{X: 0, Y: 0, Z: 0},
+			{X: 1, Y: 0, Z: 0},
+			{X: 0.5, Y: 1, Z: 0},
+			{X: 0.5, Y: 0.5, Z: 1},
+		}
+
+		It("ConvexHullShape_Create", func() {
+			settings := jolt.NewConvexHullShapeSettings(points, jolt.DefaultConvexRadius)
+			Expect(settings).NotTo(BeNil())
+
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+			Expect(shape.NumPoints()).To(Equal(uint32(4)))
+			Expect(shape.NumFaces()).To(Equal(uint32(4))) // tetrahedron
+		})
+
+		It("ConvexHullShape_GetPoint", func() {
+			settings := jolt.NewConvexHullShapeSettings(points, jolt.DefaultConvexRadius)
+			shape := settings.CreateShape()
+			Expect(shape).NotTo(BeNil())
+
+			// Hull may reorder points; just assert non-NaN.
+			p := shape.GetPoint(0)
+			Expect(math.IsNaN(float64(p.X))).To(BeFalse())
+			Expect(math.IsNaN(float64(p.Y))).To(BeFalse())
+			Expect(math.IsNaN(float64(p.Z))).To(BeFalse())
+		})
+	})
+
+	Describe("PlaneShape", func() {
+		It("PlaneShape_Create", func() {
+			plane := jolt.GoPlane{Normal: jolt.Vec3{X: 0, Y: 1, Z: 0}, Distance: 0}
+			shape := jolt.NewPlaneShapeFromGoPlane(plane, nil, 1000.0)
+			Expect(shape).NotTo(BeNil())
+
+			result := shape.GetPlane()
+			Expect(result.Normal.X).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(result.Normal.Y).To(BeNumerically("~", 1.0, 1e-5))
+			Expect(result.Normal.Z).To(BeNumerically("~", 0.0, 1e-5))
+			Expect(result.Distance).To(BeNumerically("~", 0.0, 1e-5))
+
+			Expect(shape.HalfExtent()).To(BeNumerically("~", 1000.0, 1e-3))
+		})
+	})
 })

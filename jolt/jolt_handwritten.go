@@ -447,3 +447,33 @@ func (ts *TriangleShape) GetVertex3() Vec3 {
 	runtime.KeepAlive(ts)
 	return out
 }
+
+// NewConvexHullShapeSettings creates a ConvexHullShapeSettings from a slice
+// of vertices. The slice must have at least 4 points to form a valid hull.
+func NewConvexHullShapeSettings(points []Vec3, maxConvexRadius float32) *ConvexHullShapeSettings {
+	if len(points) == 0 {
+		return nil
+	}
+	h := cjolt.JPH_ConvexHullShapeSettings_Create(
+		(*cjolt.C_JPH_Vec3)(unsafe.Pointer(&points[0])),
+		uint32(len(points)),
+		maxConvexRadius,
+	)
+	return &ConvexHullShapeSettings{h: h}
+}
+
+// GetPoint returns the i'th hull vertex.
+func (chs *ConvexHullShape) GetPoint(i uint32) Vec3 {
+	var out Vec3
+	cjolt.JPH_ConvexHullShape_GetPoint((*cjolt.C_JPH_ConvexHullShape)(unsafe.Pointer(chs.h)), i, (*cjolt.C_JPH_Vec3)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(chs)
+	return out
+}
+
+// GetPlane returns the plane equation of the PlaneShape.
+func (ps *PlaneShape) GetPlane() GoPlane {
+	var out GoPlane
+	cjolt.JPH_PlaneShape_GetPlane((*cjolt.C_JPH_PlaneShape)(unsafe.Pointer(ps.h)), (*cjolt.C_JPH_Plane)(unsafe.Pointer(&out)))
+	runtime.KeepAlive(ps)
+	return out
+}
