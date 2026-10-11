@@ -7,18 +7,6 @@
 *.out
 /gen
 
-# Editor
-.idea/
-.vscode/
-*.swp
-
 # Go build cache
 /dist/
 /bin/
-
-# OS
-.DS_Store
-
-# Go workspace (local override only — never commit)
-go.work
-go.work.sum

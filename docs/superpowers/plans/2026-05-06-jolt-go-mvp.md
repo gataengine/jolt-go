@@ -1,5 +1,7 @@
 # jolt-go MVP Implementation Plan
 
+> **Status (audit 2026-10-11): Implemented.** The linked binding-design spec lived in a JoltPhysics checkout and is not in this repo. Checkboxes below were never ticked.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a code-generated Go binding over `amerkoleci/joltc` exposing an idiomatic, OOP-shaped API for the JoltPhysics MVP surface (lifetime management, BodyInterface, all shape types, ContactListener), proven by two end-to-end integration tests.

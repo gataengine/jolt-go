@@ -1,5 +1,7 @@
 # Design — Port joltc Tests to Go (Phases A–C)
 
+> **Status (audit 2026-10-11): Implemented.**
+
 **Date:** 2026-05-07
 **Status:** Draft for review
 **Goal:** Lift the test coverage of `jolt/` from a thin smoke suite (~35 specs) to systematic per-API coverage by porting the relevant subset of `third_party/joltc/tests/` into Ginkgo tests, fixing generator out-parameter bugs inline as carve-outs.

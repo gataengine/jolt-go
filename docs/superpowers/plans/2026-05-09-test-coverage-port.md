@@ -1,5 +1,7 @@
 # Test-Coverage Port Implementation Plan (Phases A–C)
 
+> **Status (audit 2026-10-11): Implemented.** Checkboxes below were never ticked.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Port the MVP-bound subset of `third_party/joltc/tests/` into Ginkgo specs, surfacing and fixing the systemic out-pointer accessor bug as carve-outs. End state: ~63 new specs across Core, Shapes, and PhysicsSystem/BodyInterface, all passing.
